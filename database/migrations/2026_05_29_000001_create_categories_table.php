@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 80);
             $table->string('slug')->unique();
-            $table->string('icon', 10); // Armazena o emoji correspondente à categoria
+            $table->string('icon', 50); // Armazena o emoji correspondente à categoria
             $table->integer('order')->default(0);
             $table->timestamps();
         });

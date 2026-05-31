@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
-            $table->string('icon')->nullable(); // Para suportar ícones heroicons
+            $table->string('icon',50)->nullable(); // Para suportar ícones heroicons
             $table->timestamps();
         });
     }
