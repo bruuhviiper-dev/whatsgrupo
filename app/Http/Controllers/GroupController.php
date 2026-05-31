@@ -215,66 +215,84 @@ class GroupController extends Controller
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             // 1) Imagem enviada pelo usuário: converte para WebP
             $img = Image::make($request->file('image'))
-                ->fit(400, 400)         // Recorta e redimensiona para 400x400
-                ->encode('webp', 85);   // Converte para WebP com qualidade 85
+                ->fit(400, 400)
+                ->encode('webp', 85);
 
             $filename = 'groups/' . uniqid('grp_', true) . '.webp';
             \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
             $imagePath = $filename;
         } elseif (!empty($linkResult['image'])) {
+            // 2) Imagem detectada pelo validador Python (og:image do grupo no WhatsApp)
             try {
-                // 2) Imagem detectada automaticamente pelo validador (avatar do grupo no WhatsApp): baixa e converte para WebP
-                $response = Http::timeout(10)->get($linkResult['image']);
-                if ($response->successful()) {
+                $response = Http::timeout(15)
+                    ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
+                    ->get($linkResult['image']);
+                if ($response->successful() && strlen($response->body()) > 100) {
                     $img = Image::make($response->body())
                         ->fit(400, 400)
                         ->encode('webp', 85);
-
                     $filename = 'groups/' . uniqid('grp_', true) . '.webp';
                     \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
                     $imagePath = $filename;
+                    \Illuminate\Support\Facades\Log::info('[GroupController] Imagem do grupo extraída automaticamente via og:image.');
                 }
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao baixar imagem autodetectada: ' . $e->getMessage());
             }
         }
 
-        // 3) Nenhuma imagem disponível: tenta baixar a imagem padrão do WhatsApp (og:image do site oficial)
+        // 3) Nenhuma imagem disponível: tenta extrair og:image direto da página do grupo WhatsApp
         if (!$imagePath) {
             try {
-                $waDefaultUrl = 'https://web.whatsapp.com/img/favicon/1x/favicon.png';
-                // Tenta primeiro buscar a og:image da página de convite do WhatsApp
                 $waPageUrl = $validated['whatsapp_link'];
-                $pageResponse = Http::timeout(8)->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-                ])->get($waPageUrl);
 
-                if ($pageResponse->successful()) {
+                // User-Agents que o WhatsApp responde com og:image (do mais confiável ao menos)
+                $uaList = [
+                    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+                    'WhatsApp/2.24.12.76 A',
+                    'TelegramBot (like TwitterBot)',
+                    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+                ];
+
+                $extractedImageUrl = null;
+                foreach ($uaList as $ua) {
+                    $pageResponse = Http::timeout(10)->withHeaders(['User-Agent' => $ua])->get($waPageUrl);
+                    if (!$pageResponse->successful()) continue;
+
                     $pageHtml = $pageResponse->body();
-                    // Tenta extrair og:image da página do grupo
-                    if (preg_match('/<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']/', $pageHtml, $ogMatch)) {
-                        $waDefaultUrl = $ogMatch[1];
-                    } elseif (preg_match('/<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']/', $pageHtml, $ogMatch)) {
-                        $waDefaultUrl = $ogMatch[1];
+
+                    // Regex robusta: suporta atributos em qualquer ordem dentro da <meta>
+                    $patterns = [
+                        '/<meta\s[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/i',
+                        '/<meta\s[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']/i',
+                        '/<meta\s[^>]*name=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/i',
+                    ];
+                    foreach ($patterns as $pat) {
+                        if (preg_match($pat, $pageHtml, $ogMatch) && str_starts_with($ogMatch[1], 'http')) {
+                            $extractedImageUrl = html_entity_decode($ogMatch[1]);
+                            break 2;
+                        }
                     }
                 }
 
-                $imgResponse = Http::timeout(10)->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-                ])->get($waDefaultUrl);
+                if ($extractedImageUrl) {
+                    $imgResponse = Http::timeout(15)
+                        ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
+                        ->get($extractedImageUrl);
 
-                if ($imgResponse->successful() && str_starts_with($imgResponse->header('Content-Type') ?? '', 'image/')) {
-                    $img = Image::make($imgResponse->body())
-                        ->fit(400, 400)
-                        ->encode('webp', 85);
-
-                    $filename = 'groups/' . uniqid('grp_', true) . '.webp';
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
-                    $imagePath = $filename;
-                    \Illuminate\Support\Facades\Log::info('[GroupController] Imagem padrão do WhatsApp aplicada ao grupo.');
+                    if ($imgResponse->successful() && strlen($imgResponse->body()) > 100
+                        && str_starts_with($imgResponse->header('Content-Type') ?? '', 'image/')) {
+                        $img = Image::make($imgResponse->body())
+                            ->fit(400, 400)
+                            ->encode('webp', 85);
+                        $filename = 'groups/' . uniqid('grp_', true) . '.webp';
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
+                        $imagePath = $filename;
+                        \Illuminate\Support\Facades\Log::info('[GroupController] Imagem do grupo extraída via scraping direto da página WhatsApp.');
+                    }
                 }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao buscar imagem padrão do WhatsApp: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao buscar imagem da página WhatsApp: ' . $e->getMessage());
             }
         }
 
