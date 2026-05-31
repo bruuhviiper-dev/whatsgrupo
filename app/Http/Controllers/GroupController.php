@@ -186,8 +186,9 @@ class GroupController extends Controller
             'rules'         => 'nullable|string|max:500',
             'whatsapp_link' => 'required|url|unique:groups,whatsapp_link',
             'selected_rules'=> 'required|array|min:1',
-            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'submitter_email' => 'nullable|email|max:255',
+            'image'               => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'detected_image_url'  => 'nullable|url|max:2048',
+            'submitter_email'     => 'nullable|email|max:255',
             'terms'         => 'accepted',
         ], [
             'category_id.required'    => 'Selecione uma categoria.',
@@ -210,43 +211,70 @@ class GroupController extends Controller
             return back()->with('error', 'Link do WhatsApp inválido: ' . ($linkResult['error'] ?? 'formato incorreto.'))->withInput();
         }
 
-        // Processa e salva a imagem como WebP 400x400 via Intervention Image v2
+        // ── Processa e salva a imagem como WebP 400x400 ────────────────────────────
+        //
+        // Prioridade:
+        //   1) Upload manual do usuário (campo <input type="file">)
+        //   2) URL detectada pelo Alpine.js no campo hidden "detected_image_url"
+        //      (og:image capturada do WhatsApp Web em tempo real no frontend)
+        //   3) Imagem retornada pelo validador Python no campo $linkResult['image']
+        //   4) Fallback: scraping direto da página do WhatsApp no backend
+        //
         $imagePath = null;
-        if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            // 1) Imagem enviada pelo usuário: converte para WebP
-            $img = Image::make($request->file('image'))
-                ->fit(400, 400)
-                ->encode('webp', 85);
 
-            $filename = 'groups/' . uniqid('grp_', true) . '.webp';
-            \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
-            $imagePath = $filename;
-        } elseif (!empty($linkResult['image'])) {
-            // 2) Imagem detectada pelo validador Python (og:image do grupo no WhatsApp)
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            // ── 1) Upload manual: converte para WebP ────────────────────────────
             try {
-                $response = Http::timeout(15)
-                    ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
-                    ->get($linkResult['image']);
-                if ($response->successful() && strlen($response->body()) > 100) {
-                    $img = Image::make($response->body())
-                        ->fit(400, 400)
-                        ->encode('webp', 85);
-                    $filename = 'groups/' . uniqid('grp_', true) . '.webp';
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
-                    $imagePath = $filename;
-                    \Illuminate\Support\Facades\Log::info('[GroupController] Imagem do grupo extraída automaticamente via og:image.');
-                }
+                $img = Image::make($request->file('image'))
+                    ->fit(400, 400)
+                    ->encode('webp', 85);
+                $filename = 'groups/' . uniqid('grp_', true) . '.webp';
+                \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
+                $imagePath = $filename;
+                \Illuminate\Support\Facades\Log::info('[GroupController] Imagem salva via upload do usuário (WebP).');
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao baixar imagem autodetectada: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao processar upload do usuário: ' . $e->getMessage());
             }
         }
 
-        // 3) Nenhuma imagem disponível: tenta extrair og:image direto da página do grupo WhatsApp
+        if (!$imagePath) {
+            // ── 2+3) URL vinda do frontend (hidden) ou do validador Python ──────
+            $detectedUrl = trim($request->input('detected_image_url', ''));
+            $pythonUrl   = trim($linkResult['image'] ?? '');
+
+            // Prefere a URL do frontend (capturada em tempo real), depois a do Python
+            $imageUrlToFetch = filter_var($detectedUrl, FILTER_VALIDATE_URL)
+                ? $detectedUrl
+                : (filter_var($pythonUrl, FILTER_VALIDATE_URL) ? $pythonUrl : null);
+
+            if ($imageUrlToFetch) {
+                try {
+                    $response = Http::timeout(15)
+                        ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
+                        ->get($imageUrlToFetch);
+
+                    if ($response->successful() && strlen($response->body()) > 500) {
+                        $contentType = $response->header('Content-Type') ?? '';
+                        if (str_starts_with($contentType, 'image/') || str_contains($contentType, 'octet-stream')) {
+                            $img = Image::make($response->body())
+                                ->fit(400, 400)
+                                ->encode('webp', 85);
+                            $filename = 'groups/' . uniqid('grp_', true) . '.webp';
+                            \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
+                            $imagePath = $filename;
+                            \Illuminate\Support\Facades\Log::info('[GroupController] Imagem extraída via og:image do WhatsApp Web e convertida para WebP. Fonte: ' . ($detectedUrl ? 'frontend' : 'python'));
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao baixar og:image: ' . $e->getMessage());
+                }
+            }
+        }
+
+        // ── 4) Fallback final: scraping backend direto na página do WhatsApp ────
         if (!$imagePath) {
             try {
                 $waPageUrl = $validated['whatsapp_link'];
-
-                // User-Agents que o WhatsApp responde com og:image (do mais confiável ao menos)
                 $uaList = [
                     'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
                     'WhatsApp/2.24.12.76 A',
@@ -258,10 +286,7 @@ class GroupController extends Controller
                 foreach ($uaList as $ua) {
                     $pageResponse = Http::timeout(10)->withHeaders(['User-Agent' => $ua])->get($waPageUrl);
                     if (!$pageResponse->successful()) continue;
-
                     $pageHtml = $pageResponse->body();
-
-                    // Regex robusta: suporta atributos em qualquer ordem dentro da <meta>
                     $patterns = [
                         '/<meta\s[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/i',
                         '/<meta\s[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']/i',
@@ -280,19 +305,18 @@ class GroupController extends Controller
                         ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
                         ->get($extractedImageUrl);
 
-                    if ($imgResponse->successful() && strlen($imgResponse->body()) > 100
-                        && str_starts_with($imgResponse->header('Content-Type') ?? '', 'image/')) {
+                    if ($imgResponse->successful() && strlen($imgResponse->body()) > 500) {
                         $img = Image::make($imgResponse->body())
                             ->fit(400, 400)
                             ->encode('webp', 85);
                         $filename = 'groups/' . uniqid('grp_', true) . '.webp';
                         \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
                         $imagePath = $filename;
-                        \Illuminate\Support\Facades\Log::info('[GroupController] Imagem do grupo extraída via scraping direto da página WhatsApp.');
+                        \Illuminate\Support\Facades\Log::info('[GroupController] Imagem extraída via scraping backend (fallback nível 4).');
                     }
                 }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao buscar imagem da página WhatsApp: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha no scraping de imagem (fallback): ' . $e->getMessage());
             }
         }
 
