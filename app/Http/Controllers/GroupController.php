@@ -187,7 +187,7 @@ class GroupController extends Controller
             'whatsapp_link' => 'required|url|unique:groups,whatsapp_link',
             'selected_rules'=> 'required|array|min:1',
             'image'               => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'detected_image_url'  => 'nullable|url|max:2048',
+            'detected_image_b64'  => 'nullable|string|max:2097152', // até ~1.5MB em base64
             'submitter_email'     => 'nullable|email|max:255',
             'terms'         => 'accepted',
         ], [
@@ -215,15 +215,15 @@ class GroupController extends Controller
         //
         // Prioridade:
         //   1) Upload manual do usuário (campo <input type="file">)
-        //   2) URL detectada pelo Alpine.js no campo hidden "detected_image_url"
-        //      (og:image capturada do WhatsApp Web em tempo real no frontend)
-        //   3) Imagem retornada pelo validador Python no campo $linkResult['image']
-        //   4) Fallback: scraping direto da página do WhatsApp no backend
+        //   2) Base64 da imagem capturada no browser via proxy (detected_image_b64)
+        //      → é a og:image do WhatsApp baixada pelo JS via /api/wa-image e
+        //        codificada em base64 antes do submit
+        //   3) Fallback: proxy PHP tenta buscar og:image diretamente
         //
         $imagePath = null;
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            // ── 1) Upload manual: converte para WebP ────────────────────────────
+            // ── 1) Upload manual do usuário ─────────────────────────────────────
             try {
                 $img = Image::make($request->file('image'))
                     ->fit(400, 400)
@@ -233,90 +233,66 @@ class GroupController extends Controller
                 $imagePath = $filename;
                 \Illuminate\Support\Facades\Log::info('[GroupController] Imagem salva via upload do usuário (WebP).');
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao processar upload do usuário: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao processar upload: ' . $e->getMessage());
             }
         }
 
         if (!$imagePath) {
-            // ── 2+3) URL vinda do frontend (hidden) ou do validador Python ──────
-            $detectedUrl = trim($request->input('detected_image_url', ''));
-            $pythonUrl   = trim($linkResult['image'] ?? '');
+            // ── 2) Base64 da imagem capturada no browser ────────────────────────
+            // O JS faz fetch via /api/wa-image (proxy PHP), converte para base64
+            // com FileReader e envia no campo hidden detected_image_b64.
+            $b64 = $request->input('detected_image_b64', '');
 
-            // Prefere a URL do frontend (capturada em tempo real), depois a do Python
-            $imageUrlToFetch = filter_var($detectedUrl, FILTER_VALIDATE_URL)
-                ? $detectedUrl
-                : (filter_var($pythonUrl, FILTER_VALIDATE_URL) ? $pythonUrl : null);
+            // Remove header do data URL (data:image/jpeg;base64,...)
+            if (str_contains($b64, ',')) {
+                $b64 = explode(',', $b64, 2)[1];
+            }
 
-            if ($imageUrlToFetch) {
+            if (!empty($b64) && strlen($b64) > 500) {
                 try {
-                    $response = Http::timeout(15)
+                    $imageBytes = base64_decode($b64, true);
+                    if ($imageBytes !== false && strlen($imageBytes) > 200) {
+                        $img = Image::make($imageBytes)
+                            ->fit(400, 400)
+                            ->encode('webp', 85);
+                        $filename = 'groups/' . uniqid('grp_', true) . '.webp';
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
+                        $imagePath = $filename;
+                        \Illuminate\Support\Facades\Log::info('[GroupController] Imagem do grupo salva via base64 capturado no browser (WebP).');
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao decodificar base64 da imagem: ' . $e->getMessage());
+                }
+            }
+        }
+
+        if (!$imagePath) {
+            // ── 3) Fallback: tenta buscar og:image via proxy PHP ────────────────
+            // Funciona em ambientes onde o WhatsApp não bloqueia o servidor,
+            // ou com IPs de datacenter que ainda passam.
+            $imageUrlToFetch = trim($linkResult['image'] ?? '');
+
+            if (filter_var($imageUrlToFetch, FILTER_VALIDATE_URL)) {
+                try {
+                    $response = Http::timeout(12)
                         ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
                         ->get($imageUrlToFetch);
 
-                    if ($response->successful() && strlen($response->body()) > 500) {
-                        $contentType = $response->header('Content-Type') ?? '';
-                        if (str_starts_with($contentType, 'image/') || str_contains($contentType, 'octet-stream')) {
+                    if ($response->successful() && strlen($response->body()) > 200) {
+                        $ct = $response->header('Content-Type') ?? '';
+                        if (str_starts_with($ct, 'image/')) {
                             $img = Image::make($response->body())
                                 ->fit(400, 400)
                                 ->encode('webp', 85);
                             $filename = 'groups/' . uniqid('grp_', true) . '.webp';
                             \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
                             $imagePath = $filename;
-                            \Illuminate\Support\Facades\Log::info('[GroupController] Imagem extraída via og:image do WhatsApp Web e convertida para WebP. Fonte: ' . ($detectedUrl ? 'frontend' : 'python'));
+                            \Illuminate\Support\Facades\Log::info('[GroupController] Imagem salva via og:image do Python (fallback).');
                         }
                     }
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::warning('[GroupController] Falha ao baixar og:image: ' . $e->getMessage());
+                    \Illuminate\Support\Facades\Log::warning('[GroupController] Fallback og:image falhou: ' . $e->getMessage());
                 }
-            }
-        }
-
-        // ── 4) Fallback final: scraping backend direto na página do WhatsApp ────
-        if (!$imagePath) {
-            try {
-                $waPageUrl = $validated['whatsapp_link'];
-                $uaList = [
-                    'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
-                    'WhatsApp/2.24.12.76 A',
-                    'TelegramBot (like TwitterBot)',
-                    'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-                ];
-
-                $extractedImageUrl = null;
-                foreach ($uaList as $ua) {
-                    $pageResponse = Http::timeout(10)->withHeaders(['User-Agent' => $ua])->get($waPageUrl);
-                    if (!$pageResponse->successful()) continue;
-                    $pageHtml = $pageResponse->body();
-                    $patterns = [
-                        '/<meta\s[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/i',
-                        '/<meta\s[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']/i',
-                        '/<meta\s[^>]*name=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/i',
-                    ];
-                    foreach ($patterns as $pat) {
-                        if (preg_match($pat, $pageHtml, $ogMatch) && str_starts_with($ogMatch[1], 'http')) {
-                            $extractedImageUrl = html_entity_decode($ogMatch[1]);
-                            break 2;
-                        }
-                    }
-                }
-
-                if ($extractedImageUrl) {
-                    $imgResponse = Http::timeout(15)
-                        ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
-                        ->get($extractedImageUrl);
-
-                    if ($imgResponse->successful() && strlen($imgResponse->body()) > 500) {
-                        $img = Image::make($imgResponse->body())
-                            ->fit(400, 400)
-                            ->encode('webp', 85);
-                        $filename = 'groups/' . uniqid('grp_', true) . '.webp';
-                        \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $img->getEncoded());
-                        $imagePath = $filename;
-                        \Illuminate\Support\Facades\Log::info('[GroupController] Imagem extraída via scraping backend (fallback nível 4).');
-                    }
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('[GroupController] Falha no scraping de imagem (fallback): ' . $e->getMessage());
             }
         }
 
@@ -626,6 +602,170 @@ class GroupController extends Controller
         $validator = app(WhatsAppLinkValidator::class);
         $result = $validator->validate($link);
         return response()->json($result);
+    }
+
+    // -------------------------------------------------------------------------
+    // Proxy de metadados do WhatsApp (og:title + og:image) — chamado pelo JS
+    // O browser do usuário não pode fazer fetch direto (CORS), então usamos este
+    // proxy PHP que repassa o request com headers de bot de preview.
+    // -------------------------------------------------------------------------
+
+    public function waMetaProxy(Request $request)
+    {
+        $url = $request->query('url', '');
+
+        // Valida que é um URL do WhatsApp legítimo (evita SSRF)
+        if (!preg_match('/^https:\/\/(chat\.whatsapp\.com|whatsapp\.com\/channel)\//i', $url)) {
+            return response()->json(['error' => 'URL inválida'], 400);
+        }
+
+        // Rate limit: 20 requests por minuto por IP
+        $rlKey = 'wa-meta:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($rlKey, 20)) {
+            return response()->json(['error' => 'Rate limit'], 429);
+        }
+        RateLimiter::hit($rlKey, 60);
+
+        // User-Agents que o WhatsApp responde sem bloquear com og tags completas
+        $userAgents = [
+            'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+            'WhatsApp/2.24.12.76 A',
+            'TelegramBot (like TwitterBot)',
+            'LinkedInBot/1.0 (compatible; compatible; +http://www.linkedin.com)',
+        ];
+
+        $name  = null;
+        $image = null;
+
+        foreach ($userAgents as $ua) {
+            try {
+                $response = Http::timeout(10)
+                    ->withHeaders([
+                        'User-Agent'      => $ua,
+                        'Accept'          => 'text/html,application/xhtml+xml,*/*;q=0.9',
+                        'Accept-Language' => 'pt-BR,pt;q=0.9,en-US;q=0.8',
+                        'Accept-Encoding' => 'identity',
+                    ])
+                    ->get($url);
+
+                if (!$response->successful() || strlen($response->body()) < 200) {
+                    continue;
+                }
+
+                $html = $response->body();
+
+                // Extrai og:title
+                if (!$name) {
+                    $titlePatterns = [
+                        '/<meta\s[^>]*property=["\']og:title["\'][^>]*content=["\']([^"\']+)["\']/i',
+                        '/<meta\s[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:title["\']/i',
+                    ];
+                    foreach ($titlePatterns as $pat) {
+                        if (preg_match($pat, $html, $m)) {
+                            $raw = html_entity_decode(trim($m[1]));
+                            // Remove sufixos padrão do WhatsApp
+                            $raw = preg_replace('/\s*[|–\-]\s*WhatsApp.*/i', '', $raw);
+                            $raw = preg_replace('/\s*[|–\-]\s*Convite\s*de\s*grupo.*/i', '', $raw);
+                            $name = trim($raw) ?: null;
+                            break;
+                        }
+                    }
+                }
+
+                // Extrai og:image
+                if (!$image) {
+                    $imagePatterns = [
+                        '/<meta\s[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/i',
+                        '/<meta\s[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']/i',
+                    ];
+                    foreach ($imagePatterns as $pat) {
+                        if (preg_match($pat, $html, $m)) {
+                            $imgUrl = html_entity_decode(trim($m[1]));
+                            if (str_starts_with($imgUrl, 'http')) {
+                                $image = $imgUrl;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if ($name && $image) break;
+
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::debug('[waMetaProxy] Falha com UA ' . substr($ua, 0, 30) . ': ' . $e->getMessage());
+                continue;
+            }
+        }
+
+        return response()->json([
+            'name'  => $name,
+            'image' => $image,
+        ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Proxy de imagem do WhatsApp — baixa a imagem e a repassa ao browser
+    // Necessário porque a og:image do WhatsApp tem CORS restrito.
+    // -------------------------------------------------------------------------
+
+    public function waImageProxy(Request $request)
+    {
+        $url = $request->query('url', '');
+
+        // Valida que é uma URL de imagem do WhatsApp/CDN conhecido (anti-SSRF)
+        $allowedHosts = [
+            'mmg.whatsapp.net',
+            'pps.whatsapp.net',
+            'static.whatsapp.net',
+            'media.whatsapp.net',
+            'scontent.whatsapp.net',
+        ];
+
+        $host = parse_url($url, PHP_URL_HOST);
+        $isAllowed = false;
+        foreach ($allowedHosts as $allowed) {
+            if ($host === $allowed || str_ends_with($host, '.' . $allowed)) {
+                $isAllowed = true;
+                break;
+            }
+        }
+
+        if (!$isAllowed || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return response('URL não permitida', 400);
+        }
+
+        // Rate limit: 10 requests por minuto por IP
+        $rlKey = 'wa-img:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($rlKey, 10)) {
+            return response('Rate limit', 429);
+        }
+        RateLimiter::hit($rlKey, 60);
+
+        try {
+            $imgResponse = Http::timeout(15)
+                ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
+                ->get($url);
+
+            if (!$imgResponse->successful() || strlen($imgResponse->body()) < 200) {
+                return response('Imagem não encontrada', 404);
+            }
+
+            $contentType = $imgResponse->header('Content-Type') ?? 'image/jpeg';
+            // Garante que é realmente uma imagem
+            if (!str_starts_with($contentType, 'image/')) {
+                return response('Tipo de conteúdo inválido', 400);
+            }
+
+            return response($imgResponse->body(), 200, [
+                'Content-Type'                => $contentType,
+                'Cache-Control'               => 'public, max-age=3600',
+                'Access-Control-Allow-Origin' => '*',
+            ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('[waImageProxy] Erro: ' . $e->getMessage());
+            return response('Erro ao buscar imagem', 502);
+        }
     }
 
     // -------------------------------------------------------------------------
