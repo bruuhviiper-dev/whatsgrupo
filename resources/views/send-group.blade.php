@@ -153,7 +153,7 @@
                   :src="detectedImageUrl"
                   class="w-12 h-12 rounded-full object-cover shadow-sm border-2 border-green-300"
                   alt="Foto do grupo"
-                  @error="detectedImageUrl = ''"
+                  @@error="detectedImageUrl = ''"
                 />
               </template>
               <template x-if="!detectedImageUrl">
