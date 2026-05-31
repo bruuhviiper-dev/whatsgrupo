@@ -1,0 +1,25 @@
+{
+  "name": "WhatsGrupos — O maior diretório de grupos de WhatsApp do Brasil",
+  "short_name": "WhatsGrupos",
+  "description": "Encontre e divulgue grupos de WhatsApp organizados por categorias.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#25D366",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
