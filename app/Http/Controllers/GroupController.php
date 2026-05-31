@@ -99,7 +99,7 @@ class GroupController extends Controller
             ->approved()
             ->where('category_id', $group->category_id)
             ->where('id', '!=', $group->id)
-            ->orderByRaw('CASE WHEN is_vip = 1 AND vip_expires_at > datetime("now") THEN 1 ELSE 0 END DESC')
+            ->orderByRaw('CASE WHEN is_vip = 1 AND vip_expires_at > NOW() THEN 1 ELSE 0 END DESC')
             ->orderByRaw('COALESCE(last_boosted_at, created_at) DESC')
             ->limit(8)
             ->get();
