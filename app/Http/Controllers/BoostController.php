@@ -9,6 +9,7 @@ use App\Models\Group;
 use App\Services\EfiPaymentService;
 use App\Services\StripePaymentService;
 use App\Services\AsaasPaymentService;
+use App\Services\MercadoPagoPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -22,7 +23,8 @@ class BoostController extends Controller
     public function __construct(
         protected EfiPaymentService $paymentService,
         protected StripePaymentService $stripeService,
-        protected AsaasPaymentService $asaasService
+        protected AsaasPaymentService $asaasService,
+        protected MercadoPagoPaymentService $mercadoPagoService
     ) {
     }
 
@@ -363,6 +365,105 @@ class BoostController extends Controller
             'order_id'     => $order->id,
             'redirect_url' => route('boost.success', $order),
         ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Mercado Pago — PIX
+    // -------------------------------------------------------------------------
+
+    /**
+     * Cria cobrança PIX via Mercado Pago (AJAX, chamado da tela de checkout).
+     */
+    public function checkoutMercadoPagoPix(Request $request, BoostPackage $package)
+    {
+        abort_if(!$package->is_active, 404);
+
+        $validated = $request->validate([
+            'buyer_name'  => 'required|string|min:3|max:150',
+            'buyer_email' => 'required|email|max:255',
+            'buyer_cpf'   => 'nullable|string|max:14',
+        ]);
+
+        $order = BoostOrder::create([
+            'boost_package_id' => $package->id,
+            'buyer_name'       => $validated['buyer_name'],
+            'buyer_email'      => $validated['buyer_email'],
+            'payment_method'   => 'pix',
+            'payment_status'   => 'pending',
+            'boosts_total'     => $package->boosts_count,
+            'boosts_used'      => 0,
+            'amount'           => $package->price,
+        ]);
+
+        $pixData = $this->mercadoPagoService->createPixCharge($order, $validated['buyer_cpf'] ?? '');
+
+        $order->update([
+            'payment_id'     => $pixData['payment_id'],
+            'pix_qr_code'    => $pixData['qr_code'],
+            'pix_copy_paste' => $pixData['copy_paste'],
+        ]);
+
+        return response()->json([
+            'success'    => true,
+            'qr_code'    => $pixData['qr_code'],
+            'copy_paste' => $pixData['copy_paste'],
+            'payment_id' => $pixData['payment_id'],
+            'order_id'   => $order->id,
+        ]);
+    }
+
+    /**
+     * Polling de status do PIX do Mercado Pago (AJAX a cada 5 segundos).
+     */
+    public function pixStatusMercadoPago(BoostOrder $order)
+    {
+        $status = $this->mercadoPagoService->getChargeStatus($order->payment_id ?? '');
+
+        if ($status === 'paid' && $order->payment_status !== 'paid') {
+            $this->confirmPayment($order);
+        }
+
+        $fresh = $order->fresh();
+
+        return response()->json([
+            'status'       => $fresh->payment_status,
+            'redirect_url' => $fresh->payment_status === 'paid'
+                ? route('boost.success', $order)
+                : null,
+        ]);
+    }
+
+    /**
+     * Webhook do Mercado Pago para notificação de pagamentos recebidos.
+     */
+    public function webhookMercadoPago(Request $request)
+    {
+        if (! $this->mercadoPagoService->verifyWebhook($request)) {
+            Log::warning('[BoostController] Webhook Mercado Pago com assinatura inválida.');
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $payload = $request->all();
+        Log::info('[BoostController] Webhook Mercado Pago recebido:', $payload);
+
+        $result = $this->mercadoPagoService->processWebhook($payload);
+
+        if (! $result || $result['status'] !== 'paid') {
+            return response()->json(['ok' => true]);
+        }
+
+        $order = BoostOrder::where('payment_id', $result['payment_id'])
+            ->where('payment_status', 'pending')
+            ->first();
+
+        if ($order) {
+            $this->confirmPayment($order);
+            Log::info("[BoostController] Pedido #{$order->id} confirmado via Mercado Pago Webhook.");
+        } else {
+            Log::warning('[BoostController] Pedido não encontrado para MP payment_id: ' . $result['payment_id']);
+        }
+
+        return response()->json(['ok' => true]);
     }
 
     /**

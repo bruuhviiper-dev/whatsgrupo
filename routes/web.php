@@ -141,21 +141,20 @@ Route::post('/pacotes-vip/{package:slug}', [BoostController::class, 'processChec
 // Novas rotas AJAX de Checkout na mesma tela (Embedded)
 Route::post('/pacotes-vip/{package:slug}/checkout-stripe-embedded', [BoostController::class, 'checkoutStripeEmbedded'])->name('boost.checkout-stripe-embedded');
 Route::post('/pacotes-vip/{package:slug}/checkout-asaas-pix', [BoostController::class, 'checkoutAsaasPix'])->name('boost.checkout-asaas-pix');
+Route::post('/pacotes-vip/{package:slug}/checkout-mp-pix', [BoostController::class, 'checkoutMercadoPagoPix'])->name('boost.checkout-mp-pix');
 
-// Webhook do Asaas para notificações de pagamento em produção
+// Webhooks de pagamento
 Route::post('/webhook/asaas', [BoostController::class, 'webhookAsaas'])->name('webhook.asaas');
+Route::post('/webhook/efi', [BoostController::class, 'webhook'])->name('webhook.efi');
+Route::post('/webhook/stripe', [BoostController::class, 'webhookStripe'])->name('webhook.stripe');
+Route::post('/webhook/mercadopago', [BoostController::class, 'webhookMercadoPago'])->name('webhook.mercadopago');
 
 // Página de sucesso após pagamento confirmado
 Route::get('/pagamento/sucesso/{order}', [BoostController::class, 'success'])->name('boost.success');
 
-// Polling de status do PIX (chamado via AJAX a cada 5 segundos)
+// Polling de status do PIX
 Route::get('/pagamento/pix-status/{order}', [BoostController::class, 'pixStatus'])->name('boost.pix-status');
-
-// Webhook da Efí Bank para notificações de pagamento em produção
-Route::post('/webhook/efi', [BoostController::class, 'webhook'])->name('webhook.efi');
-
-// Webhook da Stripe para notificações de pagamento em produção
-Route::post('/webhook/stripe', [BoostController::class, 'webhookStripe'])->name('webhook.stripe');
+Route::get('/pagamento/mp-pix-status/{order}', [BoostController::class, 'pixStatusMercadoPago'])->name('boost.mp-pix-status');
 
 // =============================================================================
 // ROTAS DO PAINEL DE ADMINISTRAÇÃO

@@ -51,6 +51,7 @@
 
     buyerName: '{{ old('buyer_name', '') }}',
     buyerEmail: '{{ old('buyer_email', '') }}',
+    buyerCpf: '',
 
     initStripeCheckout() {
         if (!this.buyerName || !this.buyerName.trim()) { alert('Preencha o seu Nome Completo.'); return; }
@@ -82,15 +83,15 @@
         }).catch(() => { this.stripeLoading = false; this.stripeError = 'Erro de conexão com Stripe.'; });
     },
 
-    generateAsaasPix() {
+    generateMercadoPagoPix() {
         if (!this.buyerName || !this.buyerName.trim()) { alert('Preencha o seu Nome Completo.'); return; }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!this.buyerEmail || !emailRegex.test(this.buyerEmail)) { alert('Preencha um e-mail válido.'); return; }
         this.pixLoading = true; this.pixGenerated = false;
-        fetch('{{ route('boost.checkout-asaas-pix', $package->slug) }}', {
+        fetch('{{ route('boost.checkout-mp-pix', $package->slug) }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            body: JSON.stringify({ buyer_name: this.buyerName, buyer_email: this.buyerEmail })
+            body: JSON.stringify({ buyer_name: this.buyerName, buyer_email: this.buyerEmail, buyer_cpf: this.buyerCpf })
         }).then(r => r.json()).then(data => {
             this.pixLoading = false;
             if (data.success) {
@@ -104,7 +105,7 @@
     startPolling(orderId) {
         if (this.pixInterval) clearInterval(this.pixInterval);
         this.pixInterval = setInterval(() => {
-            fetch('/pagamento/pix-status/' + orderId).then(r => r.json()).then(data => {
+            fetch('/pagamento/mp-pix-status/' + orderId).then(r => r.json()).then(data => {
                 if (data.status === 'paid' && data.redirect_url) { clearInterval(this.pixInterval); window.location.href = data.redirect_url; }
             }).catch(() => {});
         }, 5000);
@@ -487,16 +488,29 @@
                 <div>
                     <label class="block text-slate-700 font-semibold text-xs uppercase tracking-wider mb-1.5">Nome Completo</label>
                     <input type="text" x-model="buyerName" placeholder="Seu nome completo"
-                           class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all">
+                           class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-[#32BCAD] focus:ring-2 focus:ring-[#32BCAD]/10 transition-all">
                 </div>
                 <div>
                     <label class="block text-slate-700 font-semibold text-xs uppercase tracking-wider mb-1.5">E-mail</label>
                     <input type="email" x-model="buyerEmail" placeholder="seu@email.com"
-                           class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100 transition-all">
+                           class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-[#32BCAD] focus:ring-2 focus:ring-[#32BCAD]/10 transition-all">
                 </div>
-                <button type="button" @click="generateAsaasPix()"
-                        class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-green-500/20">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5.283 18.36a3.505 3.505 0 0 0 2.493-1.032l3.6-3.6a.684.684 0 0 1 .946 0l3.613 3.613a3.504 3.504 0 0 0 2.493 1.032h.71l-4.56 4.56a3.647 3.647 0 0 1-5.156 0L4.85 18.36ZM18.428 5.627a3.505 3.505 0 0 0-2.493 1.032l-3.613 3.614a.67.67 0 0 1-.946 0l-3.6-3.6A3.505 3.505 0 0 0 5.283 5.64h-.48l4.57-4.56a3.647 3.647 0 0 1 5.155 0l4.55 4.56ZM1.64 12.015l4.56-4.56a3.505 3.505 0 0 0 1.032 2.493l3.6 3.6a.684.684 0 0 1 0 .946l-3.613 3.613a3.504 3.504 0 0 0-1.032 2.493h.48l4.56-4.56a3.647 3.647 0 0 1 0-5.156L1.64 12.015ZM22.36 12.015l-4.56 4.56a3.505 3.505 0 0 0-1.032-2.493l-3.613-3.6a.684.684 0 0 1 0-.946l3.6-3.613a3.504 3.504 0 0 0 1.032-2.493h-.48l-4.56 4.56a3.647 3.647 0 0 1 0 5.156l4.56 4.56Z"/></svg>
+                <div>
+                    <label class="block text-slate-700 font-semibold text-xs uppercase tracking-wider mb-1.5">
+                        CPF <span class="text-slate-400 font-normal normal-case">(recomendado)</span>
+                    </label>
+                    <input type="text" x-model="buyerCpf" placeholder="000.000.000-00" maxlength="14"
+                           @input="buyerCpf = buyerCpf.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')"
+                           class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl bg-slate-50 outline-none focus:border-[#32BCAD] focus:ring-2 focus:ring-[#32BCAD]/10 transition-all font-mono">
+                    <p class="text-slate-400 text-[10px] mt-1">Exigido pelo Mercado Pago para processar o PIX.</p>
+                </div>
+                <button type="button" @click="generateMercadoPagoPix()"
+                        class="w-full text-white font-black py-3.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md"
+                        style="background:#32BCAD; box-shadow:0 4px 14px rgba(50,188,173,0.25);"
+                        onmouseover="this.style.background='#28a89a'" onmouseout="this.style.background='#32BCAD'">
+                    <svg class="w-4 h-4" viewBox="0 0 512 512" fill="white">
+                        <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l79.199-79.199c5.639-5.639 15.682-5.64 21.322 0l79.52 79.519c14.192 14.192 33.063 22 53.12 22h15.638l-100.401 100.401c-29.806 29.807-78.146 29.807-107.952 0L105.718 391.19h6.852zm287.452-271.381c-20.057 0-38.929 7.808-53.12 22L267.1 221.209c-5.694 5.694-15.629 5.693-21.321-.001L165.69 140.81c-14.192-14.192-33.063-22-53.12-22h-6.852L205.119 18.41c29.806-29.807 78.146-29.807 107.952 0l100.319 100.319-13.362-.911zm94.823 94.824L394.447 114.237c.366 3.034.51 6.1.51 9.203 0 20.057-7.808 38.928-22 53.12l-79.521 79.52c-5.637 5.637-5.638 15.682.001 21.321l79.2 79.199c14.192 14.192 22 33.063 22 53.12 0 3.102-.143 6.167-.51 9.201l100.724-100.723c29.808-29.806 29.808-78.146.001-107.952zM54.148 214.643L-46.741 315.064c-.367-3.034-.511-6.099-.511-9.201 0-20.057 7.808-38.929 22-53.12l79.2-79.2c5.694-5.693 5.694-15.627 0-21.321l-79.521-79.52C-39.824 58.51-47.252 39.639-47.252 19.582c0-3.104.144-6.169.511-9.204L-146.841 110.634c-29.808 29.806-29.808 78.146 0 107.953z"/>
+                    </svg>
                     Gerar QR Code PIX
                 </button>
             </div>

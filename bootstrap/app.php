@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             '/webhook/efi',
             '/webhook/stripe',
             '/webhook/asaas',
+            '/webhook/mercadopago',
         ]);
 
         // Adiciona cabeçalhos de segurança globais
