@@ -55,6 +55,14 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   @stack('head')
+  @php
+    use App\Models\Setting;
+    $adsenseEnabled = Setting::adsenseEnabled();
+  @endphp
+  @if($adsenseEnabled)
+    {!! Setting::adsenseMetaTag() !!}
+    {!! Setting::adsenseScript() !!}
+  @endif
 </head>
 <body class="bg-slate-50" x-data="{ mobileMenuOpen: false }">
 

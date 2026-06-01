@@ -148,8 +148,8 @@
              onmouseout="this.style.background='#f1f5f9'">
             <x-heroicon-o-users class="w-4 h-4" /> Meus Grupos
           </a>
-          <a href="/pacotes-vip" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-white font-bold text-[13px] shadow-sm shadow-amber-500/30 hover:shadow-md hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all group">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="w-5 h-5 text-amber-100 drop-shadow-sm group-hover:scale-110 transition-transform">
+          <a href="/pacotes-vip" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 font-semibold text-[13px] hover:bg-amber-100 hover:border-amber-300 transition-all group">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="w-4 h-4 text-amber-500 flex-shrink-0">
               <path d="M239.54,98.11l-36.88,86.07a16,16,0,0,1-14.66,9.82H68a16,16,0,0,1-14.66-9.82L16.46,98.11A8,8,0,0,1,24.63,86.3l57,21.36,39.11-65.18a8,8,0,0,1,13.72,0l39.11,65.18,57-21.36a8,8,0,0,1,8.17,11.81Z"></path>
             </svg>
             Impulsionar
