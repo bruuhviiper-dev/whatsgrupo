@@ -6,7 +6,7 @@
 @section('content')
 
 {{-- Breadcrumb --}}
-<nav class="flex items-center gap-2 text-sm text-slate-500 mb-6" aria-label="Breadcrumb">
+<nav class="flex items-center gap-2 text-sm text-slate-500 pt-5 mb-6" aria-label="Breadcrumb">
     <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Início</a>
     <span class="text-slate-300">›</span>
     <span class="text-slate-900 font-medium">Blog</span>
