@@ -51,7 +51,7 @@
                 <x-heroicon-s-rocket-launch class="w-6 h-6" />
                 Ver Pacotes Agora
             </a>
-            <button onclick="window.open('{{ route('home') }}', '_blank')" class="border-2 border-slate-300 hover:border-amber-500 text-slate-900 hover:text-amber-600 font-bold px-8 py-3.5 rounded-xl transition-all inline-flex items-center gap-2">
+            <button onclick="window.open('/?tab=vip', '_blank')" class="border-2 border-slate-300 hover:border-amber-500 text-slate-900 hover:text-amber-600 font-bold px-8 py-3.5 rounded-xl transition-all inline-flex items-center gap-2">
                 Ver Exemplos de Sucesso
                 <x-heroicon-o-arrow-right class="w-5 h-5" />
             </button>
