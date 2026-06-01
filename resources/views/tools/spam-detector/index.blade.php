@@ -163,6 +163,9 @@ ANTI<span class="text-teal-100 font-bold">SPAM</span>
 
     </div>
   </div>
+  <div class="max-w-[1100px] mx-auto mt-10">
+    <x-adsense class="my-4" />
+  </div>
   <div class="mt-12 max-w-4xl mx-auto">
     <x-publish-invite />
   </div>

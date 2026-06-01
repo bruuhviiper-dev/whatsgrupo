@@ -162,6 +162,22 @@
                       </div>
                       Gerador de Enquete
                     </a>
+                    <a href="{{ route('tools.raffle-generator') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/gerador-de-sorteios*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                          <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2Zm0 2a8 8 0 1 1 0 16A8 8 0 0 1 12 4Zm-1 4v3H8a1 1 0 1 0 0 2h3v3a1 1 0 1 0 2 0v-3h3a1 1 0 1 0 0-2h-3V8a1 1 0 1 0-2 0Z"/>
+                        </svg>
+                      </div>
+                      Gerador de Sorteios
+                    </a>
+                    <a href="{{ route('tools.fonts-generator') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/gerador-de-letras*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
+                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                          <path d="M12.553 4.293a1 1 0 0 0-1.106 0l-7.5 5A1 1 0 0 0 4.5 11h2.361l-1.39 6.257A1 1 0 0 0 6.447 18.5l7.5-5a1 1 0 0 0 .553-.894V11h-2.36l1.39-6.257a1 1 0 0 0-.977-1.45Z" />
+                        </svg>
+                      </div>
+                      Gerador de Letras
+                    </a>
                   </nav>
                 </div>
 

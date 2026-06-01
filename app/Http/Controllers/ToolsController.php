@@ -26,6 +26,11 @@ class ToolsController extends Controller
         return view('tools.poll-generator.index');
     }
 
+    public function raffleGenerator()
+    {
+        return view('tools.raffle-generator.index');
+    }
+
     public function spamDetector()
     {
         return view('tools.spam-detector.index');
@@ -40,5 +45,10 @@ class ToolsController extends Controller
         $result = $service->analyze($request->input('message'));
 
         return response()->json($result);
+    }
+
+    public function fontsGenerator()
+    {
+        return view('tools.fonts-generator.index');
     }
 }

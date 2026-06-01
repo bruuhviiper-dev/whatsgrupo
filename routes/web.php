@@ -79,6 +79,15 @@ Route::get('/ferramentas/gerador-de-nomes', [\App\Http\Controllers\ToolsControll
 Route::get('/ferramentas/mensagem-de-boas-vindas', [\App\Http\Controllers\ToolsController::class, 'welcomeMessage'])->name('tools.welcome-message');
 Route::get('/ferramentas/verificador-de-link', [\App\Http\Controllers\ToolsController::class, 'linkValidator'])->name('tools.link-validator');
 Route::get('/ferramentas/gerador-de-enquete', [\App\Http\Controllers\ToolsController::class, 'pollGenerator'])->name('tools.poll-generator');
+Route::get('/ferramentas/gerador-de-letras', [\App\Http\Controllers\ToolsController::class, 'fontsGenerator'])->name('tools.fonts-generator');
+
+// Sorteios
+Route::get('/ferramentas/gerador-de-sorteios', [\App\Http\Controllers\RaffleController::class, 'index'])->name('tools.raffle-generator');
+Route::post('/ferramentas/gerador-de-sorteios', [\App\Http\Controllers\RaffleController::class, 'store'])->name('tools.raffle-generator.store');
+Route::get('/sorteio/buscar', [\App\Http\Controllers\RaffleController::class, 'search'])->name('tools.raffle.search');
+Route::post('/sorteio/{uuid}/email', [\App\Http\Controllers\RaffleController::class, 'sendEmail'])->name('tools.raffle.email');
+Route::get('/sorteio/{uuid}', [\App\Http\Controllers\RaffleController::class, 'show'])->name('tools.raffle.show');
+
 Route::get('/ferramentas/detector-de-spam', [\App\Http\Controllers\ToolsController::class, 'spamDetector'])->name('tools.spam-detector');
 Route::post('/ferramentas/detector-de-spam/analisar', [\App\Http\Controllers\ToolsController::class, 'analyzeSpam'])->name('tools.spam-detector.analyze');
 

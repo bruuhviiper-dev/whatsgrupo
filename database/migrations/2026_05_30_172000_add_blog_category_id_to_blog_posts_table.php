@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('blog_posts', function (Blueprint $table) {
-            $table->foreignId('blog_category_id')->nullable()->after('id')->constrained('blog_categories')->onDelete('set null');
-        });
+        if (!Schema::hasColumn('blog_posts', 'blog_category_id')) {
+            Schema::table('blog_posts', function (Blueprint $table) {
+                $table->foreignId('blog_category_id')->nullable()->after('id')->constrained('blog_categories')->onDelete('set null');
+            });
+        }
     }
 
     /**
