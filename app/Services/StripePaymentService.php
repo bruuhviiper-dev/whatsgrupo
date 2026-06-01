@@ -100,9 +100,10 @@ class StripePaymentService
     /**
      * Cria a sessão embedded da Stripe.
      *
-     * @param string $method  card | gpay | boleto
-     *   - card / gpay: usa métodos automáticos (wallets como Google Pay/Apple Pay
-     *     aparecem dentro do checkout em navegadores compatíveis).
+     * @param string $method  card | gpay | applepay | boleto
+     *   - card / gpay / applepay: usa métodos automáticos (wallets como Google Pay
+     *     e Apple Pay aparecem dentro do checkout em navegadores/dispositivos
+     *     compatíveis).
      *   - boleto: escopa a sessão apenas para boleto (exige endereço de cobrança).
      */
     public function createEmbeddedSession(BoostOrder $order, BoostPackage $package, string $method = 'card'): array
@@ -146,7 +147,7 @@ class StripePaymentService
                 $params['payment_method_types'] = ['boleto'];
                 $params['billing_address_collection'] = 'required';
             }
-            // card/gpay: sem payment_method_types => métodos dinâmicos da conta
+            // card/gpay/applepay: sem payment_method_types => métodos dinâmicos da conta
             // (cartão + Google Pay/Apple Pay quando habilitados e suportados).
 
             $session = Session::create($params);

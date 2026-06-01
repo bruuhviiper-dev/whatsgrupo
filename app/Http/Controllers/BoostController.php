@@ -310,7 +310,7 @@ class BoostController extends Controller
         $validated = $request->validate([
             'buyer_name'  => 'required|string|min:3|max:150',
             'buyer_email' => 'required|email|max:255',
-            'method'      => 'nullable|in:card,gpay,boleto',
+            'method'      => 'nullable|in:card,gpay,applepay,boleto',
         ]);
 
         $method = $validated['method'] ?? 'card';

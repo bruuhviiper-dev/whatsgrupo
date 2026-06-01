@@ -263,6 +263,33 @@
                         </div>
                     </label>
 
+                    {{-- Apple Pay --}}
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="payment_method" value="applepay" x-model="paymentMethod" class="sr-only">
+                        <div class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all"
+                             :class="paymentMethod === 'applepay'
+                                ? 'border-slate-800 bg-slate-50'
+                                : 'border-slate-200 bg-white hover:border-slate-300'">
+                            {{-- Apple Pay icon --}}
+                            <svg viewBox="0 0 40 26" class="w-9 h-6 flex-shrink-0">
+                                <rect width="40" height="26" rx="4" fill="#000"/>
+                                <path d="M13.6 9.4c.4-.5.7-1.1.6-1.8-.6 0-1.3.4-1.7.9-.4.4-.7 1.1-.6 1.7.7 0 1.3-.3 1.7-.8z" fill="#fff"/>
+                                <path d="M14.2 10.3c-.9 0-1.7.5-2.1.5-.5 0-1.1-.5-1.9-.5-1 0-1.9.6-2.4 1.4-1 1.8-.3 4.4.7 5.9.5.7 1.1 1.5 1.8 1.5.7 0 1-.5 1.9-.5.9 0 1.1.5 1.9.4.8 0 1.3-.7 1.8-1.4.6-.8.8-1.6.8-1.6 0 0-1.5-.6-1.6-2.3 0-1.5 1.2-2.2 1.2-2.2-.6-1-1.7-1.1-2-1.1-.9-.1-1.7.5-2.1.5z" fill="#fff"/>
+                                <text x="22.5" y="16.5" font-family="Arial, sans-serif" font-size="7.5" font-weight="600" fill="#fff">Pay</text>
+                            </svg>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold leading-none mb-0.5"
+                                   :class="paymentMethod === 'applepay' ? 'text-slate-900' : 'text-slate-800'">Apple Pay</p>
+                                <p class="text-[11px] text-slate-400">Pagamento em 1 toque · via Stripe</p>
+                            </div>
+                            <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                                 :class="paymentMethod === 'applepay' ? 'border-slate-800' : 'border-slate-300'">
+                                <div class="w-2 h-2 rounded-full bg-slate-800 transition-all"
+                                     :class="paymentMethod === 'applepay' ? 'opacity-100' : 'opacity-0'"></div>
+                            </div>
+                        </div>
+                    </label>
+
                     {{-- Boleto --}}
                     <label class="block cursor-pointer">
                         <input type="radio" name="payment_method" value="boleto" x-model="paymentMethod" class="sr-only">
@@ -323,6 +350,13 @@
                         Finalize com o Google Pay direto na tela da Stripe. Disponível em navegadores compatíveis (ex.: Chrome com um cartão salvo).
                     </p>
                 </div>
+                <div x-show="paymentMethod === 'applepay'" x-transition
+                     class="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <x-heroicon-s-shield-check class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <p class="text-[11px] font-medium leading-relaxed text-slate-600">
+                        Finalize com o Apple Pay direto na tela da Stripe. Disponível no Safari, em dispositivos Apple com um cartão na Wallet.
+                    </p>
+                </div>
                 <div x-show="paymentMethod === 'boleto'" x-transition
                      class="flex items-start gap-2.5 bg-emerald-50 border border-emerald-100 rounded-xl p-3">
                     <x-heroicon-s-information-circle class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
@@ -365,7 +399,7 @@
                         ? 'bg-[#32BCAD] hover:bg-[#28a89a] shadow-lg shadow-[#32BCAD]/25'
                         : (paymentMethod === 'boleto'
                             ? 'bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20'
-                            : (paymentMethod === 'gpay'
+                            : (paymentMethod === 'gpay' || paymentMethod === 'applepay'
                                 ? 'bg-slate-900 hover:bg-black shadow-lg shadow-slate-900/20'
                                 : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20'))">
                 <template x-if="paymentMethod === 'pix'">
@@ -388,6 +422,12 @@
                     <span class="flex items-center gap-2.5">
                         <x-heroicon-s-device-phone-mobile class="w-5 h-5" />
                         Pagar R$ {{ number_format($package->price, 2, ',', '.') }} com Google Pay
+                    </span>
+                </template>
+                <template x-if="paymentMethod === 'applepay'">
+                    <span class="flex items-center gap-2.5">
+                        <x-heroicon-s-device-phone-mobile class="w-5 h-5" />
+                        Pagar R$ {{ number_format($package->price, 2, ',', '.') }} com Apple Pay
                     </span>
                 </template>
                 <template x-if="paymentMethod === 'boleto'">
