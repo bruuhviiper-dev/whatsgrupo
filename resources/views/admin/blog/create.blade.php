@@ -51,10 +51,22 @@
     </form>
 
 <script src="{{ asset('vendor/tinymce/js/tinymce/tinymce.min.js') }}"></script>
+
+<!-- <script src="https://cdn.tiny.cloud/1/7z8np3ft9l8rtj4bcrbg73k20hcdds5eziv9n9f4psyk1oyx/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+<script>
+  tinymce.init({
+    selector: 'textarea#content', // Replace this CSS selector to match the placeholder element for TinyMCE
+    plugins: 'code table lists',
+    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | indent outdent | bullist numlist | code | table'
+  });
+</script> -->
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         tinymce.init({
             selector: 'textarea#content',
+            license_key: 'gpl',
             plugins: 'advlist autolink lists link image charmap preview anchor pagebreak searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking save table directionality emoticons template',
             toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
             toolbar_mode: 'sliding',
