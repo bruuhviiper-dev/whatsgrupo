@@ -115,35 +115,35 @@
 
                 <!-- Ferramentas -->
                 <div>
-                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 mb-2">Ferramentas</p>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 mb-1.5">Ferramentas</p>
                   @php
-                    $toolGrid = [
-                      ['/figurinhas',                            'figurinhas*',                    'heroicon-o-face-smile',           'Figurinhas'],
-                      ['/ferramentas/analise-de-engajamento',    'ferramentas/analise*',            'heroicon-o-chart-bar',            'Engajamento'],
-                      [route('tools.spam-detector'),             'ferramentas/detector-de-spam*',   'heroicon-o-shield-exclamation',   'Anti-Spam'],
-                      ['/ferramentas/gerador-de-regras',         'ferramentas/gerador-de-regras*',  'heroicon-o-document-check',       'Regras'],
-                      [route('tools.name-generator'),            'ferramentas/gerador-de-nomes*',   'heroicon-o-sparkles',             'Nomes'],
-                      [route('tools.welcome-message'),           'ferramentas/mensagem*',           'heroicon-o-hand-raised',          'Boas-Vindas'],
-                      [route('tools.link-validator'),            'ferramentas/verificador*',        'heroicon-o-link',                 'Verificar Link'],
-                      [route('tools.poll-generator'),            'ferramentas/gerador-de-enquete*', 'heroicon-o-chart-bar-square',     'Enquete'],
-                      [route('tools.raffle-generator'),          'ferramentas/gerador-de-sorteios*','heroicon-o-gift',                 'Sorteios'],
-                      [route('tools.fonts-generator'),           'ferramentas/gerador-de-letras*',  'heroicon-o-language',             'Letras'],
+                    $toolList = [
+                      ['/figurinhas',                            'figurinhas*',                    'heroicon-o-face-smile',           'Figurinhas de WhatsApp'],
+                      ['/ferramentas/analise-de-engajamento',    'ferramentas/analise*',            'heroicon-o-chart-bar',            'Análise de Engajamento'],
+                      [route('tools.spam-detector'),             'ferramentas/detector-de-spam*',   'heroicon-o-shield-exclamation',   'Detector de Spam'],
+                      ['/ferramentas/gerador-de-regras',         'ferramentas/gerador-de-regras*',  'heroicon-o-document-check',       'Gerador de Regras'],
+                      [route('tools.name-generator'),            'ferramentas/gerador-de-nomes*',   'heroicon-o-sparkles',             'Gerador de Nomes'],
+                      [route('tools.welcome-message'),           'ferramentas/mensagem*',           'heroicon-o-hand-raised',          'Mensagem de Boas-Vindas'],
+                      [route('tools.link-validator'),            'ferramentas/verificador*',        'heroicon-o-link',                 'Verificador de Link'],
+                      [route('tools.poll-generator'),            'ferramentas/gerador-de-enquete*', 'heroicon-o-chart-bar-square',     'Gerador de Enquete'],
+                      [route('tools.raffle-generator'),          'ferramentas/gerador-de-sorteios*','heroicon-o-gift',                 'Gerador de Sorteios'],
+                      [route('tools.fonts-generator'),           'ferramentas/gerador-de-letras*',  'heroicon-o-language',             'Gerador de Letras Especiais'],
                     ];
                   @endphp
-                  <div class="grid grid-cols-2 gap-1">
-                    @foreach($toolGrid as [$href, $pattern, $icon, $label])
+                  <nav class="flex flex-col gap-0.5">
+                    @foreach($toolList as [$href, $pattern, $icon, $label])
                       @php $active = request()->is($pattern); @endphp
                       <a href="{{ $href }}"
-                         class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors
                                 {{ $active
-                                    ? 'bg-slate-100 text-slate-900'
-                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                                    ? 'text-slate-900 bg-slate-100'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
                         <x-dynamic-component :component="$icon"
                           class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-slate-700' : 'text-slate-400' }}" />
-                        <span class="truncate">{{ $label }}</span>
+                        {{ $label }}
                       </a>
                     @endforeach
-                  </div>
+                  </nav>
                 </div>
 
                 <!-- Institucional -->
