@@ -315,18 +315,33 @@ class BoostController extends Controller
 
         $method = $validated['method'] ?? 'card';
 
-        $order = BoostOrder::create([
-            'boost_package_id' => $package->id,
-            'buyer_name'       => $validated['buyer_name'],
-            'buyer_email'      => $validated['buyer_email'],
-            'payment_method'   => $method,
-            'payment_status'   => 'pending',
-            'boosts_total'     => $package->boosts_count,
-            'boosts_used'      => 0,
-            'amount'           => $package->price,
-        ]);
+        try {
+            $order = BoostOrder::create([
+                'boost_package_id' => $package->id,
+                'buyer_name'       => $validated['buyer_name'],
+                'buyer_email'      => $validated['buyer_email'],
+                'payment_method'   => $method,
+                'payment_status'   => 'pending',
+                'boosts_total'     => $package->boosts_count,
+                'boosts_used'      => 0,
+                'amount'           => $package->price,
+            ]);
 
-        $sessionData = $this->stripeService->createEmbeddedSession($order, $package, $method);
+            $sessionData = $this->stripeService->createEmbeddedSession($order, $package, $method);
+        } catch (\Throwable $e) {
+            Log::error('[BoostController] Falha no checkout Stripe embedded: ' . $e->getMessage(), [
+                'method' => $method,
+                'package' => $package->slug,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                // Detalha o erro só fora de produção, para facilitar o debug local.
+                'message' => app()->environment('production')
+                    ? 'Não foi possível iniciar o pagamento. Tente novamente.'
+                    : 'Erro no servidor: ' . $e->getMessage(),
+            ], 500);
+        }
 
         return response()->json([
             'success'         => true,

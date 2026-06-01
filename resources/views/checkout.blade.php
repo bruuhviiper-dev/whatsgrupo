@@ -60,27 +60,42 @@
         this.stripeLoading = true; this.stripeModalOpen = true; this.stripeError = ''; this.stripeSimulated = false;
         fetch('{{ route('boost.checkout-stripe-embedded', $package->slug) }}', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
             body: JSON.stringify({ buyer_name: this.buyerName, buyer_email: this.buyerEmail, method: this.paymentMethod })
-        }).then(r => r.json()).then(data => {
+        }).then(async (r) => {
+            // Lê o corpo de forma segura, mesmo que não seja JSON (ex.: 500 em HTML).
+            const raw = await r.text();
+            let data = {};
+            try { data = raw ? JSON.parse(raw) : {}; }
+            catch (_) {
+                console.error('[Stripe] Resposta não-JSON do servidor:', r.status, raw);
+                throw new Error('Servidor respondeu ' + r.status + (raw ? (': ' + raw.slice(0, 300)) : '.'));
+            }
+            if (!r.ok || !data.success) {
+                throw new Error(data.message || ('Servidor respondeu ' + r.status + '.'));
+            }
+            return data;
+        }).then(data => {
             this.stripeLoading = false;
-            if (data.success) {
-                if (data.is_simulated) { this.stripeSimulated = true; this.stripeRedirectUrl = data.redirect_url; }
-                else {
-                    if (!data.publishable_key) { this.stripeError = 'Chave pública Stripe não configurada no .env.'; return; }
-                    this.stripeClientSecret = data.client_secret;
-                    this.stripePublishableKey = data.publishable_key;
-                    setTimeout(() => {
-                        try {
-                            const stripe = Stripe(data.publishable_key);
-                            stripe.initEmbeddedCheckout({ clientSecret: data.client_secret }).then(checkout => {
-                                checkout.mount('#stripe-checkout-container');
-                            }).catch(err => { this.stripeError = 'Erro ao montar checkout Stripe: ' + err.message; });
-                        } catch(err) { this.stripeError = 'Erro SDK Stripe: ' + err.message; }
-                    }, 200);
-                }
-            } else { this.stripeError = data.message || 'Erro ao inicializar pagamento.'; }
-        }).catch(() => { this.stripeLoading = false; this.stripeError = 'Erro de conexão com Stripe.'; });
+            if (data.is_simulated) { this.stripeSimulated = true; this.stripeRedirectUrl = data.redirect_url; }
+            else {
+                if (!data.publishable_key) { this.stripeError = 'Chave pública Stripe não configurada no .env.'; return; }
+                this.stripeClientSecret = data.client_secret;
+                this.stripePublishableKey = data.publishable_key;
+                setTimeout(() => {
+                    try {
+                        const stripe = Stripe(data.publishable_key);
+                        stripe.initEmbeddedCheckout({ clientSecret: data.client_secret }).then(checkout => {
+                            checkout.mount('#stripe-checkout-container');
+                        }).catch(err => { this.stripeError = 'Erro ao montar checkout Stripe: ' + err.message; });
+                    } catch(err) { this.stripeError = 'Erro SDK Stripe: ' + err.message; }
+                }, 200);
+            }
+        }).catch((err) => {
+            this.stripeLoading = false;
+            console.error('[Stripe] Falha ao iniciar checkout:', err);
+            this.stripeError = err && err.message ? err.message : 'Erro de conexão com Stripe.';
+        });
     },
 
     generateMercadoPagoPix() {
