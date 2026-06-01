@@ -106,9 +106,10 @@
                                          alt="{{ $group->name }}"
                                          class="w-9 h-9 rounded-lg object-cover flex-shrink-0 border border-slate-100">
                                 @else
-                                    <div class="w-9 h-9 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0 text-white"
+                                    <div class="w-9 h-9 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0 text-white relative overflow-hidden"
                                          style="background:linear-gradient(135deg,#25D366,#128C7E);">
-                                        {{ mb_strtoupper(mb_substr($group->name, 0, 1)) }}
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white opacity-20 absolute" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                                        <span class="z-10">{{ mb_strtoupper(mb_substr($group->name, 0, 1)) }}</span>
                                     </div>
                                 @endif
                                 <div class="min-w-0">

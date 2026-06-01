@@ -43,8 +43,9 @@
     @if($group->image_path)
         <img src="{{ Storage::url($group->image_path) }}" alt="{{ $group->name }}" loading="lazy" class="w-full h-full object-cover">
     @else
-        <div class="w-full h-full flex items-center justify-center text-7xl font-black text-slate-300 uppercase bg-slate-100">
-        {{ Str::substr($group->name, 0, 1) }}
+        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#075E54] via-[#128C7E] to-[#25D366] relative overflow-hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="absolute w-64 h-64 text-white opacity-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+            <span class="text-white text-7xl font-black uppercase drop-shadow-lg z-10">{{ Str::upper(Str::substr($group->name, 0, 1)) }}</span>
         </div>
     @endif
 

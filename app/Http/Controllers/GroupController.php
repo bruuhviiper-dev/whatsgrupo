@@ -712,42 +712,74 @@ class GroupController extends Controller
     {
         $url = $request->query('url', '');
 
-        // Valida que é uma URL de imagem do WhatsApp/CDN conhecido (anti-SSRF)
-        $allowedHosts = [
-            'mmg.whatsapp.net',
-            'pps.whatsapp.net',
-            'static.whatsapp.net',
-            'media.whatsapp.net',
-            'scontent.whatsapp.net',
+        // Anti-SSRF: aceita apenas URLs HTTPS públicas de CDNs conhecidos do WhatsApp/Facebook
+        // (og:image pode vir de mmg.whatsapp.net, pps.whatsapp.net, scontent*.fbcdn.net, etc.)
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return response('URL inválida', 400);
+        }
+
+        $parsed = parse_url($url);
+        $scheme = strtolower($parsed['scheme'] ?? '');
+        $host   = strtolower($parsed['host'] ?? '');
+
+        // Bloqueia esquemas não-HTTP e IPs internos (anti-SSRF)
+        if ($scheme !== 'https') {
+            return response('Apenas HTTPS permitido', 400);
+        }
+
+        // Lista de domínios permitidos (WhatsApp + Facebook CDN + domínios públicos de preview)
+        $allowedDomainPatterns = [
+            '/\.whatsapp\.net$/',
+            '/\.whatsapp\.com$/',
+            '/^whatsapp\.net$/',
+            '/\.fbcdn\.net$/',
+            '/\.fbsbx\.com$/',
+            '/\.facebook\.com$/',
+            '/\.cdninstagram\.com$/',
+            '/\.amazonaws\.com$/',
+            '/\.cloudfront\.net$/',
+            '/\.googleusercontent\.com$/',
+            '/\.ggpht\.com$/',
         ];
 
-        $host = parse_url($url, PHP_URL_HOST);
         $isAllowed = false;
-        foreach ($allowedHosts as $allowed) {
-            if ($host === $allowed || str_ends_with($host, '.' . $allowed)) {
+        foreach ($allowedDomainPatterns as $pattern) {
+            if (preg_match($pattern, $host)) {
                 $isAllowed = true;
                 break;
             }
         }
 
-        if (!$isAllowed || !filter_var($url, FILTER_VALIDATE_URL)) {
-            return response('URL não permitida', 400);
+        // Bloqueia IPs privados / localhost (anti-SSRF)
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            $isAllowed = false;
         }
 
-        // Rate limit: 10 requests por minuto por IP
+        if (!$isAllowed) {
+            \Illuminate\Support\Facades\Log::info('[waImageProxy] Host não permitido: ' . $host);
+            return response('Host não permitido', 400);
+        }
+
+        // Rate limit: 20 requests por minuto por IP
         $rlKey = 'wa-img:' . $request->ip();
-        if (RateLimiter::tooManyAttempts($rlKey, 10)) {
+        if (RateLimiter::tooManyAttempts($rlKey, 20)) {
             return response('Rate limit', 429);
         }
         RateLimiter::hit($rlKey, 60);
 
         try {
             $imgResponse = Http::timeout(15)
-                ->withHeaders(['User-Agent' => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)'])
+                ->withHeaders([
+                    'User-Agent'      => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',
+                    'Accept'          => 'image/webp,image/jpeg,image/png,image/*,*/*;q=0.8',
+                    'Accept-Language' => 'pt-BR,pt;q=0.9',
+                ])
                 ->get($url);
 
-            if (!$imgResponse->successful() || strlen($imgResponse->body()) < 200) {
-                return response('Imagem não encontrada', 404);
+            if (!$imgResponse->successful() || strlen($imgResponse->body()) < 100) {
+                \Illuminate\Support\Facades\Log::info('[waImageProxy] Imagem não encontrada ou pequena demais para: ' . $url);
+                // Retorna a imagem padrão do WhatsApp em vez de 404
+                return redirect(asset('images/default-group.svg'));
             }
 
             $contentType = $imgResponse->header('Content-Type') ?? 'image/jpeg';
@@ -764,7 +796,8 @@ class GroupController extends Controller
 
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('[waImageProxy] Erro: ' . $e->getMessage());
-            return response('Erro ao buscar imagem', 502);
+            // Fallback para imagem padrão em vez de erro
+            return redirect(asset('images/default-group.svg'));
         }
     }
 

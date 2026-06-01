@@ -45,14 +45,23 @@
         detectedName: '',
         detectedImageUrl: '',
         userImagePreview: '',
+        imageLoading: false,
         error: '',
         warning: '',
 
+        DEFAULT_IMG: '/images/default-group.svg',
+
         get previewSrc() {
-          return this.userImagePreview || this.detectedImageUrl || '';
+          if (this.userImagePreview) return this.userImagePreview;
+          if (this.detectedImageUrl) return this.detectedImageUrl;
+          if (this.detected) return this.DEFAULT_IMG;
+          return '';
         },
         get hasPreview() {
-          return !!(this.userImagePreview || this.detectedImageUrl);
+          return !!(this.userImagePreview || this.detectedImageUrl || this.detected);
+        },
+        get isDefaultImg() {
+          return this.detected && !this.userImagePreview && !this.detectedImageUrl;
         },
 
         handleUserImageChange(event) {
@@ -69,12 +78,16 @@
           if (fi) fi.value = '';
         },
 
-        /* ──────────────────────────────────────────────────────────
-           validateLink():
-           1) chama /api/validate-link (Python no servidor) — valida formato e tenta extrair
-           2) se não veio imagem do servidor, busca via browser fetch() direto no WhatsApp
-           3) converte a imagem para base64 via Canvas e armazena no campo hidden
-        ────────────────────────────────────────────────────────── */
+        fillName(name) {
+          if (!name) return;
+          this.detectedName = name;
+          const inp = document.getElementById('nameInput');
+          if (inp && !inp.value.trim()) {
+            inp.value = name;
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        },
+
         async validateLink() {
           const link = this.link.trim();
           if (!link.includes('chat.whatsapp.com') && !link.includes('whatsapp.com/channel')) {
@@ -85,9 +98,10 @@
           this.loading = true;
           this.error = '';
           this.warning = '';
+          this.detectedImageUrl = '';
+          document.getElementById('detected_image_b64').value = '';
 
           try {
-            /* ── Passo 1: Validação no servidor (Python) ── */
             const res = await fetch('/api/validate-link', {
               method: 'POST',
               headers: {
@@ -99,99 +113,74 @@
             const data = await res.json();
 
             if (!data.valid) {
-              this.error = data.error || 'Este link é inválido ou foi revogado.';
+              this.error = data.error || 'Este link e invalido ou foi revogado.';
               this.detected = false;
               return;
             }
 
             this.detected = true;
+            this.fillName(data.name);
 
-            /* ── Preenche nome automaticamente ── */
-            if (data.name) {
-              const nameInput = document.getElementById('nameInput');
-              if (nameInput && !nameInput.value.trim()) nameInput.value = data.name;
-              this.detectedName = data.name;
-            }
-
-            /* ── Passo 2: Busca imagem — tenta servidor primeiro, depois browser ── */
             let imageUrl = data.image || null;
 
-            if (!imageUrl) {
-              /* Servidor não conseguiu (403 do WhatsApp). Tenta fetch direto no browser.
-                 O browser do usuário tem cookies do WhatsApp Web — funciona para grupos
-                 onde o usuário está logado. Para grupos públicos, o WhatsApp retorna
-                 os og tags mesmo sem login. */
-              imageUrl = await this.fetchImageFromBrowser(link);
+            if (!imageUrl || !this.detectedName) {
+              try {
+                const metaRes = await fetch('/api/wa-meta?url=' + encodeURIComponent(link), {
+                  headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }
+                });
+                if (metaRes.ok) {
+                  const meta = await metaRes.json();
+                  if (!this.detectedName && meta.name) this.fillName(meta.name);
+                  if (!imageUrl && meta.image) imageUrl = meta.image;
+                }
+              } catch(e) {
+                console.warn('wa-meta proxy failed:', e);
+              }
             }
 
             if (imageUrl) {
-              this.detectedImageUrl = imageUrl;
-              /* ── Passo 3: Converte a imagem para base64 via Fetch+Canvas ── */
+              this.imageLoading = true;
               await this.loadImageAsBase64(imageUrl);
+              this.imageLoading = false;
             } else {
-              this.warning = 'Grupo detectado! Não conseguimos capturar a foto automaticamente — você pode enviar uma manualmente.';
+              this.warning = 'Grupo detectado! Nao conseguimos capturar a foto automaticamente - voce pode enviar uma manualmente.';
             }
 
           } catch(e) {
             console.error('validateLink error:', e);
-            this.error = 'Erro ao validar o link. Verifique a conexão.';
+            this.error = 'Erro ao validar o link. Verifique a conexao.';
           } finally {
             this.loading = false;
+            this.imageLoading = false;
           }
         },
 
-        /* Tenta extrair og:image diretamente do browser do usuário */
-        async fetchImageFromBrowser(link) {
-          try {
-            /* Usa nosso proxy PHP interno para bypassar CORS e o bloqueio do WhatsApp.
-               O proxy repassa o request com os headers corretos de bot de preview. */
-            const proxyRes = await fetch('/api/wa-meta?url=' + encodeURIComponent(link), {
-              headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }
-            });
-            if (proxyRes.ok) {
-              const meta = await proxyRes.json();
-              if (meta.name && !document.getElementById('nameInput').value.trim()) {
-                document.getElementById('nameInput').value = meta.name;
-                this.detectedName = meta.name;
-              }
-              return meta.image || null;
-            }
-          } catch(e) {
-            console.warn('fetchImageFromBrowser failed:', e);
-          }
-          return null;
-        },
-
-        /* Carrega a URL da imagem via fetch (para bypassar CORS) e converte para base64 */
         async loadImageAsBase64(imageUrl) {
           try {
-            /* Usa proxy PHP para baixar a imagem sem problemas de CORS */
             const proxyImgUrl = '/api/wa-image?url=' + encodeURIComponent(imageUrl);
+            const imgRes = await fetch(proxyImgUrl, { redirect: 'follow' });
 
-            const imgRes = await fetch(proxyImgUrl);
-            if (!imgRes.ok) throw new Error('Image fetch failed: ' + imgRes.status);
+            if (!imgRes.ok) throw new Error('Proxy retornou ' + imgRes.status);
 
             const blob = await imgRes.blob();
-            if (blob.size < 200) throw new Error('Image too small');
 
-            /* Converte Blob → base64 via FileReader */
+            if (blob.size < 1000 || blob.type === 'image/svg+xml') {
+              console.warn('loadImageAsBase64: imagem padrao/pequena, ignorando.');
+              return;
+            }
+
             const b64 = await new Promise((resolve, reject) => {
               const reader = new FileReader();
-              reader.onload = () => resolve(reader.result);
+              reader.onload  = () => resolve(reader.result);
               reader.onerror = reject;
               reader.readAsDataURL(blob);
             });
 
-            /* Armazena no campo hidden para envio ao backend */
             document.getElementById('detected_image_b64').value = b64;
-
-            /* Mostra preview no formulário */
             this.detectedImageUrl = b64;
 
           } catch(e) {
             console.warn('loadImageAsBase64 failed:', e);
-            /* Preview não disponível, mas continua sem imagem */
-            this.detectedImageUrl = '';
           }
         },
       }"
@@ -245,27 +234,42 @@
             <p class="text-xs text-amber-700" x-text="warning"></p>
           </div>
 
-          <!-- Painel de sucesso: grupo detectado COM preview -->
+          <!-- Painel de sucesso: grupo detectado -->
           <div x-show="detected" class="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-3 mt-3" style="display:none;">
-            <!-- Avatar -->
+            <!-- Avatar com preview da imagem -->
             <div class="relative flex-shrink-0">
-              <template x-if="detectedImageUrl">
+              <!-- Loading spinner enquanto baixa a imagem -->
+              <template x-if="imageLoading">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center border-2 border-green-200">
+                  <svg class="animate-spin w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                </div>
+              </template>
+              <!-- Foto capturada do WhatsApp (base64) -->
+              <template x-if="!imageLoading && detectedImageUrl">
                 <img
                   :src="detectedImageUrl"
                   class="w-12 h-12 rounded-full object-cover shadow border-2 border-green-300"
                   alt="Foto do grupo"
                 />
               </template>
-              <template x-if="!detectedImageUrl">
-                <div class="w-12 h-12 rounded-full bg-green-200 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                </div>
+              <!-- Avatar padrão do WhatsApp quando não tem foto -->
+              <template x-if="!imageLoading && !detectedImageUrl">
+                <img
+                  :src="DEFAULT_IMG"
+                  class="w-12 h-12 rounded-full object-cover shadow border-2 border-green-200 opacity-60"
+                  alt="Foto padrão"
+                />
               </template>
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-bold text-green-700 uppercase tracking-wide">✓ Grupo detectado com sucesso!</p>
               <p class="text-sm text-green-900 font-semibold truncate" x-text="detectedName || 'Link válido'"></p>
-              <p x-show="detectedImageUrl" class="text-xs text-green-600 mt-0.5">Foto capturada — você pode substituí-la abaixo</p>
+              <p x-show="imageLoading" class="text-xs text-green-500 mt-0.5 animate-pulse">Carregando foto do grupo...</p>
+              <p x-show="!imageLoading && detectedImageUrl" class="text-xs text-green-600 mt-0.5">Foto capturada — você pode substituí-la abaixo</p>
+              <p x-show="!imageLoading && !detectedImageUrl && detected" class="text-xs text-amber-600 mt-0.5">Sem foto — será usada imagem padrão ou envie uma abaixo</p>
             </div>
           </div>
         </div>
@@ -323,16 +327,30 @@
             <span class="text-xs text-slate-400 font-normal ml-1">capturada automaticamente ou envie a sua</span>
           </label>
 
-          <!-- Preview -->
+          <!-- Preview da imagem do grupo -->
           <div x-show="hasPreview" class="flex items-start gap-3" style="display:none;">
             <div class="relative">
-              <img
-                :src="previewSrc"
-                class="w-20 h-20 rounded-xl object-cover border-2 border-slate-200 shadow-sm"
-                alt="Preview"
-              />
-              <span x-show="userImagePreview" class="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="display:none;">Sua foto</span>
-              <span x-show="!userImagePreview && detectedImageUrl" class="absolute -top-1.5 -right-1.5 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="display:none;">WhatsApp</span>
+              <!-- Loading da imagem -->
+              <template x-if="imageLoading">
+                <div class="w-20 h-20 rounded-xl bg-slate-100 border-2 border-slate-200 flex items-center justify-center shadow-sm">
+                  <svg class="animate-spin w-6 h-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                </div>
+              </template>
+              <!-- Imagem com preview -->
+              <template x-if="!imageLoading">
+                <img
+                  :src="previewSrc"
+                  class="w-20 h-20 rounded-xl object-cover border-2 shadow-sm"
+                  :class="isDefaultImg ? 'border-slate-200 opacity-50' : 'border-slate-200'"
+                  alt="Preview da imagem do grupo"
+                />
+              </template>
+              <span x-show="!imageLoading && userImagePreview" class="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="display:none;">Sua foto</span>
+              <span x-show="!imageLoading && !userImagePreview && detectedImageUrl" class="absolute -top-1.5 -right-1.5 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="display:none;">WhatsApp</span>
+              <span x-show="!imageLoading && isDefaultImg" class="absolute -top-1.5 -right-1.5 bg-slate-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="display:none;">Padrão</span>
             </div>
             <button
               x-show="userImagePreview"
