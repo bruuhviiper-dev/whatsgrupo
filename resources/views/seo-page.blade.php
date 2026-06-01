@@ -22,36 +22,28 @@
     <span class="text-slate-900 font-bold">{{ $seoPage->h1 }}</span>
 </nav>
 
-{{-- Cabeçalho de SEO --}}
-<div class="mb-8 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-green-50 to-white border border-green-100 shadow-sm relative overflow-hidden">
-    <div class="absolute top-0 right-0 w-64 h-64 bg-green-200 rounded-full blur-3xl opacity-20 -z-10"></div>
-    
-    <h1 class="text-2xl sm:text-3xl font-black text-slate-900 mb-3 leading-tight">
+{{-- Cabeçalho --}}
+<div class="mb-8">
+    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mb-2 leading-tight">
         {{ $seoPage->h1 }}
     </h1>
-    
-    <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-4xl">
+    <p class="text-slate-500 text-sm sm:text-base leading-relaxed max-w-4xl">
         {{ $seoPage->content }}
     </p>
-
-    <div class="mt-4 flex items-center gap-4 text-xs font-semibold text-slate-500">
-        <span class="flex items-center gap-1"><x-heroicon-s-tag class="w-4 h-4 text-green-500" /> Foco: <strong class="text-slate-800 capitalize">{{ $seoPage->keyword }}</strong></span>
-        <span class="flex items-center gap-1"><x-heroicon-s-chart-bar class="w-4 h-4 text-blue-500" /> {{ $groups->total() }} grupo{{ $groups->total() !== 1 ? 's' : '' }} listado{{ $groups->total() !== 1 ? 's' : '' }}</span>
+    <div class="mt-3 flex items-center gap-4 text-xs font-semibold text-slate-500">
+        <span>Foco: <strong class="text-slate-800 capitalize">{{ $seoPage->keyword }}</strong></span>
+        <span>{{ $groups->total() }} grupo{{ $groups->total() !== 1 ? 's' : '' }} listado{{ $groups->total() !== 1 ? 's' : '' }}</span>
     </div>
 </div>
 
 {{-- Grid de Grupos --}}
 <div class="mb-6">
-    <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-        <x-heroicon-s-fire class="w-6 h-6 text-orange-500" />
-        <span>Grupos de WhatsApp Recomendados</span>
+    <h2 class="text-lg font-bold text-slate-900 uppercase tracking-wider mb-4">
+        Grupos Recomendados
     </h2>
 
     @if ($groups->isEmpty())
-        <div class="text-center py-16 bg-white border border-slate-200 rounded-3xl shadow-sm">
-            <div class="flex justify-center mb-4">
-                <x-heroicon-o-inbox class="w-16 h-16 text-slate-300" />
-            </div>
+        <div class="text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-sm">
             <h2 class="text-slate-900 font-bold text-xl mb-2">Nenhum grupo ativo cadastrado</h2>
             <p class="text-slate-500 text-sm mb-6">Seja o primeiro a enviar o seu grupo gratuitamente para esta listagem!</p>
             <a href="{{ route('send-group.create') }}" class="btn-primary inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-sm">
@@ -59,7 +51,7 @@
             </a>
         </div>
     @else
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach ($groups as $group)
                 <x-group-card :group="$group" />
             @endforeach
@@ -94,29 +86,40 @@
     @endif
 </div>
 
-{{-- Páginas Relacionadas (Link building interno) --}}
+{{-- Páginas Relacionadas — mesmo estilo da home "Tópicos e Assuntos mais Buscados" --}}
 @if ($relatedPages->isNotEmpty())
-    <div class="mt-12 p-6 md:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
-        <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-            <x-heroicon-s-link class="w-4 h-4 text-slate-400" /> Outras pessoas também buscaram por:
-        </h3>
-        <div class="flex flex-wrap gap-2">
-            @foreach ($relatedPages as $related)
-                @php
-                  $cleanRelatedName = str_ireplace(
-                      ['grupos de whatsapp de', 'grupos de whatsapp', 'grupo de whatsapp', 'grupos whatsapp', 'grupo whatsapp', 'no whatsapp', 'do whatsapp', 'de whatsapp', 'whatsapp', 'grupos de ', 'grupo de ', 'grupos ', 'grupo '],
-                      '', 
-                      $related->keyword
-                  );
-                  $cleanRelatedName = trim($cleanRelatedName);
-                @endphp
-                <a href="{{ url('/grupos-whatsapp/' . $related->slug) }}" 
-                   class="px-3.5 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-600 hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-all flex items-center gap-1">
-                    <x-heroicon-o-hashtag class="w-3 h-3 text-slate-400" /> Grupos de <span class="capitalize">{{ $cleanRelatedName }}</span>
-                </a>
-            @endforeach
+    <section class="mt-12 p-8 rounded-3xl bg-white border border-slate-100 shadow-sm">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-6">
+                <span class="px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-800 uppercase tracking-widest mb-2.5 inline-block">
+                    Buscas Relacionadas
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    Outras pessoas também buscaram por:
+                </h3>
+                <p class="text-slate-500 text-xs sm:text-sm mt-1">
+                    Explore outros grupos e comunidades relacionados a este tema.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2.5">
+                @foreach ($relatedPages as $related)
+                    @php
+                        $cleanRelatedName = str_ireplace(
+                            ['grupos de whatsapp de', 'grupos de whatsapp', 'grupo de whatsapp', 'grupos whatsapp', 'grupo whatsapp', 'no whatsapp', 'do whatsapp', 'de whatsapp', 'whatsapp', 'grupos de ', 'grupo de ', 'grupos ', 'grupo '],
+                            '',
+                            $related->keyword
+                        );
+                        $cleanRelatedName = trim($cleanRelatedName);
+                    @endphp
+                    <a href="{{ url('/grupos-whatsapp/' . $related->slug) }}"
+                       class="px-4 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-600 hover:bg-green-50 hover:text-primary hover:border-green-200 transition-all flex items-center gap-1.5 shadow-sm">
+                        <x-heroicon-s-fire class="w-3.5 h-3.5 text-orange-500" /> <span class="capitalize">{{ $cleanRelatedName }}</span>
+                    </a>
+                @endforeach
+            </div>
         </div>
-    </div>
+    </section>
 @endif
 
 <x-adsense class="mt-6" />

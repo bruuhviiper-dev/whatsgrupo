@@ -75,11 +75,12 @@ class HomeController extends Controller
                 $q->where('status', 'approved');
             }])->get();
 
-            // Busca 12 assuntos e páginas SEO especiais aleatórias
+            // Busca páginas SEO para a home: prioriza 2026, depois especiais, em ordem aleatória
             $seoPages = \App\Models\SeoPage::active()
                 ->whereNull('state')
+                ->orderByRaw("CASE WHEN extra_term = '2026' THEN 0 ELSE 1 END")
                 ->inRandomOrder()
-                ->limit(12)
+                ->limit(24)
                 ->get();
 
             // Busca os últimos 4 posts do blog
