@@ -1,0 +1,6 @@
+# Ignora o arquivo de verificação real do Apple Pay (cada ambiente cola o seu),
+# mas mantém as instruções versionadas.
+apple-developer-merchantid-domain-association
+!README.md
+!.gitkeep
+!.gitignore

@@ -39,6 +39,13 @@ return [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        // Caminho do arquivo de verificação de domínio do Apple Pay.
+        // A Stripe gera o conteúdo em: Dashboard > Settings > Payment Methods > Apple Pay > "Add new domain".
+        // Cole o conteúdo (sem extensão) no arquivo abaixo e o domínio será verificado.
+        'apple_pay_domain_association_path' => env(
+            'STRIPE_APPLE_PAY_DOMAIN_ASSOCIATION_PATH',
+            storage_path('app/applepay/apple-developer-merchantid-domain-association')
+        ),
     ],
 
     'mercadopago' => [

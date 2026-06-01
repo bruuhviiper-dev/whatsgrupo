@@ -144,6 +144,18 @@ Route::post('/pacotes-vip/{package:slug}/checkout-stripe-embedded', [BoostContro
 Route::post('/pacotes-vip/{package:slug}/checkout-asaas-pix', [BoostController::class, 'checkoutAsaasPix'])->name('boost.checkout-asaas-pix');
 Route::post('/pacotes-vip/{package:slug}/checkout-mp-pix', [BoostController::class, 'checkoutMercadoPagoPix'])->name('boost.checkout-mp-pix');
 
+// Verificação de domínio do Apple Pay (exigida pela Stripe para liberar o wallet no checkout embedded).
+// Serve o arquivo gerado pela Stripe como text/plain com status 200, em /.well-known/...
+Route::get('/.well-known/apple-developer-merchantid-domain-association', function () {
+    $path = config('services.stripe.apple_pay_domain_association_path');
+
+    abort_unless($path && is_file($path) && filesize($path) > 0, 404);
+
+    return response(file_get_contents($path), 200, [
+        'Content-Type' => 'text/plain',
+    ]);
+})->name('apple-pay.domain-association');
+
 // Webhooks de pagamento
 Route::post('/webhook/asaas', [BoostController::class, 'webhookAsaas'])->name('webhook.asaas');
 Route::post('/webhook/efi', [BoostController::class, 'webhook'])->name('webhook.efi');
