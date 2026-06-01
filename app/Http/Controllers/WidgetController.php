@@ -16,7 +16,7 @@ class WidgetController extends Controller
      */
     public function show(Request $request, string $category_slug = 'all')
     {
-        $query = Group::approved()->with('category');
+        $query = Group::approved()->with('category', 'verifiedGroup');
 
         $categoryName = 'Geral';
         if ($category_slug !== 'all' && $category_slug !== '') {
