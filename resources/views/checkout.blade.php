@@ -61,7 +61,7 @@
         fetch('{{ route('boost.checkout-stripe-embedded', $package->slug) }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            body: JSON.stringify({ buyer_name: this.buyerName, buyer_email: this.buyerEmail })
+            body: JSON.stringify({ buyer_name: this.buyerName, buyer_email: this.buyerEmail, method: this.paymentMethod })
         }).then(r => r.json()).then(data => {
             this.stripeLoading = false;
             if (data.success) {
@@ -233,9 +233,73 @@
                             </div>
                         </div>
                     </label>
-                </div>
 
-                {{-- Info do método selecionado --}}
+                    {{-- Google Pay --}}
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="payment_method" value="gpay" x-model="paymentMethod" class="sr-only">
+                        <div class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all"
+                             :class="paymentMethod === 'gpay'
+                                ? 'border-slate-800 bg-slate-50'
+                                : 'border-slate-200 bg-white hover:border-slate-300'">
+                            {{-- Google Pay icon --}}
+                            <svg viewBox="0 0 40 26" class="w-9 h-6 flex-shrink-0">
+                                <rect width="40" height="26" rx="4" fill="#fff" stroke="#E2E8F0"/>
+                                <path d="M19.4 13.2c0-.4 0-.8-.1-1.1h-4.1v2.1h2.4a2 2 0 0 1-.9 1.3v1.1h1.4c.8-.8 1.3-1.9 1.3-3.4z" fill="#4285F4"/>
+                                <path d="M15.2 17.5c1.2 0 2.2-.4 2.9-1.1l-1.4-1.1c-.4.3-.9.4-1.5.4-1.1 0-2.1-.8-2.4-1.8h-1.5v1.1a4.4 4.4 0 0 0 3.9 2.5z" fill="#34A853"/>
+                                <path d="M12.8 13c-.2-.5-.2-1.1 0-1.7v-1.1h-1.5a4.3 4.3 0 0 0 0 3.9l1.5-1.1z" fill="#FBBC04"/>
+                                <path d="M15.2 9.7c.6 0 1.2.2 1.6.6l1.2-1.2a4.2 4.2 0 0 0-2.8-1.1 4.4 4.4 0 0 0-3.9 2.5l1.5 1.1c.3-1 1.3-1.9 2.4-1.9z" fill="#EA4335"/>
+                                <text x="22" y="16.5" font-family="Arial, sans-serif" font-size="7.5" font-weight="700" fill="#5F6368">Pay</text>
+                            </svg>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold leading-none mb-0.5"
+                                   :class="paymentMethod === 'gpay' ? 'text-slate-900' : 'text-slate-800'">Google Pay</p>
+                                <p class="text-[11px] text-slate-400">Pagamento em 1 toque · via Stripe</p>
+                            </div>
+                            <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                                 :class="paymentMethod === 'gpay' ? 'border-slate-800' : 'border-slate-300'">
+                                <div class="w-2 h-2 rounded-full bg-slate-800 transition-all"
+                                     :class="paymentMethod === 'gpay' ? 'opacity-100' : 'opacity-0'"></div>
+                            </div>
+                        </div>
+                    </label>
+
+                    {{-- Boleto --}}
+                    <label class="block cursor-pointer">
+                        <input type="radio" name="payment_method" value="boleto" x-model="paymentMethod" class="sr-only">
+                        <div class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all"
+                             :class="paymentMethod === 'boleto'
+                                ? 'border-emerald-600 bg-emerald-50'
+                                : 'border-slate-200 bg-white hover:border-slate-300'">
+                            {{-- Boleto icon (barcode) --}}
+                            <svg viewBox="0 0 40 26" class="w-9 h-6 flex-shrink-0">
+                                <rect width="40" height="26" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+                                <g fill="#0F172A">
+                                    <rect x="5" y="6" width="1.5" height="14"/>
+                                    <rect x="7.5" y="6" width="1" height="14"/>
+                                    <rect x="10" y="6" width="2" height="14"/>
+                                    <rect x="13.5" y="6" width="1" height="14"/>
+                                    <rect x="16" y="6" width="1.5" height="14"/>
+                                    <rect x="19" y="6" width="1" height="14"/>
+                                    <rect x="21.5" y="6" width="2" height="14"/>
+                                    <rect x="25" y="6" width="1" height="14"/>
+                                    <rect x="27.5" y="6" width="1.5" height="14"/>
+                                    <rect x="30.5" y="6" width="1" height="14"/>
+                                    <rect x="33" y="6" width="2" height="14"/>
+                                </g>
+                            </svg>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold leading-none mb-0.5"
+                                   :class="paymentMethod === 'boleto' ? 'text-emerald-700' : 'text-slate-800'">Boleto Bancário</p>
+                                <p class="text-[11px] text-slate-400">Compensação em 1–3 dias úteis · via Stripe</p>
+                            </div>
+                            <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                                 :class="paymentMethod === 'boleto' ? 'border-emerald-600' : 'border-slate-300'">
+                                <div class="w-2 h-2 rounded-full bg-emerald-600 transition-all"
+                                     :class="paymentMethod === 'boleto' ? 'opacity-100' : 'opacity-0'"></div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
                 <div x-show="paymentMethod === 'pix'" x-transition
                      class="flex items-start gap-2.5 rounded-xl p-3 border border-[#32BCAD]/20 bg-[#32BCAD]/5">
                     <svg class="w-4 h-4 shrink-0 mt-0.5 text-[#32BCAD]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -250,6 +314,20 @@
                     <x-heroicon-s-shield-check class="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                     <p class="text-[11px] font-medium leading-relaxed text-blue-700">
                         Ambiente seguro Stripe. Seus dados de cartão nunca passam pelo nosso servidor.
+                    </p>
+                </div>
+                <div x-show="paymentMethod === 'gpay'" x-transition
+                     class="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <x-heroicon-s-shield-check class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                    <p class="text-[11px] font-medium leading-relaxed text-slate-600">
+                        Finalize com o Google Pay direto na tela da Stripe. Disponível em navegadores compatíveis (ex.: Chrome com um cartão salvo).
+                    </p>
+                </div>
+                <div x-show="paymentMethod === 'boleto'" x-transition
+                     class="flex items-start gap-2.5 bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                    <x-heroicon-s-information-circle class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <p class="text-[11px] font-medium leading-relaxed text-emerald-700">
+                        Gere o boleto e pague em qualquer banco ou app. O código VIP é liberado após a compensação (1–3 dias úteis).
                     </p>
                 </div>
 
@@ -285,7 +363,11 @@
                     class="w-full py-4 rounded-xl font-black text-base transition-all flex items-center justify-center gap-2.5 text-white"
                     :class="paymentMethod === 'pix'
                         ? 'bg-[#32BCAD] hover:bg-[#28a89a] shadow-lg shadow-[#32BCAD]/25'
-                        : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20'">
+                        : (paymentMethod === 'boleto'
+                            ? 'bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20'
+                            : (paymentMethod === 'gpay'
+                                ? 'bg-slate-900 hover:bg-black shadow-lg shadow-slate-900/20'
+                                : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20'))">
                 <template x-if="paymentMethod === 'pix'">
                     <span class="flex items-center gap-2.5">
                         <svg class="w-5 h-5" viewBox="0 0 512 512" fill="white">
@@ -300,6 +382,18 @@
                     <span class="flex items-center gap-2.5">
                         <x-heroicon-s-credit-card class="w-5 h-5" />
                         Pagar R$ {{ number_format($package->price, 2, ',', '.') }} com Cartão
+                    </span>
+                </template>
+                <template x-if="paymentMethod === 'gpay'">
+                    <span class="flex items-center gap-2.5">
+                        <x-heroicon-s-device-phone-mobile class="w-5 h-5" />
+                        Pagar R$ {{ number_format($package->price, 2, ',', '.') }} com Google Pay
+                    </span>
+                </template>
+                <template x-if="paymentMethod === 'boleto'">
+                    <span class="flex items-center gap-2.5">
+                        <x-heroicon-s-document-text class="w-5 h-5" />
+                        Gerar Boleto de R$ {{ number_format($package->price, 2, ',', '.') }}
                     </span>
                 </template>
             </button>

@@ -97,10 +97,18 @@ class StripePaymentService
      * Cria uma sessão de Checkout Embutida (Embedded) para o cartão de crédito.
      * Retorna array com client_secret e publishable_key.
      */
-    public function createEmbeddedSession(BoostOrder $order, BoostPackage $package): array
+    /**
+     * Cria a sessão embedded da Stripe.
+     *
+     * @param string $method  card | gpay | boleto
+     *   - card / gpay: usa métodos automáticos (wallets como Google Pay/Apple Pay
+     *     aparecem dentro do checkout em navegadores compatíveis).
+     *   - boleto: escopa a sessão apenas para boleto (exige endereço de cobrança).
+     */
+    public function createEmbeddedSession(BoostOrder $order, BoostPackage $package, string $method = 'card'): array
     {
         if ($this->isSimulated) {
-            $order->update(['payment_id' => 'STRIPE-SIM-card-' . $order->id]);
+            $order->update(['payment_id' => 'STRIPE-SIM-' . $method . '-' . $order->id]);
             return [
                 'is_simulated' => true,
                 'client_secret' => 'simulated_secret_' . $order->id,
@@ -110,7 +118,7 @@ class StripePaymentService
         }
 
         try {
-            $session = Session::create([
+            $params = [
                 'ui_mode' => 'embedded_page',
                 'return_url' => route('boost.success', $order) . '?session_id={CHECKOUT_SESSION_ID}',
                 'line_items' => [[
@@ -128,8 +136,20 @@ class StripePaymentService
                 'customer_email' => $order->buyer_email,
                 'metadata' => [
                     'order_id' => (string) $order->id,
+                    'method'   => $method,
                 ],
-            ]);
+            ];
+
+            // Boleto é assíncrono e exige endereço de cobrança. Escopamos a sessão
+            // só para boleto; a Stripe coleta CPF/CNPJ e endereço na própria tela.
+            if ($method === 'boleto') {
+                $params['payment_method_types'] = ['boleto'];
+                $params['billing_address_collection'] = 'required';
+            }
+            // card/gpay: sem payment_method_types => métodos dinâmicos da conta
+            // (cartão + Google Pay/Apple Pay quando habilitados e suportados).
+
+            $session = Session::create($params);
 
             $order->update(['payment_id' => $session->id]);
 

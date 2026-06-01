@@ -213,12 +213,22 @@ class BoostController extends Controller
         // Tipo de evento que nos interessa
         $eventType = is_array($event) ? ($event['type'] ?? '') : ($event->type ?? '');
 
-        if ($eventType === 'checkout.session.completed') {
+        if ($eventType === 'checkout.session.completed' || $eventType === 'checkout.session.async_payment_succeeded') {
             $session = is_array($event) ? ($event['data']['object'] ?? []) : ($event->data->object ?? null);
             $sessionId = is_array($session) ? ($session['id'] ?? '') : ($session->id ?? '');
             $orderId = is_array($session) ? ($session['metadata']['order_id'] ?? '') : ($session->metadata->order_id ?? '');
+            $paymentStatus = is_array($session) ? ($session['payment_status'] ?? '') : ($session->payment_status ?? '');
 
-            Log::info("[BoostController] Stripe Session Completed. ID: {$sessionId}, OrderID: {$orderId}");
+            Log::info("[BoostController] Stripe {$eventType}. ID: {$sessionId}, OrderID: {$orderId}, payment_status: {$paymentStatus}");
+
+            // Métodos assíncronos (ex.: boleto) disparam checkout.session.completed
+            // já na geração do voucher, mas com payment_status = 'unpaid'. Nesse caso
+            // NÃO entregamos o código VIP — aguardamos o async_payment_succeeded, que
+            // chega quando a cobrança é efetivamente compensada.
+            if ($eventType === 'checkout.session.completed' && $paymentStatus !== 'paid') {
+                Log::info("[BoostController] Pagamento ainda pendente (provável boleto). Aguardando compensação. OrderID: {$orderId}");
+                return response()->json(['ok' => true]);
+            }
 
             // Busca o pedido correspondente ao payment_id (Session ID) ou ID de metadados
             $order = null;
@@ -236,7 +246,7 @@ class BoostController extends Controller
 
             if ($order) {
                 $this->confirmPayment($order);
-                Log::info("[BoostController] Pedido #{$order->id} confirmado via Stripe Webhook.");
+                Log::info("[BoostController] Pedido #{$order->id} confirmado via Stripe Webhook ({$eventType}).");
             } else {
                 Log::warning("[BoostController] Pedido correspondente não encontrado para Stripe Session ID: {$sessionId}, OrderID: {$orderId}");
             }
@@ -300,20 +310,23 @@ class BoostController extends Controller
         $validated = $request->validate([
             'buyer_name'  => 'required|string|min:3|max:150',
             'buyer_email' => 'required|email|max:255',
+            'method'      => 'nullable|in:card,gpay,boleto',
         ]);
+
+        $method = $validated['method'] ?? 'card';
 
         $order = BoostOrder::create([
             'boost_package_id' => $package->id,
             'buyer_name'       => $validated['buyer_name'],
             'buyer_email'      => $validated['buyer_email'],
-            'payment_method'   => 'card',
+            'payment_method'   => $method,
             'payment_status'   => 'pending',
             'boosts_total'     => $package->boosts_count,
             'boosts_used'      => 0,
             'amount'           => $package->price,
         ]);
 
-        $sessionData = $this->stripeService->createEmbeddedSession($order, $package);
+        $sessionData = $this->stripeService->createEmbeddedSession($order, $package, $method);
 
         return response()->json([
             'success'         => true,
