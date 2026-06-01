@@ -175,91 +175,117 @@
             <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-5">Forma de Pagamento</h2>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {{-- Métodos disponíveis --}}
+                <div class="grid grid-cols-2 gap-3">
 
                     {{-- PIX --}}
                     <label class="cursor-pointer relative">
                         <input type="radio" name="payment_method" value="pix" x-model="paymentMethod" class="peer hidden">
-                        <div class="rounded-xl border-2 p-3.5 flex flex-col items-center gap-2 transition-all
+                        <div class="rounded-xl border-2 p-4 flex flex-col items-center gap-2 transition-all
                                     border-slate-200 bg-white hover:border-slate-300
-                                    peer-checked:border-green-500 peer-checked:bg-green-50 peer-checked:shadow-sm">
-                            <svg class="w-7 h-7 text-[#32BCAD]" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M5.283 18.36a3.505 3.505 0 0 0 2.493-1.032l3.6-3.6a.684.684 0 0 1 .946 0l3.613 3.613a3.504 3.504 0 0 0 2.493 1.032h.71l-4.56 4.56a3.647 3.647 0 0 1-5.156 0L4.85 18.36ZM18.428 5.627a3.505 3.505 0 0 0-2.493 1.032l-3.613 3.614a.67.67 0 0 1-.946 0l-3.6-3.6A3.505 3.505 0 0 0 5.283 5.64h-.48l4.57-4.56a3.647 3.647 0 0 1 5.155 0l4.55 4.56ZM1.64 12.015l4.56-4.56a3.505 3.505 0 0 0 1.032 2.493l3.6 3.6a.684.684 0 0 1 0 .946l-3.613 3.613a3.504 3.504 0 0 0-1.032 2.493h.48l4.56-4.56a3.647 3.647 0 0 1 0-5.156L1.64 12.015ZM22.36 12.015l-4.56 4.56a3.505 3.505 0 0 0-1.032-2.493l-3.613-3.6a.684.684 0 0 1 0-.946l3.6-3.613a3.504 3.504 0 0 0 1.032-2.493h-.48l-4.56 4.56a3.647 3.647 0 0 1 0 5.156l4.56 4.56Z"/>
+                                    peer-checked:border-[#32BCAD] peer-checked:bg-[#32BCAD]/5 peer-checked:shadow-sm">
+                            {{-- Logo PIX oficial (4 losangos) --}}
+                            <svg class="w-8 h-8" viewBox="0 0 512 512" fill="#32BCAD">
+                                <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l79.199-79.199c5.639-5.639 15.682-5.64 21.322 0l79.52 79.519c14.192 14.192 33.063 22 53.12 22h15.638l-100.401 100.401c-29.806 29.807-78.146 29.807-107.952 0L105.718 391.19h6.852zm287.452-271.381c-20.057 0-38.929 7.808-53.12 22L267.1 221.209c-5.694 5.694-15.629 5.693-21.321-.001L165.69 140.81c-14.192-14.192-33.063-22-53.12-22h-6.852L205.119 18.41c29.806-29.807 78.146-29.807 107.952 0l100.319 100.319-13.362-.911zm94.823 94.824L394.447 114.237c.366 3.034.51 6.1.51 9.203 0 20.057-7.808 38.928-22 53.12l-79.521 79.52c-5.637 5.637-5.638 15.682.001 21.321l79.2 79.199c14.192 14.192 22 33.063 22 53.12 0 3.102-.143 6.167-.51 9.201l100.724-100.723c29.808-29.806 29.808-78.146.001-107.952zM54.148 214.643L-46.741 315.064c-.367-3.034-.511-6.099-.511-9.201 0-20.057 7.808-38.929 22-53.12l79.2-79.2c5.694-5.693 5.694-15.627 0-21.321l-79.521-79.52C-39.824 58.51-47.252 39.639-47.252 19.582c0-3.104.144-6.169.511-9.204L-146.841 110.634c-29.808 29.806-29.808 78.146 0 107.953z"/>
                             </svg>
-                            <span class="text-xs font-black text-slate-700 peer-checked:text-green-700">PIX</span>
+                            <span class="text-xs font-black text-slate-700 peer-checked:text-[#32BCAD]">PIX</span>
                             <span class="text-[10px] text-slate-400 font-semibold text-center leading-tight">Aprovação<br>imediata</span>
                         </div>
-                        <div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity">
+                        <div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#32BCAD] rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity shadow-sm">
                             <x-heroicon-s-check class="w-3 h-3 text-white" />
                         </div>
                     </label>
 
-                    {{-- Cartão de Crédito --}}
+                    {{-- Cartão de Crédito / Débito --}}
                     <label class="cursor-pointer relative">
                         <input type="radio" name="payment_method" value="card" x-model="paymentMethod" class="peer hidden">
-                        <div class="rounded-xl border-2 p-3.5 flex flex-col items-center gap-2 transition-all
+                        <div class="rounded-xl border-2 p-4 flex flex-col items-center gap-2 transition-all
                                     border-slate-200 bg-white hover:border-slate-300
                                     peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-sm">
-                            <x-heroicon-s-credit-card class="w-7 h-7 text-blue-500" />
-                            <span class="text-xs font-black text-slate-700">Cartão</span>
+                            {{-- Ícone de cartão com chip + bandeiras --}}
+                            <div class="w-8 h-8 flex items-center justify-center">
+                                <svg viewBox="0 0 40 28" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                                    <rect width="40" height="28" rx="4" fill="#3B82F6"/>
+                                    <rect x="2" y="8" width="36" height="5" fill="#2563EB"/>
+                                    <rect x="4" y="16" width="8" height="5" rx="1.5" fill="#60A5FA"/>
+                                    <rect x="14" y="16" width="5" height="5" rx="1.5" fill="#93C5FD" opacity="0.6"/>
+                                    <circle cx="32" cy="18.5" r="4" fill="#EF4444" opacity="0.8"/>
+                                    <circle cx="28" cy="18.5" r="4" fill="#F97316" opacity="0.8"/>
+                                </svg>
+                            </div>
+                            <span class="text-xs font-black text-slate-700 peer-checked:text-blue-600">Cartão</span>
                             <span class="text-[10px] text-slate-400 font-semibold text-center leading-tight">Crédito/<br>Débito</span>
                         </div>
-                        <div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity">
+                        <div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity shadow-sm">
                             <x-heroicon-s-check class="w-3 h-3 text-white" />
                         </div>
                     </label>
+                </div>
 
-                    {{-- Nubank / Boleto (em breve) --}}
-                    <label class="cursor-not-allowed relative opacity-60">
-                        <div class="rounded-xl border-2 border-dashed border-slate-200 p-3.5 flex flex-col items-center gap-2">
-                            <svg class="w-7 h-7" viewBox="0 0 50 50" fill="none">
-                                <circle cx="25" cy="25" r="25" fill="#820AD1"/>
-                                <path d="M25 12C17.82 12 12 17.82 12 25C12 32.18 17.82 38 25 38C32.18 38 38 32.18 38 25C38 17.82 32.18 12 25 12ZM25 35C19.48 35 15 30.52 15 25C15 19.48 19.48 15 25 15C30.52 15 35 19.48 35 25C35 30.52 30.52 35 25 35Z" fill="white"/>
-                            </svg>
-                            <span class="text-xs font-black text-slate-500">Nubank</span>
-                            <span class="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded-full">Em breve</span>
-                        </div>
-                    </label>
+                {{-- Divisor "Em breve" --}}
+                <div class="flex items-center gap-2 mt-4 mb-3">
+                    <div class="h-px flex-1 bg-slate-100"></div>
+                    <span class="text-slate-400 text-[10px] font-bold uppercase tracking-wider px-1">Em breve</span>
+                    <div class="h-px flex-1 bg-slate-100"></div>
+                </div>
 
-                    {{-- Mercado Pago (em breve) --}}
-                    <label class="cursor-not-allowed relative opacity-60">
-                        <div class="rounded-xl border-2 border-dashed border-slate-200 p-3.5 flex flex-col items-center gap-2">
-                            <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none">
-                                <circle cx="24" cy="24" r="24" fill="#009EE3"/>
-                                <text x="24" y="30" text-anchor="middle" font-size="14" font-weight="bold" fill="white" font-family="Arial">MP</text>
-                            </svg>
-                            <span class="text-xs font-black text-slate-500">Mercado Pago</span>
-                            <span class="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded-full">Em breve</span>
-                        </div>
-                    </label>
+                {{-- Métodos em breve (linha compacta) --}}
+                <div class="grid grid-cols-4 gap-2">
 
-                    {{-- PagSeguro (em breve) --}}
-                    <label class="cursor-not-allowed relative opacity-60">
-                        <div class="rounded-xl border-2 border-dashed border-slate-200 p-3.5 flex flex-col items-center gap-2">
-                            <svg class="w-7 h-7" viewBox="0 0 48 48" fill="none">
-                                <circle cx="24" cy="24" r="24" fill="#009C38"/>
-                                <text x="24" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="white" font-family="Arial">PAG</text>
-                            </svg>
-                            <span class="text-xs font-black text-slate-500">PagSeguro</span>
-                            <span class="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded-full">Em breve</span>
-                        </div>
-                    </label>
+                    {{-- Nubank --}}
+                    <div class="cursor-not-allowed opacity-50 rounded-xl border border-dashed border-slate-200 p-2.5 flex flex-col items-center gap-1.5" title="Em breve">
+                        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
+                            <rect width="40" height="40" rx="10" fill="#820AD1"/>
+                            <path d="M11 28V12h3.2l10.8 11.2V12H28v16h-3.2L14 16.8V28H11z" fill="white"/>
+                        </svg>
+                        <span class="text-[9px] font-bold text-slate-500 text-center leading-none">Nubank</span>
+                    </div>
 
-                    {{-- Boleto (em breve) --}}
-                    <label class="cursor-not-allowed relative opacity-60">
-                        <div class="rounded-xl border-2 border-dashed border-slate-200 p-3.5 flex flex-col items-center gap-2">
-                            <x-heroicon-o-document-text class="w-7 h-7 text-slate-400" />
-                            <span class="text-xs font-black text-slate-500">Boleto</span>
-                            <span class="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded-full">Em breve</span>
-                        </div>
-                    </label>
+                    {{-- Mercado Pago --}}
+                    <div class="cursor-not-allowed opacity-50 rounded-xl border border-dashed border-slate-200 p-2.5 flex flex-col items-center gap-1.5" title="Em breve">
+                        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
+                            <rect width="40" height="40" rx="10" fill="#009EE3"/>
+                            {{-- Estrela/sorriso Mercado Pago --}}
+                            <path d="M20 8l2.47 7.6h7.99l-6.46 4.7 2.47 7.6L20 23.2l-6.47 4.7 2.47-7.6L9.54 15.6h7.99L20 8z" fill="#FFE600"/>
+                        </svg>
+                        <span class="text-[9px] font-bold text-slate-500 text-center leading-none">Mercado<br>Pago</span>
+                    </div>
 
+                    {{-- PagSeguro --}}
+                    <div class="cursor-not-allowed opacity-50 rounded-xl border border-dashed border-slate-200 p-2.5 flex flex-col items-center gap-1.5" title="Em breve">
+                        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
+                            <rect width="40" height="40" rx="10" fill="#F58220"/>
+                            {{-- Cadeado --}}
+                            <path d="M14 21v-4a6 6 0 0112 0v4" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                            <rect x="11" y="21" width="18" height="12" rx="3" fill="white"/>
+                            <circle cx="20" cy="27" r="2" fill="#F58220"/>
+                        </svg>
+                        <span class="text-[9px] font-bold text-slate-500 text-center leading-none">PagSeguro</span>
+                    </div>
+
+                    {{-- Boleto --}}
+                    <div class="cursor-not-allowed opacity-50 rounded-xl border border-dashed border-slate-200 p-2.5 flex flex-col items-center gap-1.5" title="Em breve">
+                        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7">
+                            <rect width="40" height="40" rx="10" fill="#475569"/>
+                            {{-- Código de barras --}}
+                            <rect x="8"  y="12" width="2"   height="16" fill="white"/>
+                            <rect x="12" y="12" width="1"   height="16" fill="white"/>
+                            <rect x="15" y="12" width="3"   height="16" fill="white"/>
+                            <rect x="20" y="12" width="1.5" height="16" fill="white"/>
+                            <rect x="23" y="12" width="2"   height="16" fill="white"/>
+                            <rect x="27" y="12" width="1"   height="16" fill="white"/>
+                            <rect x="30" y="12" width="2"   height="16" fill="white"/>
+                        </svg>
+                        <span class="text-[9px] font-bold text-slate-500 text-center leading-none">Boleto</span>
+                    </div>
                 </div>
 
                 {{-- Info do método selecionado --}}
-                <div x-show="paymentMethod === 'pix'" class="mt-4 flex items-start gap-2.5 bg-green-50 border border-green-100 rounded-xl p-3.5">
-                    <x-heroicon-s-bolt class="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                    <p class="text-green-800 text-xs font-semibold leading-relaxed">
+                <div x-show="paymentMethod === 'pix'" class="mt-4 flex items-start gap-2.5 rounded-xl p-3.5 border" style="background:#32BCAD0d;border-color:#32BCAD33;">
+                    <svg class="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 512 512" fill="#32BCAD">
+                        <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l79.199-79.199c5.639-5.639 15.682-5.64 21.322 0l79.52 79.519c14.192 14.192 33.063 22 53.12 22h15.638l-100.401 100.401c-29.806 29.807-78.146 29.807-107.952 0L105.718 391.19h6.852zm287.452-271.381c-20.057 0-38.929 7.808-53.12 22L267.1 221.209c-5.694 5.694-15.629 5.693-21.321-.001L165.69 140.81c-14.192-14.192-33.063-22-53.12-22h-6.852L205.119 18.41c29.806-29.807 78.146-29.807 107.952 0l100.319 100.319-13.362-.911zm94.823 94.824L394.447 114.237c.366 3.034.51 6.1.51 9.203 0 20.057-7.808 38.928-22 53.12l-79.521 79.52c-5.637 5.637-5.638 15.682.001 21.321l79.2 79.199c14.192 14.192 22 33.063 22 53.12 0 3.102-.143 6.167-.51 9.201l100.724-100.723c29.808-29.806 29.808-78.146.001-107.952zM54.148 214.643L-46.741 315.064c-.367-3.034-.511-6.099-.511-9.201 0-20.057 7.808-38.929 22-53.12l79.2-79.2c5.694-5.693 5.694-15.627 0-21.321l-79.521-79.52C-39.824 58.51-47.252 39.639-47.252 19.582c0-3.104.144-6.169.511-9.204L-146.841 110.634c-29.808 29.806-29.808 78.146 0 107.953z"/>
+                    </svg>
+                    <p class="text-xs font-semibold leading-relaxed" style="color:#0f5e58;">
                         <strong>PIX é a forma mais rápida.</strong> Gere o QR Code, pague no seu banco e o código VIP chega no seu e-mail em segundos.
                     </p>
                 </div>
@@ -275,11 +301,13 @@
             <button type="button"
                     @click="paymentMethod === 'pix' ? (pixModalOpen = true) : initStripeCheckout()"
                     class="w-full py-4 rounded-xl font-black text-base transition-all flex items-center justify-center gap-2 text-white shadow-lg"
-                    :class="paymentMethod === 'pix'
-                        ? 'bg-green-500 hover:bg-green-600 shadow-green-500/30'
-                        : 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/30'">
+                    :style="paymentMethod === 'pix'
+                        ? 'background:#32BCAD; box-shadow: 0 8px 20px rgba(50,188,173,0.30);'
+                        : 'background:#2563EB; box-shadow: 0 8px 20px rgba(37,99,235,0.25);'">
                 <span x-show="paymentMethod === 'pix'" class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M5.283 18.36a3.505 3.505 0 0 0 2.493-1.032l3.6-3.6a.684.684 0 0 1 .946 0l3.613 3.613a3.504 3.504 0 0 0 2.493 1.032h.71l-4.56 4.56a3.647 3.647 0 0 1-5.156 0L4.85 18.36ZM18.428 5.627a3.505 3.505 0 0 0-2.493 1.032l-3.613 3.614a.67.67 0 0 1-.946 0l-3.6-3.6A3.505 3.505 0 0 0 5.283 5.64h-.48l4.57-4.56a3.647 3.647 0 0 1 5.155 0l4.55 4.56ZM1.64 12.015l4.56-4.56a3.505 3.505 0 0 0 1.032 2.493l3.6 3.6a.684.684 0 0 1 0 .946l-3.613 3.613a3.504 3.504 0 0 0-1.032 2.493h.48l4.56-4.56a3.647 3.647 0 0 1 0-5.156L1.64 12.015ZM22.36 12.015l-4.56 4.56a3.505 3.505 0 0 0-1.032-2.493l-3.613-3.6a.684.684 0 0 1 0-.946l3.6-3.613a3.504 3.504 0 0 0 1.032-2.493h-.48l-4.56 4.56a3.647 3.647 0 0 1 0 5.156l4.56 4.56Z"/></svg>
+                    <svg class="w-5 h-5" viewBox="0 0 512 512" fill="white">
+                        <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l79.199-79.199c5.639-5.639 15.682-5.64 21.322 0l79.52 79.519c14.192 14.192 33.063 22 53.12 22h15.638l-100.401 100.401c-29.806 29.807-78.146 29.807-107.952 0L105.718 391.19h6.852zm287.452-271.381c-20.057 0-38.929 7.808-53.12 22L267.1 221.209c-5.694 5.694-15.629 5.693-21.321-.001L165.69 140.81c-14.192-14.192-33.063-22-53.12-22h-6.852L205.119 18.41c29.806-29.807 78.146-29.807 107.952 0l100.319 100.319-13.362-.911zm94.823 94.824L394.447 114.237c.366 3.034.51 6.1.51 9.203 0 20.057-7.808 38.928-22 53.12l-79.521 79.52c-5.637 5.637-5.638 15.682.001 21.321l79.2 79.199c14.192 14.192 22 33.063 22 53.12 0 3.102-.143 6.167-.51 9.201l100.724-100.723c29.808-29.806 29.808-78.146.001-107.952zM54.148 214.643L-46.741 315.064c-.367-3.034-.511-6.099-.511-9.201 0-20.057 7.808-38.929 22-53.12l79.2-79.2c5.694-5.693 5.694-15.627 0-21.321l-79.521-79.52C-39.824 58.51-47.252 39.639-47.252 19.582c0-3.104.144-6.169.511-9.204L-146.841 110.634c-29.808 29.806-29.808 78.146 0 107.953z"/>
+                    </svg>
                     Pagar R$ {{ number_format($package->price, 2, ',', '.') }} com PIX
                 </span>
                 <span x-show="paymentMethod === 'card'" class="flex items-center gap-2">
@@ -443,14 +471,14 @@
             </button>
 
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-                <div class="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-[#32BCAD]" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M5.283 18.36a3.505 3.505 0 0 0 2.493-1.032l3.6-3.6a.684.684 0 0 1 .946 0l3.613 3.613a3.504 3.504 0 0 0 2.493 1.032h.71l-4.56 4.56a3.647 3.647 0 0 1-5.156 0L4.85 18.36ZM18.428 5.627a3.505 3.505 0 0 0-2.493 1.032l-3.613 3.614a.67.67 0 0 1-.946 0l-3.6-3.6A3.505 3.505 0 0 0 5.283 5.64h-.48l4.57-4.56a3.647 3.647 0 0 1 5.155 0l4.55 4.56ZM1.64 12.015l4.56-4.56a3.505 3.505 0 0 0 1.032 2.493l3.6 3.6a.684.684 0 0 1 0 .946l-3.613 3.613a3.504 3.504 0 0 0-1.032 2.493h.48l4.56-4.56a3.647 3.647 0 0 1 0-5.156L1.64 12.015ZM22.36 12.015l-4.56 4.56a3.505 3.505 0 0 0-1.032-2.493l-3.613-3.6a.684.684 0 0 1 0-.946l3.6-3.613a3.504 3.504 0 0 0 1.032-2.493h-.48l-4.56 4.56a3.647 3.647 0 0 1 0 5.156l4.56 4.56Z"/>
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:#32BCAD1a;">
+                    <svg class="w-5 h-5" viewBox="0 0 512 512" fill="#32BCAD">
+                        <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l79.199-79.199c5.639-5.639 15.682-5.64 21.322 0l79.52 79.519c14.192 14.192 33.063 22 53.12 22h15.638l-100.401 100.401c-29.806 29.807-78.146 29.807-107.952 0L105.718 391.19h6.852zm287.452-271.381c-20.057 0-38.929 7.808-53.12 22L267.1 221.209c-5.694 5.694-15.629 5.693-21.321-.001L165.69 140.81c-14.192-14.192-33.063-22-53.12-22h-6.852L205.119 18.41c29.806-29.807 78.146-29.807 107.952 0l100.319 100.319-13.362-.911zm94.823 94.824L394.447 114.237c.366 3.034.51 6.1.51 9.203 0 20.057-7.808 38.928-22 53.12l-79.521 79.52c-5.637 5.637-5.638 15.682.001 21.321l79.2 79.199c14.192 14.192 22 33.063 22 53.12 0 3.102-.143 6.167-.51 9.201l100.724-100.723c29.808-29.806 29.808-78.146.001-107.952zM54.148 214.643L-46.741 315.064c-.367-3.034-.511-6.099-.511-9.201 0-20.057 7.808-38.929 22-53.12l79.2-79.2c5.694-5.693 5.694-15.627 0-21.321l-79.521-79.52C-39.824 58.51-47.252 39.639-47.252 19.582c0-3.104.144-6.169.511-9.204L-146.841 110.634c-29.808 29.806-29.808 78.146 0 107.953z"/>
                     </svg>
                 </div>
                 <div>
                     <h2 class="font-black text-slate-900">Pagamento PIX</h2>
-                    <p class="text-xs text-slate-500">{{ $package->name }} · <span class="font-bold text-green-600">{{ $package->formatted_price }}</span></p>
+                    <p class="text-xs text-slate-500">{{ $package->name }} · <span class="font-bold" style="color:#32BCAD;">{{ $package->formatted_price }}</span></p>
                 </div>
             </div>
 
