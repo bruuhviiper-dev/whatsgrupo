@@ -53,10 +53,7 @@
                 <div class="grid grid-cols-1 gap-6">
                     @foreach ($phrases as $phrase)
                         @if($loop->iteration > 1 && $loop->iteration % 2 == 1)
-                            {{-- Placeholder de AdSense no meio das frases --}}
-                            <div class="w-full h-[150px] bg-slate-200 border border-slate-300 border-dashed rounded-xl flex items-center justify-center text-slate-400 text-xs font-bold tracking-widest uppercase text-center mb-6">
-                                [ Espaço Reservado<br>AdSense In-Feed ]
-                            </div>
+                            <x-adsense class="mb-6" />
                         @endif
                         {{-- Card de Frase Estilo gruposwhats.app --}}
                         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
