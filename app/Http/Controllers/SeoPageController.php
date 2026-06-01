@@ -56,6 +56,7 @@ class SeoPageController extends Controller
             $normalQuery = Group::with(['category', 'verifiedGroup'])->approved()
                 ->where(function ($q) {
                     $q->where('is_vip', false)
+                      ->orWhereNull('vip_expires_at')
                       ->orWhere('vip_expires_at', '<=', now()->toDateTimeString());
                 });
 

@@ -124,20 +124,26 @@ class Group extends Model
 
     /**
      * Escopo para carregar apenas grupos VIP com prazo de validade ativo (não expirado).
+     * Exige is_vip=true, vip_expires_at NOT NULL e vip_expires_at > agora.
+     * Grupos com is_vip=true mas vip_expires_at=null são considerados inválidos e excluídos.
      */
     public function scopeNotExpiredVip($query)
     {
         return $query->where('is_vip', true)
+                     ->whereNotNull('vip_expires_at')
                      ->where('vip_expires_at', '>', now());
     }
 
     /**
      * Accessor: verifica se o grupo está ativo no VIP atualmente.
-     * Retorna booleano combinando a flag e o prazo do VIP no Carbon.
+     * Retorna booleano combinando a flag, a existência e o prazo do VIP.
+     * Grupos com vip_expires_at=null nunca são considerados VIP ativos.
      */
     public function getIsCurrentlyVipAttribute(): bool
     {
-        return $this->is_vip && $this->vip_expires_at && $this->vip_expires_at->isFuture();
+        return $this->is_vip
+            && $this->vip_expires_at !== null
+            && $this->vip_expires_at->isFuture();
     }
 
     /**

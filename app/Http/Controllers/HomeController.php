@@ -54,6 +54,7 @@ class HomeController extends Controller
                     ->approved()
                     ->where(function ($q) {
                         $q->where('is_vip', false)
+                          ->orWhereNull('vip_expires_at')
                           ->orWhere('vip_expires_at', '<=', now()->toDateTimeString());
                     })
                     ->orderBy('created_at', 'desc')

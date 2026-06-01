@@ -14,8 +14,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Expira grupos VIP a cada 5 minutos
-Schedule::job(new ExpireBoostsJob)->everyFiveMinutes();
+// Expira grupos VIP a cada 1 minuto (garante expiração precisa sem delay)
+Schedule::job(new ExpireBoostsJob)->everyMinute();
 
 // Gera sitemap diariamente à meia-noite
 Schedule::job(new GenerateSitemapJob)->daily();

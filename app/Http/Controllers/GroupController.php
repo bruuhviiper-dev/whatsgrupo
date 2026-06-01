@@ -47,7 +47,9 @@ class GroupController extends Controller
                 ->approved()
                 ->where('category_id', $category->id)
                 ->where(function ($q) {
-                    $q->where('is_vip', false)->orWhere('vip_expires_at', '<=', now()->toDateTimeString());
+                    $q->where('is_vip', false)
+                      ->orWhereNull('vip_expires_at')
+                      ->orWhere('vip_expires_at', '<=', now()->toDateTimeString());
                 })
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -534,6 +536,22 @@ class GroupController extends Controller
 
         // Incrementa o contador de impulsos usados no pedido
         $order->increment('boosts_used');
+
+        // ---------------------------------------------------------------
+        // Limpa o cache da home e da categoria do grupo para que ele
+        // apareça imediatamente no topo sem aguardar os 5 minutos de cache
+        // ---------------------------------------------------------------
+        $tabs = ['all', 'vip', 'popular', 'novos'];
+        for ($page = 1; $page <= 10; $page++) {
+            foreach ($tabs as $tab) {
+                Cache::forget("home_data_tab_{$tab}_page_{$page}");
+            }
+        }
+        if ($group->category) {
+            for ($page = 1; $page <= 10; $page++) {
+                Cache::forget("category_groups_{$group->category->slug}_page_{$page}");
+            }
+        }
 
         return response()->json([
             'success'    => true,
