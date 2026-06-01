@@ -127,10 +127,16 @@ class WhatsAppLinkValidator
      */
     protected function pythonAvailable(): bool
     {
+        // Se é um caminho absoluto (Windows ou Unix), verifica se o arquivo existe
+        if (file_exists($this->pythonBin) && is_file($this->pythonBin)) {
+            return true;
+        }
+
+        // Se não é um caminho absoluto, tenta usar which/where no PATH
         $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
         $check = $isWindows
-            ? shell_exec("where \"{$this->pythonBin}\" 2>NUL")
-            : shell_exec("which \"{$this->pythonBin}\" 2>/dev/null");
+            ? shell_exec("where \"python.exe\" 2>NUL")
+            : shell_exec("which python3 2>/dev/null");
 
         return !empty($check);
     }

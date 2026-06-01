@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use App\Models\Figurinha;
 use App\Repositories\FigurinhaRepository;
 use App\Services\FigurinhaService;
-use Illuminate\Http\Request;
 
 class FigurinhaAdminController extends Controller
 {
