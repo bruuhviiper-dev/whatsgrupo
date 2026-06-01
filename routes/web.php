@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FigurinhaAdminController;
+use App\Http\Controllers\Admin\PhraseAdminController;
 use App\Http\Controllers\Admin\GroupModerationController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -199,6 +200,14 @@ Route::middleware('admin.auth')->prefix('admin')->name('admin.')->group(function
         Route::post('/{figurinha}/aprovar', [FigurinhaAdminController::class, 'aprovar'])->name('aprovar');
         Route::post('/{figurinha}/rejeitar', [FigurinhaAdminController::class, 'rejeitar'])->name('rejeitar');
         Route::delete('/{figurinha}', [FigurinhaAdminController::class, 'destroy'])->name('destroy');
+    });
+
+    // Moderação de Frases de Status
+    Route::prefix('frases')->name('phrases.')->group(function () {
+        Route::get('/', [PhraseAdminController::class, 'index'])->name('index');
+        Route::post('/{phrase}/aprovar', [PhraseAdminController::class, 'aprovar'])->name('aprovar');
+        Route::post('/{phrase}/rejeitar', [PhraseAdminController::class, 'rejeitar'])->name('rejeitar');
+        Route::delete('/{phrase}', [PhraseAdminController::class, 'destroy'])->name('destroy');
     });
 
     // Moderação de Grupos

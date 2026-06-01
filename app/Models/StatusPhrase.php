@@ -18,6 +18,8 @@ class StatusPhrase extends Model
         'author',
         'category',
         'likes',
+        'status',
+        'motivo_rejeicao',
     ];
 
     protected static function boot()
@@ -51,11 +53,49 @@ class StatusPhrase extends Model
         return $labels[$this->category] ?? ucfirst($this->category);
     }
 
-    /**
-     * Get the route key for the model.
-     */
     public function getRouteKeyName(): string
     {
         return 'hash';
+    }
+
+    public function scopeAprovadas($query)
+    {
+        return $query->where('status', 'aprovado');
+    }
+
+    public function scopePendentes($query)
+    {
+        return $query->where('status', 'pendente');
+    }
+
+    public function scopeRejeitadas($query)
+    {
+        return $query->where('status', 'rejeitado');
+    }
+
+    public static function allCategories(): array
+    {
+        return [
+            'amor'       => 'Amor',
+            'amizade'    => 'Amizade',
+            'motivacao'  => 'Motivação',
+            'engracado'  => 'Engraçado',
+            'reflexao'   => 'Reflexão',
+            'academia'   => 'Academia',
+            'boa-noite'  => 'Boa Noite',
+            'bom-dia'    => 'Bom Dia',
+            'curtas'     => 'Curtas',
+            'deus'       => 'Deus',
+            'evangelica' => 'Evangélica',
+            'gratidao'   => 'Gratidão',
+            'indiretas'  => 'Indiretas',
+            'musicas'    => 'Músicas',
+            'sozinha'    => 'Sozinha',
+            'tristes'    => 'Tristes',
+            'visao'      => 'Visão',
+            'familia'    => 'Família',
+            'falsidade'  => 'Falsidade',
+            'maloka'     => 'Maloka',
+        ];
     }
 }
