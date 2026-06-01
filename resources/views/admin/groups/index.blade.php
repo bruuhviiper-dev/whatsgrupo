@@ -7,11 +7,11 @@
 
 {{-- Filtros --}}
 <form action="{{ route('admin.groups.index') }}" method="GET"
-      class="card p-4 md:p-5 mb-5">
+      class="card p-4 md:p-5 mb-5 dark:bg-slate-800 dark:border-slate-700">
     <div class="flex flex-wrap gap-3 items-end">
         <div class="flex-1 min-w-[140px]">
             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Status</label>
-            <select name="status" class="w-full rounded-lg px-3 py-2 text-sm text-slate-700 bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 font-semibold">
+            <select name="status" class="w-full rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 font-semibold">
                 <option value="">Todos</option>
                 <option value="pending"  {{ request('status') === 'pending'  ? 'selected' : '' }}>Pendente</option>
                 <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Aprovado</option>
@@ -20,7 +20,7 @@
         </div>
         <div class="flex-1 min-w-[140px]">
             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Categoria</label>
-            <select name="category_id" class="w-full rounded-lg px-3 py-2 text-sm text-slate-700 bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 font-semibold">
+            <select name="category_id" class="w-full rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 font-semibold">
                 <option value="">Todas</option>
                 @foreach ($categories as $cat)
                     <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
@@ -39,7 +39,7 @@
         </div>
         <div class="flex-1 min-w-[130px]">
             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Apostas</label>
-            <select name="gambling" class="w-full rounded-lg px-3 py-2 text-sm text-slate-700 bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 font-semibold">
+            <select name="gambling" class="w-full rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 font-semibold">
                 <option value="">Todos</option>
                 <option value="1" {{ request('gambling') === '1' ? 'selected' : '' }}>Somente apostas</option>
                 <option value="0" {{ request('gambling') === '0' ? 'selected' : '' }}>Sem apostas</option>
@@ -56,7 +56,7 @@
 </form>
 
 {{-- Header da tabela --}}
-<div class="card overflow-hidden">
+<div class="card overflow-hidden dark:bg-slate-800 dark:border-slate-700">
     <div class="card-header">
         <div class="flex items-center gap-2">
             <span class="text-xs font-bold text-slate-500">{{ $groups->total() }} grupo(s)</span>
@@ -155,7 +155,7 @@
                             @if ($group->is_gambling)
                                 <div>
                                     <span class="inline-flex items-center gap-1 text-[11px] font-bold text-orange-700 bg-orange-50 border border-orange-200 rounded-full px-2.5 py-1">
-                                        🎲 Aposta
+                                        Aposta
                                     </span>
                                     <p class="text-orange-400 text-[10px] font-medium mt-0.5 pl-1">sem boost</p>
                                 </div>
@@ -203,7 +203,7 @@
                                           onsubmit="return confirm('Remover a tag de apostas do grupo \'{{ addslashes($group->name) }}\'?')">
                                         @csrf
                                         <button type="submit" class="btn btn-orange" style="padding:5px 10px;font-size:11px;">
-                                            🎲 Remover tag
+                                            Remover tag
                                         </button>
                                     </form>
                                 @else
@@ -211,7 +211,7 @@
                                           onsubmit="return confirm('Marcar \'{{ addslashes($group->name) }}\' como grupo de APOSTAS?')">
                                         @csrf
                                         <button type="submit" class="btn btn-slate" style="padding:5px 10px;font-size:11px;" title="Marcar como apostas">
-                                            🎲 É aposta?
+                                            É aposta?
                                         </button>
                                     </form>
                                 @endif

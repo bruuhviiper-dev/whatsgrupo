@@ -31,7 +31,7 @@
     ];
     @endphp
     @foreach($statuses as $s)
-    <div class="card p-4 flex items-center gap-3">
+    <div class="card p-4 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700">
         <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
              style="{{ $s[1] ? 'background:#f0fdf4;' : 'background:#f8fafc;' }}">
             @if($s[1])

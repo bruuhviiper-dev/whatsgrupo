@@ -71,11 +71,11 @@
                 <div class="flex gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" name="theme" value="light" {{ old('theme', $theme) === 'light' ? 'checked' : '' }} class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300">
-                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Light Mode ☀️</span>
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Light Mode</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" name="theme" value="dark" {{ old('theme', $theme) === 'dark' ? 'checked' : '' }} class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 bg-slate-800">
-                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Dark Mode 🌙</span>
+                        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Dark Mode</span>
                     </label>
                 </div>
                 @error('theme')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror

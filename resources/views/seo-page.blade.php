@@ -114,7 +114,7 @@
                     @endphp
                     <a href="{{ url('/grupos-whatsapp/' . $related->slug) }}"
                        class="px-4 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-bold text-slate-600 hover:bg-green-50 hover:text-primary hover:border-green-200 transition-all flex items-center gap-1.5 shadow-sm">
-                        <x-heroicon-s-fire class="w-3.5 h-3.5 text-orange-500" /> <span class="capitalize">{{ $cleanRelatedName }}</span>
+                        <x-heroicon-o-hashtag class="w-3.5 h-3.5 text-slate-400" /> <span class="capitalize">{{ $cleanRelatedName }}</span>
                     </a>
                 @endforeach
             </div>
