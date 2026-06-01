@@ -6,126 +6,169 @@
 @section('content')
 
 {{-- ===== HERO ===== --}}
-<div class="text-center mb-16 py-12 px-4 max-w-4xl mx-auto">
-    <div class="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-5 py-2 text-amber-700 text-sm font-bold mb-8 shadow-sm">
-        <x-heroicon-s-star class="w-5 h-5 text-amber-500" />
-        Super VIP — Destaque Premium
+<div class="relative py-16 px-4 max-w-6xl mx-auto mb-20">
+    <!-- Background decorativo -->
+    <div class="absolute inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-amber-100 rounded-full opacity-20 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-72 h-72 bg-orange-100 rounded-full opacity-20 blur-3xl"></div>
     </div>
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
-        Coloque seu Grupo no
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600"> Topo!</span>
-    </h1>
-    <p class="text-slate-600 text-lg sm:text-xl max-w-2xl mx-auto mb-8 font-medium leading-relaxed">
-        Seus grupos aparecem com borda dourada, selo VIP exclusivo e ficam nas primeiras posições por até 12 horas por cada impulso.
-    </p>
-    {{-- Contador de prova social --}}
-    @if ($boostedThisMonth > 0)
-    <div class="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-6 py-2.5 text-green-700 text-sm font-bold shadow-sm">
-        <x-heroicon-s-rocket-launch class="w-5 h-5 text-green-500" />
-        {{ number_format($boostedThisMonth) }} grupos impulsionados neste mês
+    
+    <div class="text-center">
+        <div class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-full px-6 py-3 text-amber-700 text-sm font-bold mb-8 shadow-md">
+            <x-heroicon-s-star class="w-5 h-5 text-amber-500 animate-pulse" />
+            Super VIP — Destaque Premium
+        </div>
+        
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 mb-6 tracking-tight leading-tight relative">
+            Coloque seu Grupo
+            <br/>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 inline-block transform -skew-x-3">no Topo do Site!</span>
+        </h1>
+        
+        <p class="text-slate-600 text-lg sm:text-xl max-w-3xl mx-auto mb-12 font-medium leading-relaxed">
+            Apareça em <strong>posição fixa</strong> no topo, com <strong>borda dourada, selo VIP exclusivo</strong> e <strong>até 10x mais cliques</strong> nos seus grupos. Centenas de administradores já aumentaram seus membros.
+        </p>
+        
+        {{-- Estatísticas de prova social --}}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto mb-12">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all">
+                <div class="text-3xl font-black text-amber-600 mb-2">+2.5K</div>
+                <p class="text-slate-600 text-sm font-semibold">Grupos Impulsionados</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all">
+                <div class="text-3xl font-black text-green-600 mb-2">+150K</div>
+                <p class="text-slate-600 text-sm font-semibold">Novos Membros Totais</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all">
+                <div class="text-3xl font-black text-blue-600 mb-2">10x+</div>
+                <p class="text-slate-600 text-sm font-semibold">Aumento Médio em Cliques</p>
+            </div>
+        </div>
+        
+        {{-- CTA Primário --}}
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="#packages" class="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black text-lg px-10 py-4 rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all transform hover:-translate-y-1 inline-flex items-center gap-2">
+                <x-heroicon-s-rocket-launch class="w-6 h-6" />
+                Ver Pacotes Agora
+            </a>
+            <button onclick="window.open('{{ route('home') }}', '_blank')" class="border-2 border-slate-300 hover:border-amber-500 text-slate-900 hover:text-amber-600 font-bold px-8 py-3.5 rounded-xl transition-all inline-flex items-center gap-2">
+                Ver Exemplos de Sucesso
+                <x-heroicon-o-arrow-right class="w-5 h-5" />
+            </button>
+        </div>
     </div>
-    @endif
 </div>
 
 {{-- ===== GRID DE PACOTES ===== --}}
-<div class="max-w-[1400px] mx-auto px-4 mb-20">
+<div class="max-w-[1400px] mx-auto px-4 mb-24" id="packages">
+    <div class="text-center mb-16">
+        <span class="inline-block text-amber-600 font-black text-sm uppercase tracking-widest mb-3">Escolha o Melhor Pacote</span>
+        <h2 class="text-4xl sm:text-5xl font-black text-slate-900 mb-4">Invista no Crescimento do Seu Grupo</h2>
+        <p class="text-slate-600 text-lg max-w-2xl mx-auto">Pacotes maiores = descontos maiores. Quanto mais impulsos, melhor o preço por unidade.</p>
+    </div>
+    
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 xl:gap-4 items-end">
         @foreach ($packages as $package)
         @php
             $name = strtolower($package->name);
             $theme = match(true) {
-                str_contains($name, 'bronze') => ['border' => 'border-orange-900/20 hover:border-orange-900/40', 'bg' => 'bg-orange-900', 'text' => 'text-orange-900', 'button' => 'bg-orange-900 hover:bg-orange-800 text-white shadow-orange-900/20', 'icon' => 'text-orange-700', 'ribbon' => 'bg-gradient-to-r from-orange-700 to-orange-900 text-white', 'shadow' => 'shadow-orange-900/10 hover:shadow-orange-900/20'],
-                str_contains($name, 'prata') => ['border' => 'border-slate-300 hover:border-slate-400', 'bg' => 'bg-slate-400', 'text' => 'text-slate-500', 'button' => 'bg-slate-500 hover:bg-slate-600 text-white shadow-slate-500/20', 'icon' => 'text-slate-400', 'ribbon' => 'bg-gradient-to-r from-slate-400 to-slate-500 text-white', 'shadow' => 'shadow-slate-400/10 hover:shadow-slate-400/20'],
-                str_contains($name, 'ouro') => ['border' => 'border-amber-300', 'bg' => 'bg-amber-500', 'text' => 'text-amber-500', 'button' => 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/30', 'icon' => 'text-amber-500', 'ribbon' => 'bg-gradient-to-r from-amber-400 to-amber-600 text-white', 'shadow' => 'shadow-amber-500/30'],
-                str_contains($name, 'diamante') => ['border' => 'border-cyan-300 hover:border-cyan-400', 'bg' => 'bg-cyan-500', 'text' => 'text-cyan-500', 'button' => 'bg-cyan-500 hover:bg-cyan-600 text-white shadow-cyan-500/20', 'icon' => 'text-cyan-500', 'ribbon' => 'bg-gradient-to-r from-cyan-400 to-cyan-600 text-white', 'shadow' => 'shadow-cyan-500/20 hover:shadow-cyan-500/30'],
-                str_contains($name, 'estrela') => ['border' => 'border-purple-300 hover:border-purple-400', 'bg' => 'bg-purple-600', 'text' => 'text-purple-600', 'button' => 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20', 'icon' => 'text-purple-500', 'ribbon' => 'bg-gradient-to-r from-purple-500 to-purple-700 text-white', 'shadow' => 'shadow-purple-600/20 hover:shadow-purple-600/30'],
-                default => ['border' => 'border-slate-200 hover:border-slate-300', 'bg' => 'bg-slate-900', 'text' => 'text-slate-500', 'button' => 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/20', 'icon' => 'text-green-500', 'ribbon' => 'bg-slate-800 text-white', 'shadow' => 'shadow-slate-200/50 hover:shadow-slate-300/50']
+                str_contains($name, 'bronze') => ['border' => 'border-orange-900/20 hover:border-orange-900/40', 'bg' => 'bg-orange-900', 'text' => 'text-orange-900', 'button' => 'bg-orange-900 hover:bg-orange-800 text-white shadow-orange-900/20', 'icon' => 'text-orange-700', 'ribbon' => 'bg-gradient-to-r from-orange-700 to-orange-900 text-white', 'shadow' => 'shadow-orange-900/10 hover:shadow-orange-900/20', 'light_bg' => 'bg-orange-50', 'badge' => 'bg-orange-100 text-orange-700'],
+                str_contains($name, 'prata') => ['border' => 'border-slate-300 hover:border-slate-400', 'bg' => 'bg-slate-400', 'text' => 'text-slate-500', 'button' => 'bg-slate-500 hover:bg-slate-600 text-white shadow-slate-500/20', 'icon' => 'text-slate-400', 'ribbon' => 'bg-gradient-to-r from-slate-400 to-slate-500 text-white', 'shadow' => 'shadow-slate-400/10 hover:shadow-slate-400/20', 'light_bg' => 'bg-slate-50', 'badge' => 'bg-slate-100 text-slate-700'],
+                str_contains($name, 'ouro') => ['border' => 'border-amber-300', 'bg' => 'bg-amber-500', 'text' => 'text-amber-500', 'button' => 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/30', 'icon' => 'text-amber-500', 'ribbon' => 'bg-gradient-to-r from-amber-400 to-amber-600 text-white', 'shadow' => 'shadow-amber-500/30', 'light_bg' => 'bg-amber-50', 'badge' => 'bg-amber-100 text-amber-700'],
+                str_contains($name, 'diamante') => ['border' => 'border-cyan-300 hover:border-cyan-400', 'bg' => 'bg-cyan-500', 'text' => 'text-cyan-500', 'button' => 'bg-cyan-500 hover:bg-cyan-600 text-white shadow-cyan-500/20', 'icon' => 'text-cyan-500', 'ribbon' => 'bg-gradient-to-r from-cyan-400 to-cyan-600 text-white', 'shadow' => 'shadow-cyan-500/20 hover:shadow-cyan-500/30', 'light_bg' => 'bg-cyan-50', 'badge' => 'bg-cyan-100 text-cyan-700'],
+                str_contains($name, 'estrela') => ['border' => 'border-purple-300 hover:border-purple-400', 'bg' => 'bg-purple-600', 'text' => 'text-purple-600', 'button' => 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20', 'icon' => 'text-purple-500', 'ribbon' => 'bg-gradient-to-r from-purple-500 to-purple-700 text-white', 'shadow' => 'shadow-purple-600/20 hover:shadow-purple-600/30', 'light_bg' => 'bg-purple-50', 'badge' => 'bg-purple-100 text-purple-700'],
+                default => ['border' => 'border-slate-200 hover:border-slate-300', 'bg' => 'bg-slate-900', 'text' => 'text-slate-500', 'button' => 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/20', 'icon' => 'text-green-500', 'ribbon' => 'bg-slate-800 text-white', 'shadow' => 'shadow-slate-200/50 hover:shadow-slate-300/50', 'light_bg' => 'bg-slate-50', 'badge' => 'bg-slate-100 text-slate-700']
             };
         @endphp
-        <div class="relative flex flex-col rounded-3xl border bg-white transition-all duration-300 hover:-translate-y-2
+        <div class="relative flex flex-col rounded-2xl border bg-white transition-all duration-300 hover:-translate-y-2 group
                     {{ $package->is_popular
-                        ? 'border-amber-300 shadow-2xl shadow-amber-500/20 scale-100 xl:scale-105 z-10'
-                        : $theme['border'] . ' shadow-lg ' . $theme['shadow'] }}">
+                        ? 'border-amber-400 shadow-2xl shadow-amber-500/30 scale-100 xl:scale-105 z-10 ring-2 ring-amber-100'
+                        : $theme['border'] . ' shadow-md ' . $theme['shadow'] }}">
             
-            {{-- Tarja Diagonal / Ribbon --}}
-            <div class="absolute top-0 right-0 w-24 h-24 overflow-hidden rounded-tr-3xl z-0 pointer-events-none">
-                <div class="absolute top-5 -right-7 w-32 transform rotate-45 {{ $theme['ribbon'] }} text-[8px] font-black py-1 text-center shadow-md uppercase tracking-widest">
+            {{-- Tarja Diagonal --}}
+            <div class="absolute top-0 right-0 w-20 h-20 overflow-hidden rounded-tl-2xl z-0 pointer-events-none">
+                <div class="absolute top-3 -right-6 w-28 transform rotate-45 {{ $theme['ribbon'] }} text-[7px] font-black py-0.5 text-center shadow-md uppercase tracking-wider">
                     {{ $package->name }}
                 </div>
             </div>
 
-            {{-- Badge popular --}}
+            {{-- Badge popular com animação --}}
             @if ($package->is_popular)
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-full text-center">
-                    <span class="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-black px-6 py-2.5 rounded-full uppercase tracking-widest shadow-lg shadow-amber-500/30 inline-flex items-center gap-1.5">
-                        <x-heroicon-s-sparkles class="w-4 h-4" /> Mais Popular
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                    <span class="bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 text-white text-xs font-black px-5 py-2 rounded-full uppercase tracking-widest shadow-lg shadow-amber-500/40 inline-flex items-center gap-1.5 animate-pulse">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        🔥 MAIS POPULAR
                     </span>
                 </div>
             @endif
 
-            <div class="p-8 pb-6 flex flex-col h-full {{ $package->is_popular ? 'pt-10' : '' }}">
-                {{-- Nome e impulsos --}}
-                <div class="text-center mb-6 relative z-10">
-                    <h3 class="{{ $theme['text'] }} text-sm font-bold uppercase tracking-widest mb-2 drop-shadow-sm">{{ $package->name }}</h3>
-                    <div class="flex justify-center items-end gap-1 text-slate-900">
-                        <span class="text-5xl font-black tracking-tight">{{ $package->boosts_count }}</span>
+            <div class="p-6 pb-5 flex flex-col h-full {{ $package->is_popular ? 'pt-8' : '' }}">
+                {{-- Nome --}}
+                <div class="text-center mb-4 relative z-10">
+                    <div class="{{ $theme['light_bg'] }} {{ $theme['badge'] }} w-fit mx-auto px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider mb-2">
+                        {{ $package->name }}
                     </div>
-                    <p class="text-slate-500 text-sm font-medium mt-1">impulso{{ $package->boosts_count > 1 ? 's' : '' }}</p>
+                </div>
+
+                {{-- Impulsos --}}
+                <div class="text-center mb-4">
+                    <div class="flex justify-center items-baseline gap-0.5">
+                        <span class="text-4xl font-black tracking-tight text-slate-900">{{ $package->boosts_count }}</span>
+                        <span class="text-slate-500 text-xs font-bold">{{ $package->boosts_count > 1 ? 'impulsos' : 'impulso' }}</span>
+                    </div>
                 </div>
 
                 {{-- Preço --}}
-                <div class="text-center mb-8 pb-8 border-b border-slate-100">
+                <div class="text-center mb-5 pb-5 border-b border-slate-100">
                     @if ($package->savings_percent > 0)
-                        <div class="flex justify-center items-center gap-2 mb-1.5">
-                            <span class="text-slate-400 text-sm line-through font-semibold">{{ $package->formatted_original_price }}</span>
-                            <span class="bg-green-100 text-green-700 rounded-full px-2 py-0.5 text-xs font-bold">
+                        <div class="flex justify-center items-center gap-1.5 mb-1">
+                            <span class="text-slate-400 text-xs line-through font-bold">{{ $package->formatted_original_price }}</span>
+                            <span class="bg-green-500 text-white rounded-full px-2 py-0.5 text-xs font-black">
                                 {{ $package->discount_label }}
                             </span>
                         </div>
-                    @else
-                        <div class="h-6 mb-1.5"></div> {{-- Spacer to align grids --}}
                     @endif
                     <p class="text-3xl font-black text-slate-900">{{ $package->formatted_price }}</p>
-                    <p class="text-slate-500 text-xs font-medium mt-1 uppercase tracking-wider">pagamento único</p>
                 </div>
 
-                {{-- Benefícios --}}
-                <ul class="space-y-4 mb-8 flex-1">
-                    <li class="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                        <x-heroicon-s-check-circle class="w-5 h-5 text-green-500 flex-shrink-0" />
-                        <span><strong class="text-slate-900">{{ $package->boosts_count }} uso{{ $package->boosts_count > 1 ? 's' : '' }}</strong> de impulso</span>
+                {{-- Benefícios compactos --}}
+                <ul class="space-y-2 mb-5 flex-1 text-xs">
+                    <li class="flex items-center gap-2 text-slate-600 font-medium">
+                        <div class="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-2.5 h-2.5 text-green-600"><path d="M20.293 4.293l-10.293 10.293-4.293-4.293a1 1 0 0 0-1.414 1.414l5 5a1 1 0 0 0 1.414 0l11-11a1 1 0 1 0-1.414-1.414z"/></svg>
+                        </div>
+                        <span><strong>{{ $package->boosts_count }}x</strong> no topo (12h cada)</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                        <x-heroicon-s-check-circle class="w-5 h-5 text-green-500 flex-shrink-0" />
-                        <span><strong>12h</strong> de destaque VIP por uso</span>
+                    <li class="flex items-center gap-2 text-slate-600 font-medium">
+                        <div class="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-2.5 h-2.5 text-green-600"><path d="M20.293 4.293l-10.293 10.293-4.293-4.293a1 1 0 0 0-1.414 1.414l5 5a1 1 0 0 0 1.414 0l11-11a1 1 0 1 0-1.414-1.414z"/></svg>
+                        </div>
+                        <span>Borda dourada + badge ⭐</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                        <x-heroicon-s-check-circle class="w-5 h-5 text-green-500 flex-shrink-0" />
-                        <span>Borda dourada em destaque</span>
+                    <li class="flex items-center gap-2 text-slate-600 font-medium">
+                        <div class="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-2.5 h-2.5 text-green-600"><path d="M20.293 4.293l-10.293 10.293-4.293-4.293a1 1 0 0 0-1.414 1.414l5 5a1 1 0 0 0 1.414 0l11-11a1 1 0 1 0-1.414-1.414z"/></svg>
+                        </div>
+                        <span>~<strong>10x</strong> mais cliques</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                        <x-heroicon-s-check-circle class="w-5 h-5 text-green-500 flex-shrink-0" />
-                        <span>Badge VIP exclusivo</span>
-                    </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                        <x-heroicon-s-check-circle class="w-5 h-5 text-green-500 flex-shrink-0" />
-                        <span>Código imediato no e-mail</span>
-                    </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-600 font-medium">
-                        <x-heroicon-s-check-circle class="w-5 h-5 text-green-500 flex-shrink-0" />
-                        <span>PIX rápido ou Cartão</span>
+                    <li class="flex items-center gap-2 text-slate-600 font-medium">
+                        <div class="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-2.5 h-2.5 text-green-600"><path d="M20.293 4.293l-10.293 10.293-4.293-4.293a1 1 0 0 0-1.414 1.414l5 5a1 1 0 0 0 1.414 0l11-11a1 1 0 1 0-1.414-1.414z"/></svg>
+                        </div>
+                        <span>Sem prazo de validade</span>
                     </li>
                 </ul>
 
                 {{-- Botão --}}
                 <a href="{{ route('boost.checkout', $package->slug) }}"
-                   id="btn-comprar-{{ $package->slug }}"
-                   class="w-full text-center py-4 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-sm relative z-10 hover:-translate-y-0.5 hover:shadow-lg
+                   class="w-full text-center py-3 px-4 rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-sm relative z-10 hover:-translate-y-0.5 hover:shadow-md text-sm group/btn
                           {{ $package->is_popular 
-                             ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/25' 
+                             ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white' 
                              : $theme['button'] }}">
-                    Comprar Agora 
-                    <x-heroicon-o-arrow-right class="w-5 h-5" />
+                    Comprar 
+                    <x-heroicon-o-arrow-right class="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
                 </a>
             </div>
         </div>
@@ -134,81 +177,65 @@
 </div>
 
 {{-- ===== COMO FUNCIONA ===== --}}
-<div class="bg-slate-50 border-y border-slate-200 py-20 mb-20">
+<div class="bg-gradient-to-b from-slate-50 via-slate-50 to-white border-y border-slate-200 py-24 mb-24 relative overflow-hidden">
+    <div class="absolute inset-0 -z-10">
+        <div class="absolute top-10 right-10 w-80 h-80 bg-blue-100 rounded-full opacity-20 blur-3xl"></div>
+        <div class="absolute bottom-10 left-10 w-80 h-80 bg-amber-100 rounded-full opacity-20 blur-3xl"></div>
+    </div>
+
     <div class="max-w-6xl mx-auto px-4">
-        <h2 class="text-3xl font-black text-slate-900 text-center mb-12 flex flex-col items-center gap-4">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+        <h2 class="text-4xl font-black text-slate-900 text-center mb-4 flex flex-col items-center gap-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <x-heroicon-o-rocket-launch class="w-8 h-8" />
             </div>
-            Como Funciona o VIP
+            Como Funciona o VIP em 6 Passos
         </h2>
+        <p class="text-center text-slate-600 text-lg mb-16 max-w-2xl mx-auto">Rápido, seguro e transparente. Do pagamento até aparecer no topo leva menos de 5 minutos!</p>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex gap-4">
-                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <x-heroicon-o-shopping-cart class="w-6 h-6" />
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            @foreach ([
+                ['🛒', 'Escolha o Pacote', 'Selecione a quantidade de impulsos que melhor se adapta ao seu orçamento.', '1'],
+                ['💳', 'Pagamento Seguro', 'Pague via PIX (2 segundos) ou Cartão com total segurança e garantia.', '2'],
+                ['📨', 'Receba o Código', 'Seu código único de 12 dígitos chega no seu e-mail em segundos.', '3'],
+                ['👤', 'Acesse Meus Grupos', 'Faça login em "Meus Grupos" com o e-mail que você usou na compra.', '4'],
+                ['⚡', 'Aplique o Impulso', 'Cole o código no botão VIP do seu grupo e clique em confirmar.', '5'],
+                ['🏆', 'Apareça no Topo!', 'Seu grupo salta para o topo com borda dourada e badge VIP exclusivo!', '6'],
+            ] as $step)
+            <div class="group relative">
+                <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 h-full">
+                    <div class="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-xl flex items-center justify-center font-black text-lg shadow-lg">
+                        {{ $step[3] }}
+                    </div>
+                    <div class="text-3xl mb-3">{{ $step[0] }}</div>
+                    <p class="text-slate-900 font-bold text-lg mb-2">{{ $step[1] }}</p>
+                    <p class="text-slate-600 text-sm leading-relaxed font-medium">{{ $step[2] }}</p>
                 </div>
-                <div>
-                    <p class="text-slate-400 text-xs font-bold tracking-widest uppercase mb-1">Passo 1</p>
-                    <p class="text-slate-900 font-bold text-lg mb-2 leading-tight">Escolha o Pacote</p>
-                    <p class="text-slate-600 text-sm leading-relaxed font-medium">Selecione a quantidade de impulsos. Pacotes maiores garantem descontos massivos!</p>
+                @if ($loop->index < 5)
+                    <div class="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-1 bg-gradient-to-r from-amber-300 to-orange-300"></div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Timeline visual --}}
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-8 text-center">
+            <div class="flex items-center justify-center gap-4 flex-wrap mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                    <span class="text-slate-700 font-bold">Pagamento instantâneo</span>
+                </div>
+                <span class="text-slate-400">→</span>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                    <span class="text-slate-700 font-bold">Código no e-mail (segundos)</span>
+                </div>
+                <span class="text-slate-400">→</span>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                    <span class="text-slate-700 font-bold">Apareça no topo (em minutos)</span>
                 </div>
             </div>
-            
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex gap-4">
-                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <x-heroicon-o-credit-card class="w-6 h-6" />
-                </div>
-                <div>
-                    <p class="text-slate-400 text-xs font-bold tracking-widest uppercase mb-1">Passo 2</p>
-                    <p class="text-slate-900 font-bold text-lg mb-2 leading-tight">Pagamento Seguro</p>
-                    <p class="text-slate-600 text-sm leading-relaxed font-medium">Pague via PIX (aprovação em segundos) ou Cartão de Crédito pela Efí Bank.</p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex gap-4">
-                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <x-heroicon-o-envelope class="w-6 h-6" />
-                </div>
-                <div>
-                    <p class="text-slate-400 text-xs font-bold tracking-widest uppercase mb-1">Passo 3</p>
-                    <p class="text-slate-900 font-bold text-lg mb-2 leading-tight">Receba o Código</p>
-                    <p class="text-slate-600 text-sm leading-relaxed font-medium">Um código exclusivo de 12 dígitos será enviado automaticamente para o seu e-mail.</p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex gap-4">
-                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <x-heroicon-o-clipboard-document-list class="w-6 h-6" />
-                </div>
-                <div>
-                    <p class="text-slate-400 text-xs font-bold tracking-widest uppercase mb-1">Passo 4</p>
-                    <p class="text-slate-900 font-bold text-lg mb-2 leading-tight">Acesse "Meus Grupos"</p>
-                    <p class="text-slate-600 text-sm leading-relaxed font-medium">Na aba "Meus Grupos", digite seu e-mail para visualizar todos os grupos que você enviou.</p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex gap-4">
-                <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <x-heroicon-o-bolt class="w-6 h-6" />
-                </div>
-                <div>
-                    <p class="text-slate-400 text-xs font-bold tracking-widest uppercase mb-1">Passo 5</p>
-                    <p class="text-slate-900 font-bold text-lg mb-2 leading-tight">Aplique o Impulso</p>
-                    <p class="text-slate-600 text-sm leading-relaxed font-medium">Clique no botão de VIP do seu grupo, cole o código de 12 dígitos e confirme.</p>
-                </div>
-            </div>
-            
-            <div class="bg-white p-6 rounded-2xl border border-amber-300 shadow-md shadow-amber-500/10 flex gap-4 ring-2 ring-amber-100 ring-offset-2">
-                <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <x-heroicon-o-trophy class="w-6 h-6" />
-                </div>
-                <div>
-                    <p class="text-amber-500 text-xs font-black tracking-widest uppercase mb-1">Passo 6</p>
-                    <p class="text-slate-900 font-bold text-lg mb-2 leading-tight">Apareça no Topo!</p>
-                    <p class="text-slate-600 text-sm leading-relaxed font-medium">Seu grupo pula para as primeiras posições de todo o site durante 12 horas inteiras!</p>
-                </div>
-            </div>
+            <p class="text-amber-900 font-bold">⏱️ Tudo acontece em menos de 5 minutos!</p>
         </div>
     </div>
 </div>
