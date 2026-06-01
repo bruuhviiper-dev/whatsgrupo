@@ -115,73 +115,35 @@
 
                 <!-- Ferramentas -->
                 <div>
-                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 mb-1.5">Ferramentas</p>
-                  <nav class="flex flex-col gap-0.5">
-                    <a href="/figurinhas" class="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('figurinhas*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-sm">
-                        <x-heroicon-o-face-smile class="w-4 h-4"/>
-                      </div>
-                      Figurinhas de Grupos
-                    </a>
-                    <a href="/ferramentas/analise-de-engajamento" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/analise*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-green-400 to-green-600 text-white shadow-sm">
-                        <x-heroicon-o-sparkles class="w-4 h-4"/>
-                      </div>
-                      Análise de Engajamento
-                    </a>
-                    <a href="{{ route('tools.spam-detector') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/detector-de-spam*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-red-400 to-red-600 text-white shadow-sm">
-                        <x-heroicon-o-shield-exclamation class="w-4 h-4"/>
-                      </div>
-                      Detector de Spam
-                    </a>
-                    <a href="/ferramentas/gerador-de-regras" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/gerador-de-regras*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-sm">
-                        <x-heroicon-o-document-check class="w-4 h-4"/>
-                      </div>
-                      Gerador de Regras
-                    </a>
-                    <a href="{{ route('tools.name-generator') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/gerador-de-nomes*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-sm">
-                        <x-heroicon-o-sparkles class="w-4 h-4"/>
-                      </div>
-                      Gerador de Nomes
-                    </a>
-                    <a href="{{ route('tools.welcome-message') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/mensagem-de-boas-vindas*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-teal-400 to-teal-600 text-white shadow-sm">
-                        <x-heroicon-o-hand-raised class="w-4 h-4"/>
-                      </div>
-                      Msg de Boas-Vindas
-                    </a>
-                    <a href="{{ route('tools.link-validator') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/verificador*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-sm">
-                        <x-heroicon-o-link class="w-4 h-4"/>
-                      </div>
-                      Verificador de Link
-                    </a>
-                    <a href="{{ route('tools.poll-generator') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/gerador-de-enquete*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-pink-400 to-pink-600 text-white shadow-sm">
-                        <x-heroicon-o-chart-bar class="w-4 h-4"/>
-                      </div>
-                      Gerador de Enquete
-                    </a>
-                    <a href="{{ route('tools.raffle-generator') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/gerador-de-sorteios*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                          <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2Zm0 2a8 8 0 1 1 0 16A8 8 0 0 1 12 4Zm-1 4v3H8a1 1 0 1 0 0 2h3v3a1 1 0 1 0 2 0v-3h3a1 1 0 1 0 0-2h-3V8a1 1 0 1 0-2 0Z"/>
-                        </svg>
-                      </div>
-                      Gerador de Sorteios
-                    </a>
-                    <a href="{{ route('tools.fonts-generator') }}" class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-colors {{ request()->is('ferramentas/gerador-de-letras*') ? 'text-slate-900 bg-slate-100' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50' }}">
-                      <div class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                          <path d="M12.553 4.293a1 1 0 0 0-1.106 0l-7.5 5A1 1 0 0 0 4.5 11h2.361l-1.39 6.257A1 1 0 0 0 6.447 18.5l7.5-5a1 1 0 0 0 .553-.894V11h-2.36l1.39-6.257a1 1 0 0 0-.977-1.45Z" />
-                        </svg>
-                      </div>
-                      Gerador de Letras
-                    </a>
-                  </nav>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 mb-2">Ferramentas</p>
+                  @php
+                    $toolGrid = [
+                      ['/figurinhas',                            'figurinhas*',                    'heroicon-o-face-smile',           'Figurinhas'],
+                      ['/ferramentas/analise-de-engajamento',    'ferramentas/analise*',            'heroicon-o-chart-bar',            'Engajamento'],
+                      [route('tools.spam-detector'),             'ferramentas/detector-de-spam*',   'heroicon-o-shield-exclamation',   'Anti-Spam'],
+                      ['/ferramentas/gerador-de-regras',         'ferramentas/gerador-de-regras*',  'heroicon-o-document-check',       'Regras'],
+                      [route('tools.name-generator'),            'ferramentas/gerador-de-nomes*',   'heroicon-o-sparkles',             'Nomes'],
+                      [route('tools.welcome-message'),           'ferramentas/mensagem*',           'heroicon-o-hand-raised',          'Boas-Vindas'],
+                      [route('tools.link-validator'),            'ferramentas/verificador*',        'heroicon-o-link',                 'Verificar Link'],
+                      [route('tools.poll-generator'),            'ferramentas/gerador-de-enquete*', 'heroicon-o-chart-bar-square',     'Enquete'],
+                      [route('tools.raffle-generator'),          'ferramentas/gerador-de-sorteios*','heroicon-o-gift',                 'Sorteios'],
+                      [route('tools.fonts-generator'),           'ferramentas/gerador-de-letras*',  'heroicon-o-language',             'Letras'],
+                    ];
+                  @endphp
+                  <div class="grid grid-cols-2 gap-1">
+                    @foreach($toolGrid as [$href, $pattern, $icon, $label])
+                      @php $active = request()->is($pattern); @endphp
+                      <a href="{{ $href }}"
+                         class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
+                                {{ $active
+                                    ? 'bg-slate-100 text-slate-900'
+                                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <x-dynamic-component :component="$icon"
+                          class="w-4 h-4 flex-shrink-0 {{ $active ? 'text-slate-700' : 'text-slate-400' }}" />
+                        <span class="truncate">{{ $label }}</span>
+                      </a>
+                    @endforeach
+                  </div>
                 </div>
 
                 <!-- Institucional -->

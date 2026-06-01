@@ -24,7 +24,12 @@ class StripePaymentService
     {
         $secretKey = config('services.stripe.secret');
 
-        if (empty($secretKey) || str_contains($secretKey, 'placeholder')) {
+        // Modo simulado apenas se a chave estiver vazia ou for um placeholder literal
+        $isPlaceholder = empty($secretKey)
+            || $secretKey === 'sk_test_placeholder'
+            || $secretKey === 'sk_live_placeholder';
+
+        if ($isPlaceholder) {
             $this->isSimulated = true;
         } else {
             Stripe::setApiKey($secretKey);

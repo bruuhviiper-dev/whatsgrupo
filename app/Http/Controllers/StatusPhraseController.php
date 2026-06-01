@@ -46,7 +46,8 @@ class StatusPhraseController extends Controller
     {
         $categories = $this->getExtendedCategories();
 
-        $phrases = StatusPhrase::orderBy('likes', 'desc')
+        $phrases = StatusPhrase::aprovadas()
+            ->orderBy('likes', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
@@ -62,7 +63,8 @@ class StatusPhraseController extends Controller
                 ->with('error', 'Categoria de frases inválida.');
         }
 
-        $phrases = StatusPhrase::where('category', $category)
+        $phrases = StatusPhrase::aprovadas()
+            ->where('category', $category)
             ->orderBy('likes', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -144,7 +146,8 @@ class StatusPhraseController extends Controller
             'phrase'   => e($phraseText),
             'author'   => $request->input('author') ? e($request->input('author')) : 'Anônimo',
             'category' => $request->input('category'),
-            'likes'    => 0
+            'likes'    => 0,
+            'status'   => 'pendente',
         ]);
 
         $submittedPhrases = json_decode($request->cookie('submitted_phrases', '[]'), true);
@@ -211,13 +214,16 @@ class StatusPhraseController extends Controller
         $categoryName = $categories[$statusPhrase->category]['label'] ?? 'Frase';
 
         // Busca 5 frases relacionadas da mesma categoria
-        $relatedPhrases = StatusPhrase::where('category', $statusPhrase->category)
+        $relatedPhrases = StatusPhrase::aprovadas()
+            ->where('category', $statusPhrase->category)
             ->where('id', '!=', $statusPhrase->id)
             ->inRandomOrder()
             ->limit(5)
             ->get();
 
-        $nextPhrase = $relatedPhrases->first() ?? StatusPhrase::where('id', '!=', $statusPhrase->id)->inRandomOrder()->first() ?? $statusPhrase;
+        $nextPhrase = $relatedPhrases->first()
+            ?? StatusPhrase::aprovadas()->where('id', '!=', $statusPhrase->id)->inRandomOrder()->first()
+            ?? $statusPhrase;
 
         return view('phrases.show', compact('statusPhrase', 'categoryName', 'categories', 'relatedPhrases', 'nextPhrase'));
     }
