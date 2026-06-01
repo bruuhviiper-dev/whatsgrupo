@@ -174,6 +174,14 @@ Route::middleware('admin.auth')->prefix('admin')->name('admin.')->group(function
     // Dashboard principal
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Toggle rápido de tema (dark/light)
+    Route::post('/toggle-theme', function (\Illuminate\Http\Request $request) {
+        $new = $request->session()->get('admin_theme', 'light') === 'dark' ? 'light' : 'dark';
+        $request->session()->put('admin_theme', $new);
+        \App\Models\Setting::set('admin_theme', $new);
+        return back();
+    })->name('theme.toggle');
+
     // Perfil do Administrador
     Route::get('/perfil', [AdminProfileController::class, 'edit'])->name('profile');
     Route::post('/perfil', [AdminProfileController::class, 'update'])->name('profile.update');

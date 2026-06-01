@@ -35,7 +35,7 @@
         <div class="space-y-6">
             <div class="flex items-center justify-between border-b border-slate-200 pb-3">
                 <h2 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                    <x-heroicon-s-fire class="w-5 h-5 text-orange-500" />
+                    <span class="text-[#25D366] font-black text-xl leading-none">#</span>
                     <span>Frases Mais Curtidas</span>
                 </h2>
                 <span class="text-xs text-slate-500">As favoritas dos usuários</span>

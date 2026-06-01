@@ -29,7 +29,7 @@
         .bg-body { background: #f1f5f9; }
         .dark .bg-body { background: #0f172a; }
 
-        /* 🔥 Sidebar 🔥 */
+        /* Sidebar */
         .nav-link {
             display: flex; align-items: center; gap: 10px;
             padding: 9px 12px; border-radius: 8px;
@@ -43,7 +43,7 @@
         .dark .nav-link.active { color: #4ade80; }
         .nav-link .icon { width:18px; height:18px; flex-shrink:0; }
 
-        /* 🔥 Tables 🔥 */
+        /* Tables */
         .data-table { width:100%; border-collapse:collapse; }
         .data-table thead tr { background:#f8fafc; }
         .dark .data-table thead tr { background:#1e293b; }
@@ -63,7 +63,7 @@
         .dark .data-table tbody tr:hover td { background:#0f172a; }
         .data-table tbody tr:last-child td { border-bottom:none; }
 
-        /* 🔥 Badges 🔥 */
+        /* Badges */
         .badge { display:inline-flex; align-items:center; gap:4px; border-radius:999px; padding:3px 10px; font-size:11px; font-weight:700; line-height:1.4; white-space:nowrap; }
         .badge-pending  { background:#fffbeb; color:#b45309; border:1px solid #fde68a; }
         .badge-approved { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
@@ -109,7 +109,7 @@
         .dark .admin-table tbody tr:hover td { background:#0f172a; }
         .admin-table tbody tr:last-child td { border-bottom:none; }
 
-        /* 🔥 Cards 🔥 */
+        /* Cards */
         .card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,.04); }
         .dark .card { background:#1e293b; border-color:#334155; }
         .card-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #f1f5f9; }
@@ -121,14 +121,14 @@
         ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:3px; }
         ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
 
-        /* 🔥 Transitions 🔥 */
+        /* Transitions */
         .sidebar-transition { transition: width .25s cubic-bezier(.4,0,.2,1), transform .25s cubic-bezier(.4,0,.2,1); }
 
-        /* 🔥 Stat card hover 🔥 */
+        /* Stat card hover */
         .stat-card { transition: box-shadow .15s, transform .15s; }
         .stat-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); transform:translateY(-1px); }
 
-        /* 🔥 GLOBAL DARK MODE OVERRIDES 🔥 */
+        /* Global Dark Mode Overrides */
         .dark .bg-white { background-color: #1e293b !important; }
         .dark .bg-slate-50 { background-color: #0f172a !important; }
         .dark .bg-slate-100 { background-color: #334155 !important; }
@@ -145,11 +145,52 @@
         .dark .border-slate-100 { border-color: #1e293b !important; }
         .dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: #334155 !important; }
         .dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1e293b !important; }
+
+        /* Dark mode: form inputs, selects, textareas */
+        .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+        .dark select,
+        .dark textarea {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+            color-scheme: dark;
+        }
+        .dark input::placeholder,
+        .dark textarea::placeholder { color: #475569 !important; }
+        .dark input:focus,
+        .dark select:focus,
+        .dark textarea:focus {
+            border-color: #4ade80 !important;
+            outline: none;
+        }
+        .dark code { background: #334155 !important; color: #94a3b8 !important; }
+        .dark .bg-amber-50 { background-color: #451a03 !important; }
+        .dark .text-amber-700 { color: #fde68a !important; }
+        .dark .border-amber-200 { border-color: #78350f !important; }
+        .dark .bg-green-50:not(.badge-approved):not(.badge-paid) { background-color: #064e3b !important; }
+        .dark .text-green-800 { color: #86efac !important; }
+        .dark .bg-red-50:not(.badge-rejected):not(.badge-failed) { background-color: #450a0a !important; }
+        .dark .text-red-800 { color: #fca5a5 !important; }
+        .dark h1.text-slate-800, .dark h1.text-slate-900,
+        .dark h2.text-slate-800, .dark h2.text-slate-900,
+        .dark h3.text-slate-800, .dark h3.text-slate-900 { color: #f1f5f9 !important; }
+        .dark p.text-slate-700 { color: #cbd5e1 !important; }
+        .dark .text-slate-700 { color: #cbd5e1 !important; }
+        .dark label.text-slate-700 { color: #cbd5e1 !important; }
+        .dark .bg-slate-200 { background-color: #334155 !important; }
+        .dark .hover\:bg-slate-300:hover { background-color: #475569 !important; }
+        .dark .text-slate-800 { color: #f1f5f9 !important; }
+        .dark a.text-slate-800 { color: #f1f5f9 !important; }
+        .dark .divide-slate-100 > * { border-color: #1e293b; }
+        .dark .hover\:bg-slate-50:hover { background-color: #0f172a !important; }
+        .dark tr.hover\:bg-slate-50:hover td { background-color: #0f172a !important; }
+        .dark .file\:bg-blue-50 { --tw-bg-opacity: 1; background-color: #1e3a5f !important; }
+        .dark .file\:text-blue-700 { color: #93c5fd !important; }
     </style>
 </head>
 <body class="bg-body flex min-h-screen relative dark:bg-slate-900" x-data="{ sidebarOpen: false, sidebarCollapsed: false }">
 
-    {{-- 🔥 SIDEBAR 🔥 --}}
+    {{-- Sidebar --}}
     {{-- Mobile backdrop --}}
     <div x-show="sidebarOpen"
          @click="sidebarOpen = false"
@@ -291,7 +332,7 @@
 
         {{-- Logout --}}
         <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
-            <form action="{{ route('admin.logout') }}" method="POST">
+            <form action="{{ route('admin.logout') }}" method="POST" class="no-confirm">
                 @csrf
                 <button type="submit" class="flex items-center gap-3 w-full px-3 py-2 text-red-500 dark:text-red-400 font-bold text-xs rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                         :class="{'justify-center': sidebarCollapsed}">
@@ -339,6 +380,24 @@
             </div>
 
             <div class="flex items-center gap-3 flex-shrink-0">
+                {{-- Dark mode toggle --}}
+                <form action="{{ route('admin.theme.toggle') }}" method="POST" class="no-confirm">
+                    @csrf
+                    <button type="submit"
+                            class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                            title="{{ session('admin_theme') === 'dark' ? 'Modo Claro' : 'Modo Escuro' }}">
+                        @if(session('admin_theme') === 'dark')
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                        @else
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                        @endif
+                    </button>
+                </form>
+
                 {{-- Admin badge dropdown --}}
                 <div class="relative hidden sm:block" x-data="{ userMenu: false }">
                     <button @click="userMenu = !userMenu" @click.away="userMenu = false" class="flex items-center gap-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
@@ -359,7 +418,7 @@
                         <a href="{{ route('admin.profile') }}" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-colors">
                             Meu Perfil
                         </a>
-                        <form action="{{ route('admin.logout') }}" method="POST" class="block border-t border-slate-100 dark:border-slate-700">
+                        <form action="{{ route('admin.logout') }}" method="POST" class="block border-t border-slate-100 dark:border-slate-700 no-confirm">
                             @csrf
                             <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold transition-colors">
                                 Sair do Sistema
@@ -375,13 +434,13 @@
 
             {{-- Alerts --}}
             @if (session('success'))
-                <div class="mb-5 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 text-sm font-semibold shadow-sm">
+                <div class="mb-5 flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl px-4 py-3 text-sm font-semibold shadow-sm">
                     <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     {{ session('success') }}
                 </div>
             @endif
             @if (session('error'))
-                <div class="mb-5 flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm font-semibold shadow-sm">
+                <div class="mb-5 flex items-center gap-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 rounded-xl px-4 py-3 text-sm font-semibold shadow-sm">
                     <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     {{ session('error') }}
                 </div>

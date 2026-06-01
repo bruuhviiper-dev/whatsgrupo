@@ -34,7 +34,7 @@
             <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/></svg>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Nome do grupo..."
-                       class="w-full pl-9 pr-4 py-2 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 font-medium">
+                       class="w-full pl-9 pr-4 py-2 text-sm text-slate-900 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400/50 focus:border-emerald-400 font-medium">
             </div>
         </div>
         <div class="flex-1 min-w-[130px]">
@@ -254,7 +254,7 @@
 
         {{-- Paginação --}}
         @if ($groups->hasPages())
-            <div class="flex justify-center items-center gap-1.5 px-5 py-4 border-t border-slate-100 bg-slate-50/50 flex-wrap">
+            <div class="flex justify-center items-center gap-1.5 px-5 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex-wrap">
                 @if (!$groups->onFirstPage())
                     <a href="{{ $groups->previousPageUrl() }}"
                        class="btn btn-slate" style="padding:6px 14px;font-size:12px;">← Anterior</a>
