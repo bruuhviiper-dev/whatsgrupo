@@ -9,12 +9,8 @@
 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
   <div>
     <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mb-1">
-      DiretÃ³rio de Grupos do WhatsApp
+      Grupos de Whatsapp
     </h1>
-    <p class="text-sm text-slate-500">
-      <span class="text-slate-900 font-semibold">{{ number_format($totalGroups) }}</span> grupos ativos cadastrados â€¢ 
-      <span class="text-amber-600 font-semibold">{{ number_format($vipCount) }}</span> em destaque VIP agora
-    </p>
   </div>
   
   <!-- TABS DE FILTRO EM ESTILO PILL SELECIONÃVEL -->
@@ -213,7 +209,7 @@
   </div>
 </section>
 
-      {{-- Bloco Dinâmico e Rico para SEO Técnico de Rodapé (Light Clean Style) --}}
+      {{-- Bloco Dinï¿½mico e Rico para SEO Tï¿½cnico de Rodapï¿½ (Light Clean Style) --}}
       <section class="mt-16 pt-12 border-t border-slate-200/50 text-left">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
@@ -221,7 +217,7 @@
                 <x-heroicon-s-chat-bubble-left-right class="w-5 h-5 text-slate-500" /> Encontre Grupos Ativos
             </h2>
             <p class="text-xs text-slate-500 leading-relaxed">
-              O <strong>WhatsGrupos</strong> é o maior e mais atualizado diretório público para encontrar e entrar em links de grupos de WhatsApp reais do Brasil. Nossa plataforma conta com milhares de comunidades organizadas por categorias como amizades, negócios, figurinhas, jogos e muito mais. Todos os envios passam por moderação humana rigorosa de segurança para garantir apenas links ativos.
+              O <strong>WhatsGrupos</strong> ï¿½ o maior e mais atualizado diretï¿½rio pï¿½blico para encontrar e entrar em links de grupos de WhatsApp reais do Brasil. Nossa plataforma conta com milhares de comunidades organizadas por categorias como amizades, negï¿½cios, figurinhas, jogos e muito mais. Todos os envios passam por moderaï¿½ï¿½o humana rigorosa de seguranï¿½a para garantir apenas links ativos.
             </p>
           </div>
           <div>
@@ -229,15 +225,15 @@
                 <x-heroicon-s-rocket-launch class="w-5 h-5 text-slate-500" /> Como Divulgar seu Grupo
             </h2>
             <p class="text-xs text-slate-500 leading-relaxed">
-              Deseja atrair centenas de novos membros de forma rápida e qualificada? Clique em <strong>Enviar Grupo</strong> no topo, cole o link oficial de convite do WhatsApp e selecione a categoria ideal. O nosso sistema realiza a auto-detecção da imagem e do título do grupo automaticamente. Você também pode impulsionar sua comunidade assinando nossos pacotes VIPs para fixar seu grupo no topo!
+              Deseja atrair centenas de novos membros de forma rï¿½pida e qualificada? Clique em <strong>Enviar Grupo</strong> no topo, cole o link oficial de convite do WhatsApp e selecione a categoria ideal. O nosso sistema realiza a auto-detecï¿½ï¿½o da imagem e do tï¿½tulo do grupo automaticamente. Vocï¿½ tambï¿½m pode impulsionar sua comunidade assinando nossos pacotes VIPs para fixar seu grupo no topo!
             </p>
           </div>
           <div>
             <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-3 inline-flex items-center gap-2">
-                <x-heroicon-s-shield-check class="w-5 h-5 text-slate-500" /> Regras e Segurança
+                <x-heroicon-s-shield-check class="w-5 h-5 text-slate-500" /> Regras e Seguranï¿½a
             </h2>
             <p class="text-xs text-slate-500 leading-relaxed">
-              Prezamos pela integridade dos nossos usuários. É estritamente proibido o cadastro de links de grupos contendo spam, vírus, conteúdo de violência, pirataria ou menor de idade. Grupos inativos ou com links expirados são removidos automaticamente pelo nosso validador inteligente. Respeite as regras de cada administrador ao participar das discussões.
+              Prezamos pela integridade dos nossos usuï¿½rios. ï¿½ estritamente proibido o cadastro de links de grupos contendo spam, vï¿½rus, conteï¿½do de violï¿½ncia, pirataria ou menor de idade. Grupos inativos ou com links expirados sï¿½o removidos automaticamente pelo nosso validador inteligente. Respeite as regras de cada administrador ao participar das discussï¿½es.
             </p>
           </div>
         </div>

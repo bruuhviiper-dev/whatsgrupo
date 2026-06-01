@@ -70,13 +70,6 @@ class HomeController extends Controller
                 $currentPage,
                 ['path' => $request->url(), 'query' => $request->query()]
             );
-
-            // Total de grupos aprovados
-            $totalGroups = Group::approved()->count();
-
-            // Total de VIPs ativos
-            $vipCount = Group::approved()->notExpiredVip()->count();
-
             // Categorias para o menu lateral
             $categories = Category::ordered()->withCount(['groups' => function ($q) {
                 $q->where('status', 'approved');
@@ -95,17 +88,15 @@ class HomeController extends Controller
                 ->limit(4)
                 ->get();
 
-            return compact('groups', 'totalGroups', 'vipCount', 'categories', 'seoPages', 'latestBlogPosts');
+            return compact('groups','categories', 'seoPages', 'latestBlogPosts');
         });
 
         $groups = $data['groups'];
-        $totalGroups = $data['totalGroups'];
-        $vipCount = $data['vipCount'];
         $categories = $data['categories'];
         $seoPages = $data['seoPages'] ?? collect();
         $latestBlogPosts = $data['latestBlogPosts'] ?? collect();
 
-        return view('home', compact('groups', 'totalGroups', 'vipCount', 'categories', 'seoPages', 'latestBlogPosts'));
+        return view('home', compact('groups','categories', 'seoPages', 'latestBlogPosts'));
     }
 
     /**
