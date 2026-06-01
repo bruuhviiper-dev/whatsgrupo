@@ -187,7 +187,7 @@
                                 ? 'border-[#32BCAD] bg-[#32BCAD]/5'
                                 : 'border-slate-200 bg-white hover:border-slate-300'">
                             {{-- PIX icon oficial (24×24, sem coordenadas negativas) --}}
-                            <svg class="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="#32BCAD">
+                            <svg class="w-7 h-7 flex-shrink-0" viewBox="-1 -1 26 26" fill="#32BCAD">
                                 <path d="M5.283 18.36a3.505 3.505 0 0 0 2.493-1.032l3.6-3.6a.684.684 0 0 1 .946 0l3.613 3.613a3.504 3.504 0 0 0 2.493 1.032h.71l-4.56 4.56a3.647 3.647 0 0 1-5.156 0L4.85 18.36Z"/>
                                 <path d="M18.428 5.627a3.505 3.505 0 0 0-2.493 1.032l-3.613 3.614a.67.67 0 0 1-.946 0l-3.6-3.6A3.505 3.505 0 0 0 5.283 5.64h-.48l4.57-4.56a3.647 3.647 0 0 1 5.155 0l4.55 4.56Z"/>
                                 <path d="M1.64 12.015l4.56-4.56a3.505 3.505 0 0 0 1.032 2.493l3.6 3.6a.684.684 0 0 1 0 .946l-3.613 3.613a3.504 3.504 0 0 0-1.032 2.493h.48l4.56-4.56a3.647 3.647 0 0 1 0-5.156Z"/>
@@ -462,7 +462,7 @@
 
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:#32BCAD1a;">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="#32BCAD">
+                    <svg class="w-5 h-5" viewBox="-1 -1 26 26" fill="#32BCAD">
                         <path d="M5.283 18.36a3.505 3.505 0 0 0 2.493-1.032l3.6-3.6a.684.684 0 0 1 .946 0l3.613 3.613a3.504 3.504 0 0 0 2.493 1.032h.71l-4.56 4.56a3.647 3.647 0 0 1-5.156 0L4.85 18.36Z"/>
                         <path d="M18.428 5.627a3.505 3.505 0 0 0-2.493 1.032l-3.613 3.614a.67.67 0 0 1-.946 0l-3.6-3.6A3.505 3.505 0 0 0 5.283 5.64h-.48l4.57-4.56a3.647 3.647 0 0 1 5.155 0l4.55 4.56Z"/>
                         <path d="M1.64 12.015l4.56-4.56a3.505 3.505 0 0 0 1.032 2.493l3.6 3.6a.684.684 0 0 1 0 .946l-3.613 3.613a3.504 3.504 0 0 0-1.032 2.493h.48l4.56-4.56a3.647 3.647 0 0 1 0-5.156Z"/>
@@ -498,7 +498,7 @@
                 </div>
                 <button type="button" @click="generateMercadoPagoPix()"
                         class="w-full bg-[#32BCAD] hover:bg-[#28a89a] text-white font-black py-3.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-[#32BCAD]/25">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="white">
+                    <svg class="w-4 h-4" viewBox="-1 -1 26 26" fill="white">
                         <path d="M5.283 18.36a3.505 3.505 0 0 0 2.493-1.032l3.6-3.6a.684.684 0 0 1 .946 0l3.613 3.613a3.504 3.504 0 0 0 2.493 1.032h.71l-4.56 4.56a3.647 3.647 0 0 1-5.156 0L4.85 18.36Z"/>
                         <path d="M18.428 5.627a3.505 3.505 0 0 0-2.493 1.032l-3.613 3.614a.67.67 0 0 1-.946 0l-3.6-3.6A3.505 3.505 0 0 0 5.283 5.64h-.48l4.57-4.56a3.647 3.647 0 0 1 5.155 0l4.55 4.56Z"/>
                         <path d="M1.64 12.015l4.56-4.56a3.505 3.505 0 0 0 1.032 2.493l3.6 3.6a.684.684 0 0 1 0 .946l-3.613 3.613a3.504 3.504 0 0 0-1.032 2.493h.48l4.56-4.56a3.647 3.647 0 0 1 0-5.156Z"/>
@@ -546,7 +546,7 @@
 
             <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
                 <span class="flex items-center gap-1"><x-heroicon-s-lock-closed class="w-3 h-3" /> Transação Segura</span>
-                <span class="bg-slate-100 text-slate-500 font-black px-2 py-0.5 rounded text-[9px] uppercase tracking-widest">Asaas</span>
+                <span class="bg-slate-100 text-slate-500 font-black px-2 py-0.5 rounded text-[9px] uppercase tracking-widest">Mercado Pago</span>
             </div>
         </div>
     </div>
