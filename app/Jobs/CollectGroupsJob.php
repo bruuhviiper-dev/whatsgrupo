@@ -32,7 +32,7 @@ class CollectGroupsJob implements ShouldQueue
 
     public function handle(GroupCollectorService $service): void
     {
-        ini_set('memory_limit', '2G');
+        ini_set('memory_limit', '-1'); // sem limite — evita estouro em coletas grandes
 
         $executedAt = now();
 

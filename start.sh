@@ -292,9 +292,9 @@ start_bg "queue-coleta" \
     php "$SCRIPT_DIR/artisan" queue:work \
         --queue=coleta \
         --tries=2 \
-        --timeout=600 \
+        --timeout=10800 \
         --sleep=10 \
-        --max-time=3600
+        --max-time=14400
 
 # ── 12. Schedule (cron via artisan) ──────────────────────────
 start_bg "scheduler" \

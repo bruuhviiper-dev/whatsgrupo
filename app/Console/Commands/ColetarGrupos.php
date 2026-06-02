@@ -17,7 +17,7 @@ class ColetarGrupos extends Command
     public function handle(): int
     {
         set_time_limit(0);
-        ini_set('memory_limit', '2G');
+        ini_set('memory_limit', '-1'); // sem limite — evita estouro em coletas grandes
 
         $this->line('');
         $this->info('╔══════════════════════════════════════════════════════╗');
