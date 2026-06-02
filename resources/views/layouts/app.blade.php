@@ -128,17 +128,17 @@
       {{-- ── AÇÕES (direita) ─────────────────────────────────────────────── --}}
       <div class="flex items-center gap-1.5 sm:gap-2 ml-auto md:ml-0">
 
-        {{-- Meus Grupos: texto discreto (lg+) --}}
+        {{-- Meus Grupos: botão cinza visível (lg+) --}}
         <a href="/meus-grupos"
-           class="hidden lg:inline-flex items-center gap-1.5 text-[13px] font-medium px-3 py-2 rounded-lg transition-all
-                  {{ request()->is('meus-grupos*') ? 'text-white bg-slate-800' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">
+           class="hidden lg:inline-flex items-center justify-center gap-1.5 min-w-[140px] text-[13px] font-semibold px-4 py-2 rounded-lg border transition-all
+                  {{ request()->is('meus-grupos*') ? 'bg-slate-700 border-slate-600 text-white' : 'bg-slate-800 border-slate-700/70 text-slate-200 hover:bg-slate-700 hover:text-white hover:border-slate-600' }}">
           <x-heroicon-o-users class="w-4 h-4" />
           Meus Grupos
         </a>
 
         {{-- Impulsionar: DESTAQUE com fundo amarelo (consistente com o offcanvas) --}}
         <a href="/pacotes-vip"
-           class="hidden md:inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 hover:border-amber-300 text-amber-700 hover:text-amber-800 text-[13px] font-bold px-3.5 py-2 rounded-lg shadow-sm shadow-amber-900/10 transition-all"
+           class="hidden md:inline-flex items-center justify-center gap-1.5 min-w-[140px] bg-amber-50 hover:bg-amber-100 border border-amber-200 hover:border-amber-300 text-amber-700 hover:text-amber-800 text-[13px] font-semibold px-4 py-2 rounded-lg shadow-sm shadow-amber-900/10 transition-all"
            aria-label="Impulsionar grupo — pacotes VIP">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="w-3.5 h-3.5 text-amber-500 shrink-0">
             <path d="M239.54,98.11l-36.88,86.07a16,16,0,0,1-14.66,9.82H68a16,16,0,0,1-14.66-9.82L16.46,98.11A8,8,0,0,1,24.63,86.3l57,21.36,39.11-65.18a8,8,0,0,1,13.72,0l39.11,65.18,57-21.36a8,8,0,0,1,8.17,11.81Z"></path>
@@ -148,7 +148,7 @@
 
         {{-- Enviar Grupo: CTA primário verde --}}
         <a href="/enviar-grupo"
-           class="hidden sm:inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#1da851] text-white text-[13px] font-semibold px-3.5 py-2 rounded-lg shadow-sm shadow-green-900/20 transition-colors">
+           class="hidden sm:inline-flex items-center justify-center gap-1.5 min-w-[140px] bg-[#25D366] hover:bg-[#1da851] border border-[#25D366] hover:border-[#1da851] text-white text-[13px] font-semibold px-4 py-2 rounded-lg shadow-sm shadow-green-900/20 transition-colors">
           <x-heroicon-s-plus class="w-4 h-4" />
           Enviar Grupo
         </a>
