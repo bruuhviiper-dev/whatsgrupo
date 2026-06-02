@@ -38,7 +38,13 @@ GERADOR<span class="text-green-100 font-bold">ENQUETE</span>
 </a>
 @endsection
 
+@section('canonical', route('tools.poll-generator'))
+
 @section('content')
+
+<x-seo.tool name="Gerador de Enquetes para WhatsApp"
+            description="Monte enquetes prontas para postar e engajar os membros do seu grupo de WhatsApp." />
+
 <div class="max-w-4xl mx-auto" x-data="pollGenerator()">
     <div class="text-center mb-10">
         <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] bg-pink-50 border-2 border-pink-100 text-pink-500 mb-6 shadow-[0_0_25px_rgba(236,72,153,0.2)] rotate-3">

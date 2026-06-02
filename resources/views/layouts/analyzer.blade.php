@@ -56,6 +56,9 @@
 
   @stack('head')
 
+  {{-- Google Analytics (GA4) --}}
+  <x-google-analytics />
+
   {{-- JSON-LD global (Organization + WebSite + SearchAction) --}}
   <x-seo.global />
   @stack('schema')
@@ -138,7 +141,7 @@
     <div class="flex items-center justify-around h-20 max-w-full px-2">
       
       <!-- Home Analisador -->
-      <a href="/ferramentas/analise-de-engajamento" class="flex flex-col items-center justify-center w-16 h-16 rounded-lg text-slate-600 hover:text-[#25D366] hover:bg-green-50 transition-all {{ request()->is('ferramentas*') || request()->is('analise*') ? 'text-[#25D366] bg-green-50' : '' }}">
+      <a href="{{ route('tools.engagement.create') }}" class="flex flex-col items-center justify-center w-16 h-16 rounded-lg text-slate-600 hover:text-[#25D366] hover:bg-green-50 transition-all {{ request()->is('analise*') ? 'text-[#25D366] bg-green-50' : '' }}">
         <x-heroicon-o-sparkles class="w-6 h-6" />
         <span class="text-[10px] font-bold mt-0.5">Analisador</span>
       </a>
@@ -150,7 +153,7 @@
       </a>
 
       <!-- FAB Nova Analise - Centro destacado -->
-      <a href="/ferramentas/analise-de-engajamento" class="flex flex-col items-center justify-center -translate-y-4 relative">
+      <a href="{{ route('tools.engagement.create') }}" class="flex flex-col items-center justify-center -translate-y-4 relative">
         <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#25D366] to-[#128C7E] shadow-lg shadow-green-500/40 flex items-center justify-center transition-transform hover:scale-110 active:scale-95">
           <x-heroicon-s-magnifying-glass class="w-8 h-8 text-white" />
         </div>

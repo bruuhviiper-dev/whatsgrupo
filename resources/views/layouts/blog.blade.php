@@ -56,6 +56,9 @@
 
   @stack('head')
 
+  {{-- Google Analytics (GA4) --}}
+  <x-google-analytics />
+
   {{-- JSON-LD global (Organization + WebSite + SearchAction) --}}
   <x-seo.global />
   @stack('schema')
@@ -166,7 +169,7 @@
       </button>
 
       <!-- Ferramentas -->
-      <a href="/ferramentas/analise-de-engajamento" class="flex flex-col items-center justify-center w-16 h-16 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all">
+      <a href="{{ route('tools.engagement.create') }}" class="flex flex-col items-center justify-center w-16 h-16 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all">
         <x-heroicon-o-wrench-screwdriver class="w-6 h-6" />
         <span class="text-[10px] font-bold mt-0.5">Ferramentas</span>
       </a>

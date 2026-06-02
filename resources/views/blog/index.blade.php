@@ -11,10 +11,10 @@
     ['name' => 'Blog', 'url' => url('/blog')],
 ]" />
 @php
-    $postItems = collect($posts)->map(fn ($p) => [
-        'name' => $p->title,
-        'url'  => url('/blog/' . $p->slug),
-    ])->all();
+    $postItems = [];
+    foreach ($posts as $p) {
+        $postItems[] = ['name' => $p->title, 'url' => url('/blog/' . $p->slug)];
+    }
 @endphp
 @if(count($postItems))
 <x-seo.itemlist name="Blog WhatsGrupos" :items="$postItems" />

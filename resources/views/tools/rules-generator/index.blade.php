@@ -40,7 +40,13 @@ GERADOR<span class="text-green-100 font-bold">REGRAS</span>
 </a>
 @endsection
 
+@section('canonical', route('tools.rules.index'))
+
 @section('content')
+
+<x-seo.tool name="Gerador de Regras para Grupos de WhatsApp"
+            description="Crie regras claras e completas para administrar o seu grupo de WhatsApp, prontas para copiar e colar." />
+
 <div class="py-8 md:py-12" x-data="rulesGenerator()">
   <div class="text-center max-w-2xl mx-auto mb-10">
     <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] bg-blue-50 border-2 border-blue-100 text-blue-600 mb-6 shadow-[0_0_25px_rgba(37,99,235,0.2)] rotate-3">

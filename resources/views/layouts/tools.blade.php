@@ -56,6 +56,9 @@
 
   @stack('head')
 
+  {{-- Google Analytics (GA4) --}}
+  <x-google-analytics />
+
   {{-- JSON-LD global (Organization + WebSite + SearchAction) --}}
   <x-seo.global />
   @stack('schema')

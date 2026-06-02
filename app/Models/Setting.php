@@ -42,4 +42,22 @@ class Setting extends Model
     {
         return static::get('adsense_client_id');
     }
+
+    // ── Google Analytics (GA4) ──────────────────────────────────────────────
+    public static function googleAnalyticsEnabled(): bool
+    {
+        return (bool) static::get('ga_enabled', false);
+    }
+
+    /** ID de medição GA4 (ex: G-XXXXXXXXXX). */
+    public static function googleAnalyticsId(): ?string
+    {
+        return static::get('ga_measurement_id');
+    }
+
+    /** Script completo colado pelo admin (tem prioridade sobre o ID). */
+    public static function googleAnalyticsScript(): ?string
+    {
+        return static::get('ga_script');
+    }
 }

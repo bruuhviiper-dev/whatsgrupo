@@ -10,10 +10,10 @@
     ['name' => 'Frases para Status', 'url' => route('phrases.index')],
 ]" />
 @php
-    $phraseItems = collect($phrases)->map(fn ($p) => [
-        'name' => Str::limit($p->phrase, 90),
-        'url'  => route('phrases.show', $p),
-    ])->all();
+    $phraseItems = [];
+    foreach ($phrases as $p) {
+        $phraseItems[] = ['name' => Str::limit($p->phrase, 90), 'url' => route('phrases.show', $p)];
+    }
 @endphp
 @if(count($phraseItems))
 <x-seo.itemlist name="Frases para Status de WhatsApp" :items="$phraseItems" />

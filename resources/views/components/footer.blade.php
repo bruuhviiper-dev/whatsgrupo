@@ -1,3 +1,9 @@
+{{-- AdSense global: reflete em TODAS as páginas (o componente x-adsense já exclui
+     faq, termos, contato e política de privacidade, e só renderiza com AdSense ativo). --}}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 my-8">
+    <x-adsense format="auto" />
+</div>
+
 <footer class="bg-slate-900 border-t border-slate-800 pt-16 pb-8 mt-16">
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
@@ -38,8 +44,8 @@
                 <ul class="space-y-3">
                     <li><a href="/figurinhas" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Figurinhas para WhatsApp</a></li>
                     <li><a href="/frases" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Frases para Status</a></li>
-                    <li><a href="/ferramentas/analise-de-engajamento" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Análise de Engajamento</a></li>
-                    <li><a href="/ferramentas/gerador-de-regras" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Gerador de Regras</a></li>
+                    <li><a href="{{ route('tools.engagement.create') }}" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Análise de Engajamento</a></li>
+                    <li><a href="{{ route('tools.rules.index') }}" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Gerador de Regras</a></li>
                     <li><a href="{{ route('tools.name-generator') }}" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Gerador de Nomes</a></li>
                     <li><a href="{{ route('tools.welcome-message') }}" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Msg de Boas-Vindas</a></li>
                     <li><a href="{{ route('tools.link-validator') }}" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Verificador de Link</a></li>

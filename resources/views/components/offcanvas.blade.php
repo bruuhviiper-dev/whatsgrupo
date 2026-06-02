@@ -118,16 +118,16 @@
                   <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 mb-1.5">Ferramentas</p>
                   @php
                     $toolList = [
-                      ['/figurinhas',                            'figurinhas*',                    'heroicon-o-face-smile',           'Figurinhas de WhatsApp'],
-                      ['/ferramentas/analise-de-engajamento',    'ferramentas/analise*',            'heroicon-o-chart-bar',            'Análise de Engajamento'],
-                      [route('tools.spam-detector'),             'ferramentas/detector-de-spam*',   'heroicon-o-shield-exclamation',   'Detector de Spam'],
-                      ['/ferramentas/gerador-de-regras',         'ferramentas/gerador-de-regras*',  'heroicon-o-document-check',       'Gerador de Regras'],
-                      [route('tools.name-generator'),            'ferramentas/gerador-de-nomes*',   'heroicon-o-sparkles',             'Gerador de Nomes'],
-                      [route('tools.welcome-message'),           'ferramentas/mensagem*',           'heroicon-o-hand-raised',          'Mensagem de Boas-Vindas'],
-                      [route('tools.link-validator'),            'ferramentas/verificador*',        'heroicon-o-link',                 'Verificador de Link'],
-                      [route('tools.poll-generator'),            'ferramentas/gerador-de-enquete*', 'heroicon-o-chart-bar-square',     'Gerador de Enquete'],
-                      [route('tools.raffle-generator'),          'ferramentas/gerador-de-sorteios*','heroicon-o-gift',                 'Gerador de Sorteios'],
-                      [route('tools.fonts-generator'),           'ferramentas/gerador-de-letras*',  'heroicon-o-language',             'Gerador de Letras Especiais'],
+                      ['/figurinhas',                       'figurinhas*',                  'heroicon-o-face-smile',           'Figurinhas de WhatsApp'],
+                      [route('tools.engagement.create'),    'analise-de-engajamento*',      'heroicon-o-chart-bar',            'Análise de Engajamento'],
+                      [route('tools.spam-detector'),        'detector-de-spam*',            'heroicon-o-shield-exclamation',   'Detector de Spam'],
+                      [route('tools.rules.index'),          'gerador-de-regras*',           'heroicon-o-document-check',       'Gerador de Regras'],
+                      [route('tools.name-generator'),       'gerador-de-nomes*',            'heroicon-o-sparkles',             'Gerador de Nomes'],
+                      [route('tools.welcome-message'),      'mensagem-de-boas-vindas*',     'heroicon-o-hand-raised',          'Mensagem de Boas-Vindas'],
+                      [route('tools.link-validator'),       'verificador-de-link*',         'heroicon-o-link',                 'Verificador de Link'],
+                      [route('tools.poll-generator'),       'gerador-de-enquete*',          'heroicon-o-chart-bar-square',     'Gerador de Enquete'],
+                      [route('tools.raffle-generator'),     'gerador-de-sorteios*',         'heroicon-o-gift',                 'Gerador de Sorteios'],
+                      [route('tools.fonts-generator'),      'gerador-de-letras*',           'heroicon-o-language',             'Gerador de Letras Especiais'],
                     ];
                   @endphp
                   <nav class="flex flex-col gap-0.5">

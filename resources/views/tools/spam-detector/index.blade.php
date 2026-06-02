@@ -36,7 +36,13 @@ ANTI<span class="text-teal-100 font-bold">SPAM</span>
 </a>
 @endsection
 
+@section('canonical', route('tools.spam-detector'))
+
 @section('content')
+
+<x-seo.tool name="Detector de Spam para WhatsApp"
+            description="Analise mensagens e descubra se há sinais de spam, golpe ou phishing antes de compartilhar no seu grupo." />
+
 <div class="py-8 md:py-12" x-data="spamDetector()">
   <div class="text-center max-w-2xl mx-auto mb-10">
     <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] bg-red-50 border-2 border-red-100 text-red-500 mb-6 shadow-[0_0_25px_rgba(239,68,68,0.2)] rotate-3">

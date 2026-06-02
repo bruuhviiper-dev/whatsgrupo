@@ -40,7 +40,13 @@ GERADOR<span class="text-green-100 font-bold">NOMES</span>
 </a>
 @endsection
 
+@section('canonical', route('tools.name-generator'))
+
 @section('content')
+
+<x-seo.tool name="Gerador de Nomes para Grupos de WhatsApp"
+            description="Gere nomes criativos, engraçados e exclusivos para o seu grupo de WhatsApp, de graça e sem cadastro." />
+
 <div class="py-8 md:py-12" x-data="nameGenerator()">
   <div class="text-center max-w-2xl mx-auto mb-10">
     <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] bg-purple-50 border-2 border-purple-100 text-purple-500 mb-6 shadow-[0_0_25px_rgba(168,85,247,0.2)] rotate-3">

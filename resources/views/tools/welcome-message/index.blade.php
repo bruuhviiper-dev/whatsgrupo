@@ -40,7 +40,13 @@ BOAS<span class="text-green-100 font-bold">VINDAS</span>
 </a>
 @endsection
 
+@section('canonical', route('tools.welcome-message'))
+
 @section('content')
+
+<x-seo.tool name="Gerador de Mensagem de Boas-Vindas para WhatsApp"
+            description="Crie mensagens de boas-vindas personalizadas para receber novos membros no seu grupo de WhatsApp." />
+
 <div class="py-8 md:py-12" x-data="welcomeGenerator()">
   <div class="text-center max-w-2xl mx-auto mb-10">
     <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] bg-teal-50 border-2 border-teal-100 text-teal-600 mb-6 shadow-[0_0_25px_rgba(13,148,136,0.2)] rotate-3">

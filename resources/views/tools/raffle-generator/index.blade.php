@@ -54,7 +54,13 @@
   </a>
 @endsection
 
+@section('canonical', route('tools.raffle-generator'))
+
 @section('content')
+
+<x-seo.tool name="Gerador de Sorteios para WhatsApp"
+            description="Realize sorteios justos e transparentes para o seu grupo de WhatsApp, com resultado verificável." />
+
   <div class="py-8 md:py-12" x-data="raffleGenerator()">
 
     {{-- Hero --}}
@@ -906,7 +912,7 @@
             this.history.push(historyItem);
 
             try {
-              const response = await fetch('/ferramentas/gerador-de-sorteios', {
+              const response = await fetch('{{ route('tools.raffle-generator.store') }}', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',

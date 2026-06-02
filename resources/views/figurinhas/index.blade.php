@@ -4,8 +4,13 @@
 
 @section('title', 'Figurinhas para WhatsApp | WhatsGrupos')
 @section('description', 'Baixe as melhores figurinhas e stickers para WhatsApp. Categorias: Engraçado, Amor, Zoeira e mais!')
+@section('canonical', route('figurinhas.index'))
 
 @section('content')
+
+<x-seo.tool name="Figurinhas para WhatsApp"
+            description="Baixe gratuitamente as melhores figurinhas e stickers para WhatsApp, organizadas por categoria." />
+
 <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
         <h1 class="text-3xl font-black text-slate-900 mb-1">Figurinhas para WhatsApp</h1>

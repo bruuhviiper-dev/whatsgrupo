@@ -17,6 +17,9 @@ class SettingsController extends Controller
             'adsense_meta_tag'  => Setting::get('adsense_meta_tag'),
             'adsense_slot_auto' => Setting::get('adsense_slot_auto'),
             'favicon'           => Setting::get('favicon'),
+            'ga_enabled'        => Setting::get('ga_enabled', '0'),
+            'ga_measurement_id' => Setting::get('ga_measurement_id'),
+            'ga_script'         => Setting::get('ga_script'),
         ];
 
         return view('admin.settings', compact('settings'));
@@ -30,6 +33,8 @@ class SettingsController extends Controller
             'adsense_meta_tag'  => 'nullable|string',
             'adsense_slot_auto' => 'nullable|string|max:50',
             'favicon'           => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,ico|max:2048',
+            'ga_measurement_id' => 'nullable|string|max:50',
+            'ga_script'         => 'nullable|string',
         ]);
 
         if ($request->hasFile('favicon')) {
@@ -42,6 +47,11 @@ class SettingsController extends Controller
         Setting::set('adsense_script',    $request->input('adsense_script'));
         Setting::set('adsense_meta_tag',  $request->input('adsense_meta_tag'));
         Setting::set('adsense_slot_auto', $request->input('adsense_slot_auto'));
+
+        // Google Analytics (GA4)
+        Setting::set('ga_enabled',        $request->boolean('ga_enabled') ? '1' : '0');
+        Setting::set('ga_measurement_id', $request->input('ga_measurement_id'));
+        Setting::set('ga_script',         $request->input('ga_script'));
 
         return redirect()->route('admin.settings')->with('success', 'Configurações salvas com sucesso!');
     }

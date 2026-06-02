@@ -67,30 +67,45 @@ Route::post('/frases/curtir/{phrase}', [\App\Http\Controllers\StatusPhraseContro
 Route::post('/frases/enviar', [\App\Http\Controllers\StatusPhraseController::class, 'submit'])->name('phrases.submit');
 Route::get('/enviar-frase', [\App\Http\Controllers\StatusPhraseController::class, 'create'])->name('phrases.create');
 
-// --- Nova Ferramenta: Analisador de Engajamento ---
-Route::get('/ferramentas/analise-de-engajamento', [\App\Http\Controllers\EngagementAnalysisController::class, 'create'])->name('tools.engagement.create');
-Route::post('/ferramentas/analise-de-engajamento', [\App\Http\Controllers\EngagementAnalysisController::class, 'store'])->name('tools.engagement.store');
+// --- Ferramentas (URLs na raiz, sem o prefixo /ferramentas para melhor SEO) ---
+// Os NOMES das rotas seguem os mesmos (tools.*), então route() e os links continuam válidos.
+
+// Analisador de Engajamento
+Route::get('/analise-de-engajamento', [\App\Http\Controllers\EngagementAnalysisController::class, 'create'])->name('tools.engagement.create');
+Route::post('/analise-de-engajamento', [\App\Http\Controllers\EngagementAnalysisController::class, 'store'])->name('tools.engagement.store');
 Route::get('/analise/{uuid}', [\App\Http\Controllers\EngagementAnalysisController::class, 'show'])->name('tools.engagement.show');
 
-// --- Nova Ferramenta: Gerador de Regras ---
-Route::get('/ferramentas/gerador-de-regras', [\App\Http\Controllers\RulesGeneratorController::class, 'index'])->name('tools.rules.index');
+// Gerador de Regras
+Route::get('/gerador-de-regras', [\App\Http\Controllers\RulesGeneratorController::class, 'index'])->name('tools.rules.index');
 
-// --- Novas Ferramentas ---
-Route::get('/ferramentas/gerador-de-nomes', [\App\Http\Controllers\ToolsController::class, 'nameGenerator'])->name('tools.name-generator');
-Route::get('/ferramentas/mensagem-de-boas-vindas', [\App\Http\Controllers\ToolsController::class, 'welcomeMessage'])->name('tools.welcome-message');
-Route::get('/ferramentas/verificador-de-link', [\App\Http\Controllers\ToolsController::class, 'linkValidator'])->name('tools.link-validator');
-Route::get('/ferramentas/gerador-de-enquete', [\App\Http\Controllers\ToolsController::class, 'pollGenerator'])->name('tools.poll-generator');
-Route::get('/ferramentas/gerador-de-letras', [\App\Http\Controllers\ToolsController::class, 'fontsGenerator'])->name('tools.fonts-generator');
+// Demais ferramentas
+Route::get('/gerador-de-nomes', [\App\Http\Controllers\ToolsController::class, 'nameGenerator'])->name('tools.name-generator');
+Route::get('/mensagem-de-boas-vindas', [\App\Http\Controllers\ToolsController::class, 'welcomeMessage'])->name('tools.welcome-message');
+Route::get('/verificador-de-link', [\App\Http\Controllers\ToolsController::class, 'linkValidator'])->name('tools.link-validator');
+Route::get('/gerador-de-enquete', [\App\Http\Controllers\ToolsController::class, 'pollGenerator'])->name('tools.poll-generator');
+Route::get('/gerador-de-letras', [\App\Http\Controllers\ToolsController::class, 'fontsGenerator'])->name('tools.fonts-generator');
 
 // Sorteios
-Route::get('/ferramentas/gerador-de-sorteios', [\App\Http\Controllers\RaffleController::class, 'index'])->name('tools.raffle-generator');
-Route::post('/ferramentas/gerador-de-sorteios', [\App\Http\Controllers\RaffleController::class, 'store'])->name('tools.raffle-generator.store');
+Route::get('/gerador-de-sorteios', [\App\Http\Controllers\RaffleController::class, 'index'])->name('tools.raffle-generator');
+Route::post('/gerador-de-sorteios', [\App\Http\Controllers\RaffleController::class, 'store'])->name('tools.raffle-generator.store');
 Route::get('/sorteio/buscar', [\App\Http\Controllers\RaffleController::class, 'search'])->name('tools.raffle.search');
 Route::post('/sorteio/{uuid}/email', [\App\Http\Controllers\RaffleController::class, 'sendEmail'])->name('tools.raffle.email');
 Route::get('/sorteio/{uuid}', [\App\Http\Controllers\RaffleController::class, 'show'])->name('tools.raffle.show');
 
-Route::get('/ferramentas/detector-de-spam', [\App\Http\Controllers\ToolsController::class, 'spamDetector'])->name('tools.spam-detector');
-Route::post('/ferramentas/detector-de-spam/analisar', [\App\Http\Controllers\ToolsController::class, 'analyzeSpam'])->name('tools.spam-detector.analyze');
+// Detector de Spam
+Route::get('/detector-de-spam', [\App\Http\Controllers\ToolsController::class, 'spamDetector'])->name('tools.spam-detector');
+Route::post('/detector-de-spam/analisar', [\App\Http\Controllers\ToolsController::class, 'analyzeSpam'])->name('tools.spam-detector.analyze');
+
+// Redirects 301 dos caminhos antigos (/ferramentas/*) para as novas URLs (preserva SEO/links)
+Route::permanentRedirect('/ferramentas/analise-de-engajamento', '/analise-de-engajamento');
+Route::permanentRedirect('/ferramentas/gerador-de-regras',       '/gerador-de-regras');
+Route::permanentRedirect('/ferramentas/gerador-de-nomes',        '/gerador-de-nomes');
+Route::permanentRedirect('/ferramentas/mensagem-de-boas-vindas', '/mensagem-de-boas-vindas');
+Route::permanentRedirect('/ferramentas/verificador-de-link',     '/verificador-de-link');
+Route::permanentRedirect('/ferramentas/gerador-de-enquete',      '/gerador-de-enquete');
+Route::permanentRedirect('/ferramentas/gerador-de-letras',       '/gerador-de-letras');
+Route::permanentRedirect('/ferramentas/gerador-de-sorteios',     '/gerador-de-sorteios');
+Route::permanentRedirect('/ferramentas/detector-de-spam',        '/detector-de-spam');
 
 // Página comercial e de publicidade
 Route::get('/anuncie', [HomeController::class, 'advertise'])->name('advertise');

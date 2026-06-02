@@ -83,6 +83,9 @@
 
   @stack('head')
 
+  {{-- Google Analytics (GA4) em todas as páginas --}}
+  <x-google-analytics />
+
   {{-- JSON-LD global (Organization + WebSite + SearchAction) em todas as páginas --}}
   <x-seo.global />
   @stack('schema')

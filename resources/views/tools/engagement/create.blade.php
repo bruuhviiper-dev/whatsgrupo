@@ -5,7 +5,13 @@
 @section('title', 'Analisador de Engajamento de Grupo | WhatsGrupos')
 @section('description', 'Descubra o engajamento e a saúde do seu grupo de WhatsApp com nossa Inteligência Artificial.')
 
+@section('canonical', route('tools.engagement.create'))
+
 @section('content')
+
+<x-seo.tool name="Analisador de Engajamento de Grupo de WhatsApp"
+            description="Descubra o nível de engajamento e a saúde do seu grupo de WhatsApp com nossa análise inteligente e gratuita." />
+
 <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-10">
         <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] bg-green-50 border-2 border-green-100 text-green-600 mb-6 shadow-[0_0_25px_rgba(34,197,94,0.2)] rotate-3">

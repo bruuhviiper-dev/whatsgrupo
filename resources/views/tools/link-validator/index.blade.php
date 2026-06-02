@@ -40,7 +40,13 @@ VALIDA<span class="text-green-100 font-bold">LINK</span>
 </a>
 @endsection
 
+@section('canonical', route('tools.link-validator'))
+
 @section('content')
+
+<x-seo.tool name="Verificador de Link de Grupo de WhatsApp"
+            description="Verifique gratuitamente se o link de convite do seu grupo de WhatsApp está ativo e válido." />
+
 <div class="py-8 md:py-12" x-data="linkValidator()">
   <div class="text-center max-w-2xl mx-auto mb-10">
     <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] bg-blue-50 border-2 border-blue-100 text-blue-500 mb-6 shadow-[0_0_25px_rgba(59,130,246,0.2)] rotate-3">

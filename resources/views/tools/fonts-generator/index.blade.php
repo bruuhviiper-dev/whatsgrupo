@@ -52,7 +52,13 @@
   </a>
 @endsection
 
+@section('canonical', route('tools.fonts-generator'))
+
 @section('content')
+
+<x-seo.tool name="Gerador de Letras e Fontes para WhatsApp"
+            description="Transforme seu texto em letras e fontes estilizadas para status, nomes e mensagens do WhatsApp." />
+
   <div class="py-8 md:py-12" x-data="fontsGenerator()">
 
     {{-- Hero --}}

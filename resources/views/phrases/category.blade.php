@@ -12,10 +12,10 @@
     ['name' => $categoryName, 'url' => route('phrases.category', $category)],
 ]" />
 @php
-    $phraseItems = collect($phrases)->map(fn ($p) => [
-        'name' => Str::limit($p->phrase, 90),
-        'url'  => route('phrases.show', $p),
-    ])->all();
+    $phraseItems = [];
+    foreach ($phrases as $p) {
+        $phraseItems[] = ['name' => Str::limit($p->phrase, 90), 'url' => route('phrases.show', $p)];
+    }
 @endphp
 @if(count($phraseItems))
 <x-seo.itemlist :name="'Frases de ' . $categoryName" :items="$phraseItems" />
