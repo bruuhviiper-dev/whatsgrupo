@@ -102,65 +102,91 @@
 </head>
 <body class="bg-[#f8fafc]" x-data="{ mobileMenuOpen: false }">
 
-  <!-- HEADER — mesmo estilo escuro do footer (bg-slate-900) -->
+  {{-- ─────────────────────────────────────────────────────────────────────────
+       HEADER — Mobile-first: Row 1 = brand + nav, Row 2 = search (mobile only)
+       Desktop: single row — brand | search (center) | actions
+  ────────────────────────────────────────────────────────────────────────── --}}
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-    <div class="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
 
-      <!-- Logo — inspirado no estilo do concorrente: círculo verde sólido + ícone branco -->
-      <a href="/" class="flex items-center gap-3 no-underline group shrink-0">
-        <div class="w-10 h-10 bg-[#25D366] rounded-2xl flex items-center justify-center shadow-lg shadow-[#25D366]/30 group-hover:bg-[#1da851] transition-colors">
-          {{-- Ícone de grupos/comunidade (pessoas) em branco --}}
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-          </svg>
-        </div>
-        <span class="font-black text-[22px] text-white tracking-tight" style="font-family:'Outfit',sans-serif;">
-          Whats<span class="text-[#25D366]">Grupos</span>
+    {{-- ── Linha principal ──────────────────────────────────────────────── --}}
+    <div class="max-w-[1400px] mx-auto px-4 h-14 flex items-center justify-between gap-3">
+
+      {{-- ── NAVBRAND ────────────────────────────────────────────────────── --}}
+      {{--
+        Conceito: wordmark dual-weight + "live dot" animado.
+        O ponto verde pulsante representa grupos ativos em tempo real —
+        referência ao indicador de online do WhatsApp. Único no segmento,
+        legível em qualquer tamanho, sem nenhum ícone genérico.
+      --}}
+      <a href="/" class="flex items-center gap-2 shrink-0 select-none group" aria-label="WhatsGrupos — Início">
+
+        {{-- Live dot: ponto estático + anel ping --}}
+        <span class="relative flex items-center justify-center w-3 h-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-60"></span>
+          <span class="relative inline-flex rounded-full w-2.5 h-2.5 bg-[#25D366] group-hover:bg-[#1da851] transition-colors"></span>
         </span>
+
+        {{-- Wordmark: "Whats" leve recua, "Grupos" domina --}}
+        <span class="leading-none" style="font-family:'Outfit',sans-serif;">
+          <span class="text-[19px] font-light text-slate-400 tracking-tight group-hover:text-slate-300 transition-colors">Whats</span><span class="text-[19px] font-black text-white tracking-tight">Grupos</span>
+        </span>
+
       </a>
 
-      <!-- Busca centralizada -->
-      <div class="w-full md:w-[40%] lg:w-[48%] order-3 md:order-2" x-data="{ q: '{{ request('q', '') }}' }">
-        <form action="{{ request()->is('blog') || request()->is('blog/*') ? '/blog' : '/buscar' }}" method="GET" class="relative">
-          <input
-            type="text"
-            name="q"
-            x-model="q"
-            placeholder="{{ request()->is('blog') || request()->is('blog/*') ? 'Buscar no blog...' : 'Buscar grupos ativos...' }}"
-            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 pr-10 text-sm text-slate-100 placeholder-slate-400 outline-none focus:border-[#25D366] focus:ring-1 focus:ring-[#25D366] transition-all"
-          />
-          <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#25D366] transition-colors">
-            <x-heroicon-o-magnifying-glass class="w-5 h-5" />
-          </button>
+      {{-- ── BUSCA (centro — visível só em md+) ──────────────────────────── --}}
+      <div class="hidden md:flex flex-1 max-w-xl mx-6" x-data="{ q: '{{ request('q', '') }}' }">
+        <form action="{{ request()->is('blog') || request()->is('blog/*') ? '/blog' : '/buscar' }}" method="GET" class="relative w-full">
+          <x-heroicon-o-magnifying-glass class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input type="text" name="q" x-model="q"
+            placeholder="Buscar grupos..."
+            class="w-full bg-slate-800/70 border border-slate-700/60 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[#25D366]/70 focus:bg-slate-800 focus:ring-1 focus:ring-[#25D366]/40 transition-all" />
         </form>
       </div>
 
-      <!-- Nav + Hamburger -->
-      <div class="flex items-center gap-3 order-2 md:order-3">
-        <nav class="hidden md:flex items-center gap-2">
+      {{-- ── AÇÕES (direita) ─────────────────────────────────────────────── --}}
+      <div class="flex items-center gap-2">
+
+        {{-- Desktop nav --}}
+        <nav class="hidden md:flex items-center gap-1.5">
           <a href="/enviar-grupo"
-             class="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#1da851] text-white text-[13px] font-bold px-4 py-2 rounded-lg transition-colors">
-            <x-heroicon-s-plus class="w-4 h-4" /> Enviar Grupo
+             class="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#1da851] text-white text-[13px] font-semibold px-3.5 py-2 rounded-lg transition-colors">
+            <x-heroicon-s-plus class="w-3.5 h-3.5" />
+            Enviar Grupo
           </a>
           <a href="/meus-grupos"
-             class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-[13px] font-semibold px-4 py-2 rounded-lg border border-slate-700 transition-colors">
-            <x-heroicon-o-users class="w-4 h-4" /> Meus Grupos
+             class="inline-flex items-center gap-1.5 text-slate-300 hover:text-white text-[13px] font-medium px-3 py-2 rounded-lg hover:bg-slate-800 transition-all">
+            Meus Grupos
           </a>
           <a href="/pacotes-vip"
-             class="inline-flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[13px] font-semibold px-3.5 py-2 rounded-lg border border-amber-500/30 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="w-4 h-4 shrink-0">
-              <path d="M239.54,98.11l-36.88,86.07a16,16,0,0,1-14.66,9.82H68a16,16,0,0,1-14.66-9.82L16.46,98.11A8,8,0,0,1,24.63,86.3l57,21.36,39.11-65.18a8,8,0,0,1,13.72,0l39.11,65.18,57-21.36a8,8,0,0,1,8.17,11.81Z"/>
-            </svg>
-            Impulsionar
+             class="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 text-[13px] font-medium px-3 py-2 rounded-lg hover:bg-amber-500/10 transition-all">
+            <svg viewBox="0 0 16 16" fill="currentColor" class="w-3.5 h-3.5 shrink-0"><path d="M2.5 1l2.5 4L8 1l3 4 2.5-1L12 8H4L1.5 4z"/><rect x="4" y="9" width="8" height="1.5" rx=".75"/><rect x="4" y="11.5" width="8" height="1.5" rx=".75"/></svg>
+            VIP
           </a>
         </nav>
 
-        <button @click="mobileMenuOpen = true" class="text-slate-300 hover:text-[#25D366] transition-colors p-1" aria-label="Abrir Menu">
-          <x-heroicon-o-bars-3 class="w-7 h-7" />
-        </button>
-      </div>
+        {{-- Divider (desktop) --}}
+        <div class="hidden md:block w-px h-5 bg-slate-700/60 mx-1"></div>
 
+        {{-- Hamburger --}}
+        <button @click="mobileMenuOpen = true"
+                class="flex items-center justify-center w-9 h-9 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                aria-label="Abrir Menu">
+          <x-heroicon-o-bars-3 class="w-5 h-5" />
+        </button>
+
+      </div>
     </div>
+
+    {{-- ── Busca mobile (abaixo da linha principal, só < md) ─────────────── --}}
+    <div class="md:hidden border-t border-slate-800/60 px-4 py-2" x-data="{ q: '{{ request('q', '') }}' }">
+      <form action="{{ request()->is('blog') || request()->is('blog/*') ? '/blog' : '/buscar' }}" method="GET" class="relative">
+        <x-heroicon-o-magnifying-glass class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <input type="text" name="q" x-model="q"
+          placeholder="Buscar grupos..."
+          class="w-full bg-slate-800/70 border border-slate-700/50 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[#25D366]/70 focus:ring-1 focus:ring-[#25D366]/30 transition-all" />
+      </form>
+    </div>
+
   </header>
 
   <!-- NAVEGAÇÃO DE CATEGORIAS EXPANSÍVEL GLOBAL (apenas na home e lista de categorias) -->
