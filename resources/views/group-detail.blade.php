@@ -77,7 +77,7 @@
             </h1>
         </div>
 
-        <!-- Botão de Acesso Direto -->
+        <!-- Botï¿½o de Acesso Direto -->
         <a href="/g/{{ $group->id }}/entrar" target="_blank" rel="nofollow noopener"
             class="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-8 py-3.5 rounded-xl font-black text-sm uppercase tracking-wide transition-all shadow-md hover:shadow-lg text-decoration-none">
             <svg style="width: 20px; height: 20px; fill: currentColor;" viewBox="0 0 24 24">
@@ -243,7 +243,7 @@
   <!-- Grupos relacionados -->
   @if($related->count())
   <div class="mb-12">
-    <h2 class="text-xl font-bold text-slate-900 mb-6">Mais grupos de {{ $group->category->name }}</h2>
+    <h2 class="text-xl font-bold text-slate-900 mb-6">Grupos relacionados de {{ $group->category->name }}</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       @foreach($related as $rel)
         @include('components.group-card', ['group' => $rel])

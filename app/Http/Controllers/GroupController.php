@@ -96,13 +96,13 @@ class GroupController extends Controller
         // Incrementa o contador de visualizações
         $group->increment('views');
 
-        // Grupos relacionados (mesma categoria, aprovados, exceto o atual) ordenados por score desc
+        // Grupos relacionados: SOMENTE ativos (aprovados), da mesma categoria,
+        // exceto o próprio grupo, e os MAIS NOVOS cadastrados primeiro. Até 8 cards.
         $related = Group::with(['category', 'verifiedGroup'])
             ->approved()
             ->where('category_id', $group->category_id)
             ->where('id', '!=', $group->id)
-            ->orderByRaw('CASE WHEN is_vip = 1 AND vip_expires_at > NOW() THEN 1 ELSE 0 END DESC')
-            ->orderByRaw('COALESCE(last_boosted_at, created_at) DESC')
+            ->orderBy('created_at', 'desc')
             ->limit(8)
             ->get();
 
