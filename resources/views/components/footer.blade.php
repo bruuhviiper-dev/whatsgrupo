@@ -9,10 +9,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <!-- Brand & Description -->
             <div class="col-span-1 md:col-span-2">
-                <a href="/" class="flex items-center gap-2 mb-4">
-                    <x-heroicon-s-chat-bubble-oval-left-ellipsis class="w-8 h-8 text-[#25D366]" />
-                    <span class="text-2xl font-black tracking-tighter text-white">Whats<span class="text-[#25D366]">Grupos</span></span>
-                </a>
+                <x-brand href="/" size="lg" theme="dark" class="mb-4" />
                 <p class="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
                     O maior e mais atualizado diretório público para encontrar e entrar em links de grupos de WhatsApp reais do Brasil.
                 </p>

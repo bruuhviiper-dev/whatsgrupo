@@ -20,8 +20,9 @@
     <link rel="apple-touch-icon" href="{{ Storage::disk('public')->url($dynamicFavicon) }}">
   @else
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <link rel="icon" type="image/png" href="{{ asset('favicon.svg') }}">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
   @endif
 
   <!-- Open Graph -->
@@ -109,67 +110,55 @@
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
 
     {{-- ── Linha principal ──────────────────────────────────────────────── --}}
-    <div class="max-w-[1400px] mx-auto px-4 h-14 flex items-center justify-between gap-3">
+    <div class="max-w-[1400px] mx-auto px-4 h-16 flex items-center gap-3 lg:gap-5">
 
-      {{-- ── NAVBRAND ────────────────────────────────────────────────────── --}}
-      {{--
-        Conceito: wordmark dual-weight + "live dot" animado.
-        O ponto verde pulsante representa grupos ativos em tempo real —
-        referência ao indicador de online do WhatsApp. Único no segmento,
-        legível em qualquer tamanho, sem nenhum ícone genérico.
-      --}}
-      <a href="/" class="flex items-center gap-2 shrink-0 select-none group" aria-label="WhatsGrupos — Início">
+      {{-- ── NAVBRAND (componente reutilizável) ──────────────────────────── --}}
+      <x-brand href="/" size="md" theme="dark" />
 
-        {{-- Live dot: ponto estático + anel ping --}}
-        <span class="relative flex items-center justify-center w-3 h-3">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-60"></span>
-          <span class="relative inline-flex rounded-full w-2.5 h-2.5 bg-[#25D366] group-hover:bg-[#1da851] transition-colors"></span>
-        </span>
-
-        {{-- Wordmark: "Whats" leve recua, "Grupos" domina --}}
-        <span class="leading-none" style="font-family:'Outfit',sans-serif;">
-          <span class="text-[19px] font-light text-slate-400 tracking-tight group-hover:text-slate-300 transition-colors">Whats</span><span class="text-[19px] font-black text-white tracking-tight">Grupos</span>
-        </span>
-
-      </a>
-
-      {{-- ── BUSCA (centro — visível só em md+) ──────────────────────────── --}}
-      <div class="hidden md:flex flex-1 max-w-xl mx-6" x-data="{ q: '{{ request('q', '') }}' }">
+      {{-- ── BUSCA (centro — flex, visível só em md+) ────────────────────── --}}
+      <div class="hidden md:flex flex-1 max-w-2xl mx-auto" x-data="{ q: '{{ request('q', '') }}' }">
         <form action="{{ request()->is('blog') || request()->is('blog/*') ? '/blog' : '/buscar' }}" method="GET" class="relative w-full">
-          <x-heroicon-o-magnifying-glass class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <x-heroicon-o-magnifying-glass class="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input type="text" name="q" x-model="q"
-            placeholder="Buscar grupos..."
-            class="w-full bg-slate-800/70 border border-slate-700/60 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[#25D366]/70 focus:bg-slate-800 focus:ring-1 focus:ring-[#25D366]/40 transition-all" />
+            placeholder="Buscar grupos de WhatsApp..."
+            class="w-full bg-slate-800/70 border border-slate-700/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[#25D366]/70 focus:bg-slate-800 focus:ring-1 focus:ring-[#25D366]/40 transition-all" />
         </form>
       </div>
 
       {{-- ── AÇÕES (direita) ─────────────────────────────────────────────── --}}
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5 sm:gap-2 ml-auto md:ml-0">
 
-        {{-- Desktop nav --}}
-        <nav class="hidden md:flex items-center gap-1.5">
-          <a href="/enviar-grupo"
-             class="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#1da851] text-white text-[13px] font-semibold px-3.5 py-2 rounded-lg transition-colors">
-            <x-heroicon-s-plus class="w-3.5 h-3.5" />
-            Enviar Grupo
-          </a>
-          <a href="/meus-grupos"
-             class="inline-flex items-center gap-1.5 text-slate-300 hover:text-white text-[13px] font-medium px-3 py-2 rounded-lg hover:bg-slate-800 transition-all">
-            Meus Grupos
-          </a>
-          <a href="/pacotes-vip"
-             class="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 text-[13px] font-medium px-3 py-2 rounded-lg hover:bg-amber-500/10 transition-all">
-            <svg viewBox="0 0 16 16" fill="currentColor" class="w-3.5 h-3.5 shrink-0"><path d="M2.5 1l2.5 4L8 1l3 4 2.5-1L12 8H4L1.5 4z"/><rect x="4" y="9" width="8" height="1.5" rx=".75"/><rect x="4" y="11.5" width="8" height="1.5" rx=".75"/></svg>
-            VIP
-          </a>
-        </nav>
+        {{-- Meus Grupos: texto discreto (lg+) --}}
+        <a href="/meus-grupos"
+           class="hidden lg:inline-flex items-center gap-1.5 text-[13px] font-medium px-3 py-2 rounded-lg transition-all
+                  {{ request()->is('meus-grupos*') ? 'text-white bg-slate-800' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">
+          <x-heroicon-o-users class="w-4 h-4" />
+          Meus Grupos
+        </a>
 
-        {{-- Divider (desktop) --}}
-        <div class="hidden md:block w-px h-5 bg-slate-700/60 mx-1"></div>
+        {{-- Impulsionar: DESTAQUE com fundo amarelo (consistente com o offcanvas) --}}
+        <a href="/pacotes-vip"
+           class="hidden md:inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 hover:border-amber-300 text-amber-700 hover:text-amber-800 text-[13px] font-bold px-3.5 py-2 rounded-lg shadow-sm shadow-amber-900/10 transition-all"
+           aria-label="Impulsionar grupo — pacotes VIP">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" class="w-3.5 h-3.5 text-amber-500 shrink-0">
+            <path d="M239.54,98.11l-36.88,86.07a16,16,0,0,1-14.66,9.82H68a16,16,0,0,1-14.66-9.82L16.46,98.11A8,8,0,0,1,24.63,86.3l57,21.36,39.11-65.18a8,8,0,0,1,13.72,0l39.11,65.18,57-21.36a8,8,0,0,1,8.17,11.81Z"></path>
+          </svg>
+          Impulsionar
+        </a>
 
-        {{-- Hamburger --}}
+        {{-- Enviar Grupo: CTA primário verde --}}
+        <a href="/enviar-grupo"
+           class="hidden sm:inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#1da851] text-white text-[13px] font-semibold px-3.5 py-2 rounded-lg shadow-sm shadow-green-900/20 transition-colors">
+          <x-heroicon-s-plus class="w-4 h-4" />
+          Enviar Grupo
+        </a>
+
+        {{-- Divider (md+) --}}
+        <div class="hidden md:block w-px h-6 bg-slate-700/60 mx-1"></div>
+
+        {{-- Hamburger / Menu completo --}}
         <button @click="mobileMenuOpen = true"
-                class="flex items-center justify-center w-9 h-9 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
+                class="flex items-center justify-center w-10 h-10 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
                 aria-label="Abrir Menu">
           <x-heroicon-o-bars-3 class="w-5 h-5" />
         </button>
@@ -178,12 +167,12 @@
     </div>
 
     {{-- ── Busca mobile (abaixo da linha principal, só < md) ─────────────── --}}
-    <div class="md:hidden border-t border-slate-800/60 px-4 py-2" x-data="{ q: '{{ request('q', '') }}' }">
+    <div class="md:hidden border-t border-slate-800/60 px-4 py-2.5" x-data="{ q: '{{ request('q', '') }}' }">
       <form action="{{ request()->is('blog') || request()->is('blog/*') ? '/blog' : '/buscar' }}" method="GET" class="relative">
-        <x-heroicon-o-magnifying-glass class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <x-heroicon-o-magnifying-glass class="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input type="text" name="q" x-model="q"
-          placeholder="Buscar grupos..."
-          class="w-full bg-slate-800/70 border border-slate-700/50 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[#25D366]/70 focus:ring-1 focus:ring-[#25D366]/30 transition-all" />
+          placeholder="Buscar grupos de WhatsApp..."
+          class="w-full bg-slate-800/70 border border-slate-700/50 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[#25D366]/70 focus:ring-1 focus:ring-[#25D366]/30 transition-all" />
       </form>
     </div>
 
@@ -283,11 +272,11 @@
         <span class="text-[10px] font-bold mt-1 text-slate-400">Enviar</span>
       </a>
 
-      <!-- Pacotes VIP -->
+      <!-- Impulsionar (Pacotes VIP) -->
       <a href="/pacotes-vip" class="flex flex-col items-center justify-center w-16 h-16 rounded-lg transition-all
          {{ request()->is('pacotes-vip') ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400' }}">
-        <x-heroicon-o-star class="w-6 h-6" />
-        <span class="text-[10px] font-bold mt-0.5">VIP</span>
+        <x-heroicon-s-rocket-launch class="w-6 h-6" />
+        <span class="text-[10px] font-bold mt-0.5">Impulsionar</span>
       </a>
 
       <!-- Menu -->
