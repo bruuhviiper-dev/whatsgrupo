@@ -36,7 +36,7 @@
         /* Sidebar */
         .nav-link {
             display: flex; align-items: center; gap: 10px;
-            padding: 9px 12px; border-radius: 8px;
+            padding: 11px 12px; border-radius: 8px;
             color: #64748b; font-size: 13px; font-weight: 600;
             transition: all .15s; text-decoration: none; white-space: nowrap;
         }
@@ -227,7 +227,7 @@
         </div>
 
         {{-- Navigation --}}
-        <nav class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-0.5">
+        <nav class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-1.5">
             {{-- Section label --}}
             <p x-show="!sidebarCollapsed" x-transition.opacity class="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 mb-2 mt-1">Principal</p>
 
@@ -463,20 +463,29 @@
         </main>
     </div>
 
-    <script src="https://cdn.tiny.cloud/1/7z8np3ft9l8rtj4bcrbg73k20hcdds5eziv9n9f4psyk1oyx/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    {{-- TinyMCE self-hosted (vendor local, v8 GPL) — NÃO usa a CDN/Tiny Cloud (sem API key).
+         Init único e centralizado para o editor do blog (qualquer textarea#content do admin). --}}
+    <script src="{{ asset('vendor/tinymce/js/tinymce/tinymce.min.js') }}" referrerpolicy="origin"></script>
     <script>
-        setTimeout(() => {
-            if (!document.querySelector('.tox-tinymce') && document.querySelector('textarea#content')) {
-                tinymce.init({
-                    selector: 'textarea#content',
-                    plugins: 'advlist autolink lists link image charmap preview anchor pagebreak',
-                    toolbar_mode: 'floating',
-                    toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-                    height: 500,
-                    setup: editor => editor.on('change', () => tinymce.triggerSave())
-                });
-            }
-        }, 500);
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof tinymce === 'undefined' || !document.querySelector('textarea#content')) return;
+            const isDark = document.documentElement.classList.contains('dark');
+            tinymce.init({
+                selector: 'textarea#content',
+                license_key: 'gpl',           // build GPL self-hosted
+                promotion: false,             // remove o "Upgrade" da Tiny Cloud
+                branding: false,
+                height: 500,
+                menubar: 'edit insert format table',
+                plugins: 'advlist autolink lists link image charmap preview anchor pagebreak searchreplace wordcount visualblocks code fullscreen insertdatetime media nonbreaking table directionality emoticons help',
+                toolbar: 'undo redo | blocks | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | removeformat | fullscreen preview code',
+                toolbar_mode: 'sliding',
+                skin: isDark ? 'oxide-dark' : 'oxide',
+                content_css: isDark ? 'dark' : 'default',
+                // Mantém o textarea sincronizado para o submit do formulário
+                setup: editor => editor.on('change input undo redo', () => editor.save()),
+            });
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

@@ -63,25 +63,7 @@
     </form>
 </div>
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof tinymce !== 'undefined' && document.querySelector('textarea#content')) {
-            tinymce.init({
-                selector: 'textarea#content',
-                license_key: 'gpl',
-                plugins: 'advlist autolink lists link image charmap preview anchor pagebreak searchreplace wordcount visualblocks code fullscreen insertdatetime media nonbreaking table directionality emoticons',
-                toolbar: 'undo redo | bold italic underline | formatselect | alignleft aligncenter alignright | outdent indent | numlist bullist | forecolor backcolor removeformat | fullscreen preview | insertfile image media link | code | ltr rtl',
-                toolbar_mode: 'sliding',
-                height: 500,
-                language: 'pt_BR',
-                skin: document.documentElement.classList.contains('dark') ? 'oxide-dark' : 'oxide',
-                content_css: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-                promotion: false,
-            });
-        }
-    });
-</script>
-@endpush
+{{-- O editor TinyMCE (vendor self-hosted) é inicializado de forma centralizada
+     em resources/views/admin/layout.blade.php para qualquer textarea#content. --}}
 
 @endsection
