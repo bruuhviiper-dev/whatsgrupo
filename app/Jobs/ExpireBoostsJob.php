@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Job responsável por expirar os impulsos VIP de grupos cujo prazo já venceu.
- * Executado a cada 5 minutos via agendador do Laravel.
+ * Executado a cada 1 minuto via agendador do Laravel (routes/console.php).
  *
  * BUG CORRIGIDO: após expirar, limpa o cache da home e das categorias afetadas,
  * garantindo que o grupo saia imediatamente do topo em TODAS as páginas.

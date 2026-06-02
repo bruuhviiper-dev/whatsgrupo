@@ -10,10 +10,7 @@ use Illuminate\Console\Command;
 class ColetarGrupos extends Command
 {
     protected $signature = 'grupos:coletar
-                            {--queue : Disparar via fila (modo job) ao invés de executar direto}
-                            {--categorias= : Slugs de categorias separados por vírgula (ex: futebol,games-e-jogos)}
-                            {--paginas=3 : Número de páginas por diretório}
-                            {--dry-run : Apenas exibe o que seria coletado sem salvar no banco}';
+                            {--queue : Disparar via fila (modo job) ao invés de executar direto}';
 
     protected $description = 'Coleta grupos reais de WhatsApp em diretórios públicos e buscadores, cadastrando-os conforme as regras de negócio.';
 
@@ -35,17 +32,6 @@ class ColetarGrupos extends Command
             return 1;
         }
 
-        // Filtro por categorias específicas
-        $filtroSlugs = $this->option('categorias');
-        if ($filtroSlugs) {
-            $slugs = array_map('trim', explode(',', $filtroSlugs));
-            $categories = $categories->filter(fn ($c) => in_array($c->slug, $slugs))->values();
-            if ($categories->isEmpty()) {
-                $this->error('❌ Nenhuma das categorias informadas foi encontrada no banco.');
-                return 1;
-            }
-        }
-
         $this->info("📂 Categorias para coleta: {$categories->count()}");
         $categories->each(fn ($c) => $this->line("   • {$c->name} [{$c->slug}]"));
         $this->line('');
@@ -56,11 +42,6 @@ class ColetarGrupos extends Command
             $this->info('✅ Job CollectGroupsJob despachado para a fila!');
             $this->line('   → Execute: php artisan queue:work --queue=default --timeout=7200');
             return 0;
-        }
-
-        // Modo dry-run
-        if ($this->option('dry-run')) {
-            $this->warn('🔍 Modo dry-run: nenhum grupo será salvo.');
         }
 
         $this->info('🚀 Iniciando coleta direta...');

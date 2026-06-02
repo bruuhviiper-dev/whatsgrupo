@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Group;
+use App\Services\WhatsAppLinkValidator;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -178,26 +179,18 @@ class GroupCollectorService
             return 'invalido';
         }
 
-        // ── Extrai hash canônico (fallback PHP) ──
-        if (empty($hash)) {
-            preg_match(
-                '/(?:chat\.whatsapp\.com\/(?:invite\/)?|whatsapp\.com\/channel\/)([A-Za-z0-9_\-]{10,60})/i',
-                $link,
-                $m
-            );
-            $hash = $m[1] ?? null;
-        }
+        // ── Hash canônico e link normalizado ──
+        // Usa o WhatsAppLinkValidator como FONTE ÚNICA DE VERDADE (mesma lógica do CRUD),
+        // cobrindo todas as variações de URL (/invite/ /join/ /v/ /v= e hash direta) e
+        // garantindo unicidade idêntica entre o bot e o cadastro manual. O hash enviado
+        // pelo Python é ignorado de propósito para evitar divergências.
+        $canonical = WhatsAppLinkValidator::normalizeLink($link);
+        $hash      = WhatsAppLinkValidator::extractHash($link);
 
         if (empty($hash)) {
             $this->log("#{$idx}: hash não extraível de {$link}", 'WARNING');
             return 'invalido';
         }
-
-        // ── Monta canonical ──
-        $isChannel = str_contains($link, 'channel');
-        $canonical = $isChannel
-            ? "https://whatsapp.com/channel/{$hash}"
-            : "https://chat.whatsapp.com/{$hash}";
 
         // ── Deduplicação: hash + link canônico ──
         $jaExiste = Group::where('invite_hash', $hash)->exists()
@@ -249,21 +242,33 @@ class GroupCollectorService
         // ── 3 Regras fixas obrigatórias ──
         $regras = self::REGRAS_FIXAS;
 
-        // ── Cria o grupo como pendente ──
-        Group::create([
-            'category_id'     => $category->id,
-            'name'            => $nome,
-            'description'     => $desc,
-            'rules'           => $regras,
-            'whatsapp_link'   => $canonical,
-            'invite_hash'     => $hash,
-            'image_path'      => $imagePath,
-            'submitter_email' => 'bot@whatsgrupos.com',
-            'status'          => 'pending',
-            'is_vip'          => false,
-        ]);
+        // ── Detecção automática de apostas/gambling (mesma regra do CRUD) ──
+        // Grupos de aposta nunca poderão ser impulsionados (getCanBoostAttribute).
+        $isGambling = Group::detectGambling($nome, $desc);
 
-        $this->log("#{$idx}: ✓ IMPORTADO – {$canonical} (cat: {$category->name})", 'SUCCESS');
+        // ── Cria o grupo como pendente ──
+        // Envolvido em try/catch para que uma eventual violação do índice único
+        // (corrida de duplicados) seja tratada como 'duplicado' e NUNCA derrube o lote.
+        try {
+            Group::create([
+                'category_id'     => $category->id,
+                'name'            => $nome,
+                'description'     => $desc,
+                'rules'           => $regras,
+                'whatsapp_link'   => $canonical,
+                'invite_hash'     => $hash,
+                'image_path'      => $imagePath,
+                'submitter_email' => 'bot@whatsgrupos.com',
+                'status'          => 'pending',
+                'is_vip'          => false,
+                'is_gambling'     => $isGambling,
+            ]);
+        } catch (\Throwable $e) {
+            $this->log("#{$idx}: falha ao salvar {$canonical} – " . $e->getMessage(), 'WARNING');
+            return 'duplicado';
+        }
+
+        $this->log("#{$idx}: ✓ IMPORTADO – {$canonical} (cat: {$category->name}" . ($isGambling ? ', aposta' : '') . ')', 'SUCCESS');
         return 'ok';
     }
 
@@ -313,7 +318,7 @@ class GroupCollectorService
             $this->log("Imagem salva sem conversão WebP: {$path}", 'WARNING');
             return $path;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->log("Erro ao processar imagem {$url}: " . $e->getMessage(), 'WARNING');
             return null;
         }
@@ -322,26 +327,28 @@ class GroupCollectorService
     private function converterComIntervention(string $body, string $path): bool
     {
         try {
-            // Suporta Intervention v2 e v3
-            if (class_exists(\Intervention\Image\ImageManager::class)) {
-                // v3
-                $manager = new \Intervention\Image\ImageManager(
-                    new \Intervention\Image\Drivers\Gd\Driver()
-                );
-                $image = $manager->read($body)->scale(width: 400)->toWebp(85);
-                Storage::disk('public')->put($path, (string) $image);
-                return true;
-            }
-
+            // Intervention Image v2 (versão fixada no composer.json: 2.7) — mesmo
+            // caminho usado pelo GroupController::store. A facade é resolvida pelo FQCN,
+            // dispensando alias registrado.
             if (class_exists(\Intervention\Image\Facades\Image::class)) {
-                // v2
                 $image = \Intervention\Image\Facades\Image::make($body)
                     ->fit(400, 400)
                     ->encode('webp', 85);
                 Storage::disk('public')->put($path, (string) $image);
                 return true;
             }
-        } catch (\Exception $e) {
+
+            // Intervention Image v3 — só ativa se o driver da v3 existir de fato,
+            // evitando o fatal \Error "Driver não encontrado" sob a v2.
+            if (class_exists(\Intervention\Image\Drivers\Gd\Driver::class)) {
+                $manager = new \Intervention\Image\ImageManager(
+                    new \Intervention\Image\Drivers\Gd\Driver()
+                );
+                $image = $manager->read($body)->cover(400, 400)->toWebp(85);
+                Storage::disk('public')->put($path, (string) $image);
+                return true;
+            }
+        } catch (\Throwable $e) {
             $this->log('Intervention falhou: ' . $e->getMessage(), 'DEBUG');
         }
         return false;
@@ -382,7 +389,7 @@ class GroupCollectorService
                 Storage::disk('public')->put($path, $webpData);
                 return true;
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->log('GD falhou: ' . $e->getMessage(), 'DEBUG');
         }
         return false;
@@ -402,7 +409,7 @@ class GroupCollectorService
             Storage::disk('public')->put($path, $imagick->getImageBlob());
             $imagick->clear();
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->log('Imagick falhou: ' . $e->getMessage(), 'DEBUG');
         }
         return false;

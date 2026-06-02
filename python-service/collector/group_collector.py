@@ -63,9 +63,11 @@ REGRAS_FIXAS = (
     "3. Respeite todos os membros do grupo. Sem preconceito, bullying ou ofensas."
 )
 
-# Regex para capturar qualquer hash de convite WhatsApp
-RE_WA_GROUP   = re.compile(r'chat\.whatsapp\.com/(?:invite/)?([A-Za-z0-9_\-]{15,36})')
-RE_WA_CHANNEL = re.compile(r'whatsapp\.com/channel/([A-Za-z0-9_\-@]{15,60})')
+# Regex para capturar qualquer hash de convite WhatsApp.
+# Cobre TODAS as variações de URL (imune a /invite/ /join/ /v/ /v= e hash direta),
+# alinhado ao WhatsAppLinkValidator do PHP para garantir unicidade entre bot e CRUD.
+RE_WA_GROUP   = re.compile(r'chat\.whatsapp\.com/(?:invite/|join/|v/|v=)?([A-Za-z0-9_\-]{10,36})')
+RE_WA_CHANNEL = re.compile(r'whatsapp\.com/channel/([A-Za-z0-9_\-@]{10,60})')
 
 # User-agents rotativos
 USER_AGENTS = [
@@ -657,9 +659,17 @@ class GroupCollector:
         if cat_slug not in self.categorias:
             cat_slug = 'outros'
 
-        # Extrai hash puro para enviar ao PHP
-        m = RE_WA_GROUP.search(canonical)
-        hash_puro = m.group(1) if m else RE_WA_CHANNEL.search(canonical).group(1) if RE_WA_CHANNEL.search(canonical) else h
+        # Extrai hash puro para enviar ao PHP.
+        # Grupos → hash crua; canais → prefixo 'channel_' (idêntico ao WhatsAppLinkValidator::extractHash do PHP),
+        # garantindo que o mesmo canal coletado pelo bot e cadastrado no CRUD tenham a MESMA invite_hash.
+        m_grp = RE_WA_GROUP.search(canonical)
+        m_ch  = RE_WA_CHANNEL.search(canonical)
+        if m_grp:
+            hash_puro = m_grp.group(1)
+        elif m_ch:
+            hash_puro = 'channel_' + m_ch.group(1)
+        else:
+            hash_puro = h
 
         # Sanitização de nome e desc
         nome = re.sub(r'\s+', ' ', nome or '').strip()[:100]

@@ -292,6 +292,14 @@ start_bg "scheduler" \
         sleep 60
     done'
 
+# ── 12.5. Coleta inicial de grupos (dispara 1x na fila 'coleta') ─
+# Enfileira CollectGroupsJob na fila 'coleta'; o worker 'queue-coleta'
+# (subido acima) processa em segundo plano sem travar o boot.
+info "Disparando coleta inicial de grupos (fila 'coleta')..."
+php "$SCRIPT_DIR/artisan" grupos:coletar --queue --no-interaction 2>&1 | tail -3 \
+    || warn "Não foi possível disparar a coleta inicial agora (verifique o log)."
+ok "Coleta inicial enfileirada — será processada pelo worker 'queue-coleta'."
+
 echo ""
 echo -e "${BOLD}── Resumo dos serviços ativos ─────────${NC}"
 echo -e "  ${CYAN}queue-default${NC}  →  jobs gerais (default)"
