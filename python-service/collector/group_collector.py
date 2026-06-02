@@ -244,34 +244,39 @@ TERMO_PARA_SLUG = {
 # DIRETÓRIOS ALVO PRIMÁRIOS (rastreamento completo por site)
 # ──────────────────────────────────────────────────────────────────────────────
 DIRETORIOS = [
+    # ── Confirmados ao vivo: entregam links WA no HTML estático ──────────────
     {
-        'nome': 'GrupoNoZap',
-        'base_url': 'https://www.gruponozap.com',
-        'seeds': ['https://www.gruponozap.com/grupos'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
+        # Testado: wa=9-11 links por página, paginação via index.php?page=index&p={n}
+        'nome': 'AllGrupos',
+        'base_url': 'https://www.allgrupos.com.br',
+        'seeds': [
+            'https://www.allgrupos.com.br',
+            'https://www.allgrupos.com.br/grupos/amizade',
+            'https://www.allgrupos.com.br/grupos/futebol',
+            'https://www.allgrupos.com.br/grupos/tecnologia',
+            'https://www.allgrupos.com.br/grupos/games',
+            'https://www.allgrupos.com.br/grupos/humor',
+            'https://www.allgrupos.com.br/grupos/namoro',
+            'https://www.allgrupos.com.br/grupos/negocios',
+            'https://www.allgrupos.com.br/grupos/noticias',
+            'https://www.allgrupos.com.br/grupos/musica',
+        ],
+        'paginacao': {'tipo': 'custom_allgrupos', 'inicio': 1, 'max': 100},
         'link_interno': True,
     },
     {
-        'nome': 'GrupoNoBrasil',
-        'base_url': 'https://www.gruponobrasil.com.br',
-        'seeds': ['https://www.gruponobrasil.com.br/grupos-de-whatsapp'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
+        # Testado: wa=6 links em /grupos, sem paginação padrão (crawl de links internos)
+        'nome': 'GrupodeWhatsApp_Online',
+        'base_url': 'https://grupodewhatsapp.online',
+        'seeds': [
+            'https://grupodewhatsapp.online/grupos',
+            'https://grupodewhatsapp.online',
+        ],
+        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 30},
         'link_interno': True,
     },
-    {
-        'nome': 'ZapGroups',
-        'base_url': 'https://zapgroups.com.br',
-        'seeds': ['https://zapgroups.com.br', 'https://zapgroups.com.br/grupos'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
-        'link_interno': True,
-    },
-    {
-        'nome': 'MegaGrupos',
-        'base_url': 'https://www.megagrupos.com.br',
-        'seeds': ['https://www.megagrupos.com.br/grupos-whatsapp'],
-        'paginacao': {'tipo': 'path', 'padrao': '/page/{n}', 'inicio': 1, 'max': 50},
-        'link_interno': True,
-    },
+
+    # ── Confirmados online (200) — links via BFS de páginas internas ─────────
     {
         'nome': 'LinkGrupos',
         'base_url': 'https://www.linkgrupos.com.br',
@@ -287,59 +292,10 @@ DIRETORIOS = [
         'link_interno': True,
     },
     {
-        'nome': 'WikiGrupos',
-        'base_url': 'https://wikigrupos.com.br',
-        'seeds': ['https://wikigrupos.com.br/grupos-de-whatsapp'],
-        'paginacao': {'tipo': 'path', 'padrao': '/page/{n}', 'inicio': 1, 'max': 30},
-        'link_interno': True,
-    },
-    {
-        'nome': 'AddGrupos',
-        'base_url': 'https://addgrupos.com',
-        'seeds': ['https://addgrupos.com/grupos'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
-        'link_interno': True,
-    },
-    {
-        'nome': 'GruposWhatsApp',
-        'base_url': 'https://www.gruposwhatsapp.com.br',
-        'seeds': ['https://www.gruposwhatsapp.com.br'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
-        'link_interno': True,
-    },
-    {
-        'nome': 'Whatsgrupos_BR',
-        'base_url': 'https://whatsgrupos.com.br',
-        'seeds': ['https://whatsgrupos.com.br/grupos'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
-        'link_interno': True,
-    },
-    {
         'nome': 'GrupoWhats',
         'base_url': 'https://grupowhats.com',
-        'seeds': ['https://grupowhats.com'],
+        'seeds': ['https://grupowhats.com', 'https://grupowhats.com/grupos'],
         'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
-        'link_interno': True,
-    },
-    {
-        'nome': 'EntraNoGrupo',
-        'base_url': 'https://entranogrup.com.br',
-        'seeds': ['https://entranogrup.com.br', 'https://entranogrup.com.br/grupos'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 30},
-        'link_interno': True,
-    },
-    {
-        'nome': 'ZapAqui',
-        'base_url': 'https://www.zapaqui.com.br',
-        'seeds': ['https://www.zapaqui.com.br', 'https://www.zapaqui.com.br/grupos'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 30},
-        'link_interno': True,
-    },
-    {
-        'nome': 'ParticipeDoGrupo',
-        'base_url': 'https://participedogrupo.com',
-        'seeds': ['https://participedogrupo.com'],
-        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 30},
         'link_interno': True,
     },
     {
@@ -350,9 +306,51 @@ DIRETORIOS = [
         'link_interno': True,
     },
     {
-        'nome': 'GruposWhatsLink',
-        'base_url': 'https://gruposwhatslink.com.br',
-        'seeds': ['https://gruposwhatslink.com.br'],
+        'nome': 'GruposdeWhats',
+        'base_url': 'https://gruposdewhats.com.br',
+        'seeds': ['https://gruposdewhats.com.br', 'https://gruposdewhats.com.br/grupos'],
+        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
+        'link_interno': True,
+    },
+    {
+        'nome': 'WGrupos',
+        'base_url': 'https://www.wgrupos.com',
+        'seeds': ['https://www.wgrupos.com/whatsapp', 'https://www.wgrupos.com/whatsapp/2'],
+        'paginacao': {'tipo': 'path', 'padrao': '/{n}', 'inicio': 1, 'max': 30},
+        'link_interno': True,
+    },
+    {
+        'nome': 'GruposBrasil',
+        'base_url': 'https://gruposbrasil.com.br',
+        'seeds': ['https://gruposbrasil.com.br'],
+        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 50},
+        'link_interno': True,
+    },
+    {
+        'nome': 'GruposZapp',
+        'base_url': 'https://gruposzapp.com',
+        'seeds': ['https://gruposzapp.com'],
+        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 30},
+        'link_interno': True,
+    },
+    {
+        'nome': 'SuperGrupos',
+        'base_url': 'https://supergrupos.com.br',
+        'seeds': ['https://supergrupos.com.br', 'https://supergrupos.com.br/grupos'],
+        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 30},
+        'link_interno': True,
+    },
+    {
+        'nome': 'MaisGrupos',
+        'base_url': 'https://maisgrupos.com',
+        'seeds': ['https://maisgrupos.com', 'https://maisgrupos.com/grupos'],
+        'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 30},
+        'link_interno': True,
+    },
+    {
+        'nome': 'ChamaNoZap',
+        'base_url': 'https://chamanozap.com.br',
+        'seeds': ['https://chamanozap.com.br', 'https://chamanozap.com.br/grupos'],
         'paginacao': {'tipo': 'query', 'param': 'page', 'inicio': 1, 'max': 30},
         'link_interno': True,
     },
@@ -748,6 +746,11 @@ class GroupCollector:
                 padrao = pg.get('padrao', '/page/{n}')
                 base = seed.rstrip('/')
                 urls.append(base + padrao.replace('{n}', str(n)))
+            elif tipo == 'custom_allgrupos':
+                # AllGrupos usa index.php?page=index&p={n}&search=#groups-section
+                # base_url vem do cfg do diretório
+                _base = cfg.get('base_url', 'https://www.allgrupos.com.br')
+                urls.append(f'{_base}/index.php?page=index&p={n}&search=#groups-section')
 
         return urls if urls else [seed]
 
@@ -1057,8 +1060,12 @@ class GroupCollector:
 # PONTO DE ENTRADA
 # ──────────────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
+    # Garante stdout UTF-8 sem BOM (evita erro de JSON parse no PHP/read)
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+
     try:
-        raw = sys.stdin.read().strip()
+        raw = sys.stdin.read().strip().lstrip('﻿')  # remove BOM se houver
         categories = json.loads(raw) if raw else []
     except Exception:
         categories = []
