@@ -3,6 +3,38 @@
 @section('title', $post->title . ' — Blog WhatsGrupos')
 @section('description', $post->meta_description)
 @section('canonical', url('/blog/' . $post->slug))
+@section('og_type', 'article')
+
+{{-- Structured data: BlogPosting + BreadcrumbList --}}
+@push('schema')
+@php
+    $siteUrl = rtrim(url('/'), '/');
+    $postUrl = url('/blog/' . $post->slug);
+    $blogPosting = [
+        '@context'         => 'https://schema.org',
+        '@type'            => 'BlogPosting',
+        'headline'         => Str::limit($post->title, 110),
+        'description'      => $post->meta_description,
+        'url'              => $postUrl,
+        'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $postUrl],
+        'datePublished'    => $post->created_at->toIso8601String(),
+        'dateModified'     => $post->updated_at->toIso8601String(),
+        'inLanguage'       => 'pt-BR',
+        'image'            => asset('images/og-default.png'),
+        'author'           => ['@type' => 'Organization', 'name' => 'WhatsGrupos', 'url' => $siteUrl . '/'],
+        'publisher'        => ['@id' => $siteUrl . '/#organization'],
+    ];
+@endphp
+<script type="application/ld+json">
+{!! json_encode($blogPosting, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
+@endpush
+
+<x-seo.breadcrumbs :items="[
+    ['name' => 'Início', 'url' => url('/')],
+    ['name' => 'Blog', 'url' => url('/blog')],
+    ['name' => $post->title, 'url' => url('/blog/' . $post->slug)],
+]" />
 
 @section('content')
 

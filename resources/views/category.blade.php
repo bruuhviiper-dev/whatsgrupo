@@ -80,4 +80,28 @@
   {{ $groups->onEachSide(2)->links('components.pagination') }}
 </div>
 
+<!-- BLOCO DE TEXTO SEO DA CATEGORIA -->
+<section class="mt-12 p-6 md:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm">
+  <h2 class="text-lg font-bold text-slate-900 mb-3">Grupos de WhatsApp de {{ $category->name }}</h2>
+  <p class="text-slate-600 text-sm leading-relaxed">
+    Encontre aqui os melhores <strong>grupos de WhatsApp de {{ $category->name }}</strong> ativos do Brasil, com links
+    de convite verificados pelo nosso validador automático. Entre nos grupos com um clique, participe das conversas e
+    faça parte de comunidades reais sobre {{ Str::lower($category->name) }}. Novos grupos são adicionados todos os dias —
+    volte sempre para conferir as novidades. Tem um grupo de {{ Str::lower($category->name) }}?
+    <a href="/enviar-grupo" class="text-primary font-semibold hover:underline">Cadastre-o gratuitamente</a> e alcance
+    milhares de pessoas. Veja também os
+    <a href="/grupos-novos" class="text-primary font-semibold hover:underline">grupos mais novos</a> e os
+    <a href="/grupos-mais-populares" class="text-primary font-semibold hover:underline">mais populares</a> do portal.
+  </p>
+</section>
+
+{{-- Structured data: ItemList dos grupos + BreadcrumbList --}}
+@if($groups->count())
+  <x-schema-list :title="'Grupos de WhatsApp de ' . $category->name" :groups="$groups->getCollection()" />
+@endif
+<x-seo.breadcrumbs :items="[
+    ['name' => 'Início', 'url' => url('/')],
+    ['name' => 'Grupos de ' . $category->name, 'url' => url('/categoria/' . $category->slug)],
+]" />
+
 @endsection

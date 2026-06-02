@@ -7,8 +7,11 @@
 
   <title>@yield('title', 'WhatsGrupos') — Grupos de WhatsApp</title>
   <meta name="description" content="@yield('description', 'Encontre e entre nos melhores grupos de WhatsApp organizados por categorias.')">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="WhatsGrupos">
   <link rel="canonical" href="@yield('canonical', url()->current())">
+  <link rel="alternate" hreflang="pt-BR" href="@yield('canonical', url()->current())">
+  <link rel="alternate" hreflang="x-default" href="@yield('canonical', url()->current())">
   
   <!-- Favicons -->
   @php $dynamicFavicon = \App\Models\Setting::get('favicon'); @endphp
@@ -22,8 +25,9 @@
   @endif
 
   <!-- Open Graph -->
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="@yield('og_type', 'website')">
   <meta property="og:site_name" content="WhatsGrupos">
+  <meta property="og:locale" content="pt_BR">
   <meta property="og:title" content="@yield('title', 'WhatsGrupos') — Grupos de WhatsApp">
   <meta property="og:description" content="@yield('description', 'Encontre e entre nos melhores grupos de WhatsApp...')">
   <meta property="og:image" content="@yield('og_image', asset('images/og-default.png'))">
@@ -78,6 +82,9 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   @stack('head')
+
+  {{-- JSON-LD global (Organization + WebSite + SearchAction) em todas as páginas --}}
+  <x-seo.global />
   @stack('schema')
 
   {{-- Google AdSense: Meta Tag e Script (gerenciados pelo painel) --}}

@@ -1,16 +1,33 @@
 @props(['group'])
 
+@php
+    $siteUrl = rtrim(url('/'), '/');
+    $groupUrl = route('group.show', $group->slug ?: $group->id);
+    $img = $group->image_path ? asset('storage/' . $group->image_path) : asset('images/og-default.png');
+
+    $schema = [
+        '@context'         => 'https://schema.org',
+        '@type'            => 'WebPage',
+        '@id'              => $groupUrl . '#webpage',
+        'url'              => $groupUrl,
+        'name'             => html_entity_decode($group->name),
+        'description'      => Str::limit(strip_tags($group->description), 200),
+        'inLanguage'       => 'pt-BR',
+        'datePublished'    => $group->created_at->toIso8601String(),
+        'dateModified'     => $group->updated_at->toIso8601String(),
+        'isPartOf'         => ['@id' => $siteUrl . '/#website'],
+        'primaryImageOfPage' => ['@type' => 'ImageObject', 'url' => $img],
+        'image'            => $img,
+        'about'            => [
+            '@type' => 'Thing',
+            'name'  => $group->category->name ?? 'Grupos de WhatsApp',
+        ],
+        'publisher'        => ['@id' => $siteUrl . '/#organization'],
+    ];
+@endphp
+
 @push('schema')
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "{{ htmlspecialchars($group->name) }}",
-  "description": "{{ htmlspecialchars(Str::limit(strip_tags($group->description), 150)) }}",
-  "url": "{{ route('group.show', $group->slug) }}",
-  "image": "{{ $group->image_path ? asset('storage/' . $group->image_path) : asset('images/placeholder-group.webp') }}",
-  "datePublished": "{{ $group->created_at->toIso8601String() }}",
-  "dateModified": "{{ $group->updated_at->toIso8601String() }}"
-}
+{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
 </script>
 @endpush

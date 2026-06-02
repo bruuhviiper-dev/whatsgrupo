@@ -174,6 +174,31 @@
     </div>
   </section>
 
+  @php
+    // Fonte única das perguntas: alimenta o accordion visível E o FAQPage JSON-LD,
+    // garantindo correspondência exata (exigência do Google para rich results).
+    $homeFaqs = [
+        ['q' => 'O que é o WhatsGrupos e como ele funciona?',
+         'a' => 'O WhatsGrupos é o maior catálogo independente e motor de busca para links de convites de grupos e canais de WhatsApp no Brasil. Conectamos administradores de comunidades com usuários reais que desejam interagir sobre assuntos de interesse comum, de forma 100% gratuita. Basta escolher uma categoria, encontrar um grupo ativo e entrar com um clique.'],
+        ['q' => 'Como entrar em um grupo de WhatsApp usando o link?',
+         'a' => 'É muito simples: navegue pelas categorias ou use a barra de pesquisa, escolha o grupo que deseja participar e clique no botão "Entrar no Grupo". Você será direcionado ao site oficial do WhatsApp, que abrirá o aplicativo no seu celular ou computador de forma segura e instantânea.'],
+        ['q' => 'Como divulgar e cadastrar o meu grupo gratuitamente?',
+         'a' => 'Clique em "Enviar Grupo" no menu superior, cole o link oficial de convite do WhatsApp, escolha a categoria ideal, digite o nome e a descrição do grupo e marque pelo menos uma regra. Nosso robô tenta obter automaticamente a imagem de perfil e o nome do grupo. O cadastro é gratuito e o grupo passa por moderação antes de ser publicado.'],
+        ['q' => 'Como criar um grupo de WhatsApp?',
+         'a' => 'No aplicativo do WhatsApp, toque em Nova conversa e depois em Novo grupo, selecione os participantes, defina um nome e uma foto e confirme. Depois, abra o grupo, toque em Convidar via link e copie o link de convite — é esse link que você cadastra aqui no WhatsGrupos para atrair novos membros.'],
+        ['q' => 'Quantas pessoas cabem em um grupo de WhatsApp?',
+         'a' => 'Atualmente um grupo de WhatsApp comporta até 1.024 participantes. O limite começou em 100, passou para 256 e foi ampliado para 512 e depois 1.024. Para audiências maiores, o WhatsApp oferece os Canais, que permitem alcançar um número ilimitado de seguidores em modo de transmissão.'],
+        ['q' => 'Como sair de um grupo de WhatsApp?',
+         'a' => 'Abra o grupo, toque no nome do grupo no topo para ver os detalhes, role até o final e toque em "Sair do grupo" e confirme. Se você for administrador, vale designar outro administrador antes de sair para que a comunidade continue moderada.'],
+        ['q' => 'Qual a diferença entre grupo e canal de WhatsApp?',
+         'a' => 'No grupo todos os participantes podem conversar entre si (até 1.024 pessoas). Já o canal é uma ferramenta de transmissão de mão única: apenas o administrador publica e os seguidores recebem as atualizações, sem limite de seguidores. No WhatsGrupos você encontra e cadastra tanto grupos quanto canais.'],
+        ['q' => 'O WhatsGrupos é seguro para os usuários?',
+         'a' => 'Sim. Fazemos varreduras constantes com um validador automático de links para desativar convites expirados e moderamos os envios para impedir spam e conteúdo ilegal. Ainda assim, mantenha boas práticas: configure sua privacidade para ocultar sua foto de desconhecidos e nunca compartilhe senhas ou códigos recebidos no celular.'],
+        ['q' => 'O que são os grupos VIP e as categorias especiais?',
+         'a' => 'Os grupos VIP são destaques que aparecem no topo das listagens por tempo determinado. As categorias especiais são páginas otimizadas para os termos mais buscados do Brasil (como Figurinhas, Palmeiras, Roblox e muitos outros). Nosso sistema faz buscas inteligentes contínuas para recomendar apenas as conversas mais ativas de cada tema.'],
+    ];
+  @endphp
+
   <!-- DYNAMIC FAQ & ABOUT WHATSRUPOS SECTION (Alpine.js Accordion) -->
   <section class="mt-20 p-8 rounded-3xl bg-white border border-slate-100 shadow-sm" x-data="{ faqOpen: null }">
     <div class="max-w-3xl mx-auto">
@@ -183,7 +208,7 @@
           Dúvidas Frequentes
         </span>
         <h2 class="text-2xl font-black text-slate-900 tracking-tight">
-          Perguntas Frequentes sobre WhatsApp & WhatsGrupos
+          Perguntas Frequentes sobre Grupos de WhatsApp
         </h2>
         <p class="text-slate-500 text-xs sm:text-sm mt-2">
           Tudo o que você precisa saber sobre o uso de grupos, canais e a divulgação gratuita no nosso portal.
@@ -191,89 +216,62 @@
       </div>
 
       <div class="space-y-4">
-        <!-- FAQ 1 -->
-        <div class="border-b border-slate-100 pb-4">
-          <button @click="faqOpen === 1 ? faqOpen = null : faqOpen = 1"
+        @foreach($homeFaqs as $i => $faq)
+        <div class="border-b border-slate-100 pb-4 last:border-0">
+          <button @click="faqOpen === {{ $i }} ? faqOpen = null : faqOpen = {{ $i }}"
             class="w-full flex justify-between items-center text-left font-extrabold text-slate-800 hover:text-primary transition-colors text-sm sm:text-base">
-            <span>O que é o WhatsGrupos e como ele funciona?</span>
-            <x-heroicon-m-chevron-down class="w-5 h-5 text-slate-400 transition-transform"
-              x-bind:class="faqOpen === 1 ? 'rotate-180 text-primary' : ''" />
+            <span>{{ $faq['q'] }}</span>
+            <x-heroicon-m-chevron-down class="w-5 h-5 text-slate-400 transition-transform shrink-0 ml-3"
+              x-bind:class="faqOpen === {{ $i }} ? 'rotate-180 text-primary' : ''" />
           </button>
-          <div x-show="faqOpen === 1" x-collapse class="mt-3 text-xs sm:text-sm text-slate-500 leading-relaxed"
+          <div x-show="faqOpen === {{ $i }}" x-collapse class="mt-3 text-xs sm:text-sm text-slate-500 leading-relaxed"
             style="display: none;">
-            O <strong>WhatsGrupos</strong> é o maior catálogo independente e motor de busca para links de convites de
-            grupos e canais de WhatsApp no Brasil. Conectamos administradores de comunidades com usuários reais que
-            desejam interagir sobre assuntos de seu interesse comum, de forma 100% gratuita.
+            {{ $faq['a'] }}
           </div>
         </div>
-
-        <!-- FAQ 2 -->
-        <div class="border-b border-slate-100 pb-4">
-          <button @click="faqOpen === 2 ? faqOpen = null : faqOpen = 2"
-            class="w-full flex justify-between items-center text-left font-extrabold text-slate-800 hover:text-primary transition-colors text-sm sm:text-base">
-            <span>Como entrar em um grupo de WhatsApp usando o link?</span>
-            <x-heroicon-m-chevron-down class="w-5 h-5 text-slate-400 transition-transform"
-              x-bind:class="faqOpen === 2 ? 'rotate-180 text-primary' : ''" />
-          </button>
-          <div x-show="faqOpen === 2" x-collapse class="mt-3 text-xs sm:text-sm text-slate-500 leading-relaxed"
-            style="display: none;">
-            É muito simples! Basta navegar pelas nossas categorias ou utilizar a barra de pesquisa, escolher o grupo que
-            deseja entrar e clicar no botão "Entrar no Grupo". Você será direcionado para o site oficial do WhatsApp que
-            abrirá o aplicativo no seu celular ou computador de forma segura e instantânea.
-          </div>
-        </div>
-
-        <!-- FAQ 3 -->
-        <div class="border-b border-slate-100 pb-4">
-          <button @click="faqOpen === 3 ? faqOpen = null : faqOpen = 3"
-            class="w-full flex justify-between items-center text-left font-extrabold text-slate-800 hover:text-primary transition-colors text-sm sm:text-base">
-            <span>Como posso divulgar o meu grupo gratuitamente?</span>
-            <x-heroicon-m-chevron-down class="w-5 h-5 text-slate-400 transition-transform"
-              x-bind:class="faqOpen === 3 ? 'rotate-180 text-primary' : ''" />
-          </button>
-          <div x-show="faqOpen === 3" x-collapse class="mt-3 text-xs sm:text-sm text-slate-500 leading-relaxed"
-            style="display: none;">
-            Para divulgar sua comunidade, clique em "Enviar Grupo" no menu superior. Cole o link oficial de convite do
-            WhatsApp, escolha a categoria ideal, digite o nome e descrição do grupo e marque pelo menos uma regra do
-            grupo. Nosso robô inteligente tentará obter automaticamente a imagem de perfil e o nome do seu grupo do
-            WhatsApp para você!
-          </div>
-        </div>
-
-        <!-- FAQ 4 -->
-        <div class="border-b border-slate-100 pb-4">
-          <button @click="faqOpen === 4 ? faqOpen = null : faqOpen = 4"
-            class="w-full flex justify-between items-center text-left font-extrabold text-slate-800 hover:text-primary transition-colors text-sm sm:text-base">
-            <span>O WhatsGrupos é seguro para os usuários?</span>
-            <x-heroicon-m-chevron-down class="w-5 h-5 text-slate-400 transition-transform"
-              x-bind:class="faqOpen === 4 ? 'rotate-180 text-primary' : ''" />
-          </button>
-          <div x-show="faqOpen === 4" x-collapse class="mt-3 text-xs sm:text-sm text-slate-500 leading-relaxed"
-            style="display: none;">
-            Sim! Nós fazemos varreduras constantes com nosso validador automático de links para desativar convites
-            expirados e realizamos moderações constantes para impedir spam ou conteúdo ilegal. Lembre-se, porém, de manter
-            as boas práticas de segurança, como configurar sua privacidade para ocultar sua foto a desconhecidos e nunca
-            compartilhar senhas ou códigos recebidos no celular.
-          </div>
-        </div>
-
-        <!-- FAQ 5 -->
-        <div class="pb-2">
-          <button @click="faqOpen === 5 ? faqOpen = null : faqOpen = 5"
-            class="w-full flex justify-between items-center text-left font-extrabold text-slate-800 hover:text-primary transition-colors text-sm sm:text-base">
-            <span>O que são os grupos recomendados e as categorias especiais?</span>
-            <x-heroicon-m-chevron-down class="w-5 h-5 text-slate-400 transition-transform"
-              x-bind:class="faqOpen === 5 ? 'rotate-180 text-primary' : ''" />
-          </button>
-          <div x-show="faqOpen === 5" x-collapse class="mt-3 text-xs sm:text-sm text-slate-500 leading-relaxed"
-            style="display: none;">
-            As categorias especiais são páginas otimizadas para os termos e assuntos mais buscados do Brasil (como
-            Figurinhas, Palmeiras, Roblox, etc.). Nosso sistema realiza buscas inteligentes contínuas por correspondência
-            de texto para agrupar e recomendar apenas as conversas mais ativas focadas exatamente em cada um desses temas!
-          </div>
-        </div>
+        @endforeach
       </div>
 
     </div>
   </section>
+
+  <!-- BLOCO DE TEXTO SEO (conteúdo longo otimizado para buscadores) -->
+  <section class="mt-12 p-8 rounded-3xl bg-white border border-slate-100 shadow-sm">
+    <div class="max-w-3xl mx-auto prose prose-slate prose-sm sm:prose-base max-w-none">
+      <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-4">
+        O melhor site de links de Grupos de WhatsApp do Brasil
+      </h2>
+      <p class="text-slate-600 text-sm leading-relaxed mb-4">
+        O <strong>WhatsGrupos</strong> reúne os melhores <strong>grupos de WhatsApp ativos</strong> em um só lugar.
+        Aqui você encontra links de convite organizados por categoria — de <a href="/categoria/amizade" class="text-primary font-semibold hover:underline">amizade</a>,
+        <a href="/categoria/namoro" class="text-primary font-semibold hover:underline">namoro</a> e
+        <a href="/categoria/futebol" class="text-primary font-semibold hover:underline">futebol</a> a
+        <a href="/categoria/games-e-jogos" class="text-primary font-semibold hover:underline">games</a>,
+        <a href="/categoria/ganhar-dinheiro" class="text-primary font-semibold hover:underline">renda extra</a> e
+        <a href="/categoria/vagas-de-emprego" class="text-primary font-semibold hover:underline">vagas de emprego</a> — todos
+        verificados pelo nosso validador automático para garantir que os links estejam funcionando.
+      </p>
+      <p class="text-slate-600 text-sm leading-relaxed mb-4">
+        Quer divulgar a sua comunidade? <a href="/enviar-grupo" class="text-primary font-semibold hover:underline">Cadastre seu grupo gratuitamente</a>
+        em segundos e alcance milhares de pessoas interessadas no seu tema. Você também pode
+        <a href="/pacotes-vip" class="text-primary font-semibold hover:underline">impulsionar seu grupo</a> para aparecer
+        em destaque no topo das listagens. Explore ainda os
+        <a href="/grupos-novos" class="text-primary font-semibold hover:underline">grupos novos</a> e os
+        <a href="/grupos-mais-populares" class="text-primary font-semibold hover:underline">mais populares</a> do dia.
+      </p>
+      <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-2 mt-6">Grupos e canais de WhatsApp para todos os interesses</h3>
+      <p class="text-slate-600 text-sm leading-relaxed">
+        Um grupo de WhatsApp comporta até <strong>1.024 participantes</strong> e é perfeito para conversas e troca de
+        experiências. Já os <strong>canais de WhatsApp</strong> permitem transmitir conteúdo para um número ilimitado de
+        seguidores. No WhatsGrupos você descobre e participa dos dois formatos, com novos grupos sendo adicionados todos
+        os dias por administradores e pelo nosso coletor inteligente — sempre priorizando comunidades reais e ativas.
+      </p>
+    </div>
+  </section>
+
+  {{-- Structured data: FAQPage (perguntas acima) + ItemList (grupos listados) --}}
+  <x-seo.faq :faqs="$homeFaqs" />
+  @if(isset($groups) && $groups->count())
+    <x-schema-list title="Grupos de WhatsApp" :groups="$groups->getCollection()" />
+  @endif
 @endsection

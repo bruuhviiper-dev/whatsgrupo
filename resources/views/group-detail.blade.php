@@ -1,6 +1,11 @@
 @extends('layouts.app')
-@section('title', 'Grupo ' . $group->name)
-@section('description', Str::limit($group->description, 155))
+@section('title', $group->name . ' — Grupo de WhatsApp de ' . $group->category->name)
+@section('description', Str::limit(strip_tags($group->description), 155))
+@section('canonical', route('group.show', $group->slug ?: $group->id))
+@section('og_type', 'article')
+@if($group->image_path)
+@section('og_image', asset('storage/' . $group->image_path))
+@endif
 
 @section('content')
 
@@ -254,9 +259,33 @@
 
   <x-adsense class="mb-12" />
 
+  <!-- BLOCO DE TEXTO SEO CONTEXTUAL -->
+  <section class="mb-12 p-6 md:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm">
+    <h2 class="text-lg font-bold text-slate-900 mb-3">Sobre grupos de {{ $group->category->name }} no WhatsApp</h2>
+    <p class="text-slate-600 text-sm leading-relaxed">
+      O grupo <strong>{{ $group->name }}</strong> faz parte da categoria
+      <a href="/categoria/{{ $group->category->slug }}" class="text-primary font-semibold hover:underline">{{ $group->category->name }}</a>
+      no WhatsGrupos, o maior diretório de <strong>grupos de WhatsApp ativos</strong> do Brasil. Para participar, clique em
+      "Entrar no Grupo" e você será direcionado com segurança ao convite oficial do WhatsApp. Lembre-se de respeitar as
+      regras do grupo. Conheça também outros
+      <a href="/categoria/{{ $group->category->slug }}" class="text-primary font-semibold hover:underline">grupos de {{ $group->category->name }}</a>,
+      os <a href="/grupos-novos" class="text-primary font-semibold hover:underline">grupos mais novos</a> e os
+      <a href="/grupos-mais-populares" class="text-primary font-semibold hover:underline">mais populares</a> do dia. Tem uma
+      comunidade? <a href="/enviar-grupo" class="text-primary font-semibold hover:underline">Cadastre seu grupo gratuitamente</a>.
+    </p>
+  </section>
+
   <!-- LATEST BLOG POSTS SECTION -->
   <x-blog-section :posts="$latestBlogPosts ?? collect()" :bare="true" />
 </div>
+
+{{-- Structured data: WebPage do grupo + BreadcrumbList --}}
+<x-schema-group :group="$group" />
+<x-seo.breadcrumbs :items="[
+    ['name' => 'Início', 'url' => url('/')],
+    ['name' => $group->category->name, 'url' => url('/categoria/' . $group->category->slug)],
+    ['name' => $group->name, 'url' => route('group.show', $group->slug ?: $group->id)],
+]" />
 @endsection
 
 
