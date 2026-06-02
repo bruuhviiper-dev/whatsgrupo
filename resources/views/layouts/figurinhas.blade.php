@@ -141,7 +141,7 @@
     <div class="flex items-center justify-around h-20 max-w-full px-2">
       
       <!-- Home Figurinhas -->
-      <a href="/figurinhas" class="flex flex-col items-center justify-center w-16 h-16 rounded-lg text-slate-600 hover:text-[#25D366] hover:bg-green-50 transition-all {{ request()->is('figurinhas') ? 'text-[#25D366] bg-green-50' : '' }}">
+      <a href="{{ route('figurinhas.index') }}" class="flex flex-col items-center justify-center w-16 h-16 rounded-lg text-slate-600 hover:text-[#25D366] hover:bg-green-50 transition-all {{ request()->is('figurinhas-whatsapp') ? 'text-[#25D366] bg-green-50' : '' }}">
         <x-heroicon-o-face-smile class="w-6 h-6" />
         <span class="text-[10px] font-bold mt-0.5">Figurinhas</span>
       </a>

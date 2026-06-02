@@ -118,7 +118,7 @@
                   <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 mb-1.5">Ferramentas</p>
                   @php
                     $toolList = [
-                      ['/figurinhas',                       'figurinhas*',                  'heroicon-o-face-smile',           'Figurinhas de WhatsApp'],
+                      ['/figurinhas-whatsapp',              'figurinhas-whatsapp*',         'heroicon-o-face-smile',           'Figurinhas de WhatsApp'],
                       [route('tools.engagement.create'),    'analise-de-engajamento*',      'heroicon-o-chart-bar',            'Análise de Engajamento'],
                       [route('tools.spam-detector'),        'detector-de-spam*',            'heroicon-o-shield-exclamation',   'Detector de Spam'],
                       [route('tools.rules.index'),          'gerador-de-regras*',           'heroicon-o-document-check',       'Gerador de Regras'],

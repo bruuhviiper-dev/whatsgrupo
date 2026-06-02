@@ -1,6 +1,6 @@
 @extends('layouts.figurinhas')
 
-@section('navbar_color', 'bg-[#15803d]')
+@section('navbar_color', 'bg-[#166534]')
 
 @section('title', 'Enviar Figurinha para WhatsApp | WhatsGrupos')
 @section('description', 'Envie sua figurinha para o nosso banco de figurinhas do WhatsApp. Aprovação rápida e gratuita!')

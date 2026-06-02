@@ -1,6 +1,6 @@
 @extends('layouts.figurinhas')
 
-@section('navbar_color', 'bg-[#15803d]')
+@section('navbar_color', 'bg-[#166534]')
 
 @section('title', 'Figurinhas para WhatsApp | WhatsGrupos')
 @section('description', 'Baixe as melhores figurinhas e stickers para WhatsApp. Categorias: Engraçado, Amor, Zoeira e mais!')
@@ -11,18 +11,25 @@
 <x-seo.tool name="Figurinhas para WhatsApp"
             description="Baixe gratuitamente as melhores figurinhas e stickers para WhatsApp, organizadas por categoria." />
 
-<div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <div>
-        <h1 class="text-3xl font-black text-slate-900 mb-1">Figurinhas para WhatsApp</h1>
-        <p class="text-sm text-slate-500 font-medium">
-            <span class="text-slate-900 font-bold">{{ $figurinhas->total() }}</span> figurinhas disponíveis para baixar grátis.
+{{-- HERO no padrão das demais ferramentas: badge de ícone + título com destaque em gradiente + subtítulo --}}
+<div class="py-8 md:py-12">
+    <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-[24px] bg-fuchsia-50 border-2 border-fuchsia-100 text-fuchsia-500 mb-6 shadow-[0_0_25px_rgba(217,70,239,0.2)] rotate-3">
+            <x-heroicon-s-face-smile class="w-10 h-10 -rotate-3" />
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black text-slate-800 mb-4 tracking-tight">
+            Figurinhas para <span class="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-600 to-pink-500">WhatsApp</span>
+        </h1>
+        <p class="text-slate-500 text-lg mb-6">
+            Baixe grátis as melhores figurinhas e stickers para WhatsApp, organizadas por categoria.
+            <span class="block mt-1 text-sm font-medium">
+                <span class="text-slate-900 font-bold">{{ $figurinhas->total() }}</span> figurinhas disponíveis para baixar agora.
+            </span>
         </p>
+        <a href="{{ route('figurinhas.create') }}" class="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-full transition-all shadow-md hover:shadow-lg">
+            <x-heroicon-o-plus-circle class="w-5 h-5" /> Enviar Figurinha
+        </a>
     </div>
-    
-    <a href="{{ route('figurinhas.create') }}" class="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2.5 rounded-full transition-all shadow-md hover:shadow-lg whitespace-nowrap">
-        <x-heroicon-o-plus-circle class="w-5 h-5" /> Enviar Figurinha
-    </a>
-</div>
 
 <!-- Barra de Busca -->
 <form method="GET" action="{{ route('figurinhas.index') }}" class="mb-8 relative">
@@ -109,6 +116,8 @@
 @endif
 
 <x-adsense class="mt-8" />
+
+</div>{{-- /py-8 hero+conteúdo --}}
 
 @endsection
 

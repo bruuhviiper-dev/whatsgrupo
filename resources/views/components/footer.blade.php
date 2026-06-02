@@ -39,7 +39,7 @@
             <div>
                 <h4 class="text-white font-bold text-sm uppercase tracking-wider mb-4">Ferramentas</h4>
                 <ul class="space-y-3">
-                    <li><a href="/figurinhas" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Figurinhas para WhatsApp</a></li>
+                    <li><a href="/figurinhas-whatsapp" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Figurinhas para WhatsApp</a></li>
                     <li><a href="/frases" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Frases para Status</a></li>
                     <li><a href="{{ route('tools.engagement.create') }}" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Análise de Engajamento</a></li>
                     <li><a href="{{ route('tools.rules.index') }}" class="text-slate-400 hover:text-[#25D366] transition-colors text-sm font-medium">Gerador de Regras</a></li>

@@ -1,6 +1,6 @@
 @extends('layouts.figurinhas')
 
-@section('navbar_color', 'bg-[#15803d]')
+@section('navbar_color', 'bg-[#166534]')
 
 @section('title', "Figurinha: {$figurinha->titulo} para WhatsApp | WhatsGrupos")
 @section('description', "Baixe a figurinha {$figurinha->titulo} na categoria {$figurinha->categoria->label()} e envie no seu WhatsApp.")

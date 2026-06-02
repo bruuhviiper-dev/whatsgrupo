@@ -119,14 +119,21 @@ Route::view('/contato', 'pages.contato')->name('pages.contato');
 
 // =============================================================================
 // FIGURINHAS PARA WHATSAPP
+// URL na raiz como ferramenta (/figurinhas-whatsapp) para reforçar o SEO.
+// Os NOMES das rotas continuam 'figurinhas.*', então route() e os links seguem válidos.
 // =============================================================================
-Route::prefix('figurinhas')->name('figurinhas.')->group(function () {
+Route::prefix('figurinhas-whatsapp')->name('figurinhas.')->group(function () {
     Route::get('/', [FigurinhaController::class, 'index'])->name('index');
     Route::get('/enviar', [FigurinhaController::class, 'create'])->name('create');
     Route::post('/enviar', [FigurinhaController::class, 'store'])->name('store');
     Route::get('/{slug}/baixar', [FigurinhaController::class, 'download'])->name('download');
     Route::get('/{slug}', [FigurinhaController::class, 'show'])->name('show');
 });
+
+// Redirects 301 dos caminhos antigos (/figurinhas*) para as novas URLs (preserva SEO/links)
+Route::permanentRedirect('/figurinhas', '/figurinhas-whatsapp');
+Route::get('/figurinhas/{path}', fn (string $path) => redirect('/figurinhas-whatsapp/' . $path, 301))
+    ->where('path', '.*');
 
 // Formulário de envio de novo grupo (GET = formulário, POST = salvar)
 Route::get('/enviar-grupo', [GroupController::class, 'create'])->name('send-group.create');
