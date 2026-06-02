@@ -2,8 +2,25 @@
 
 @section('title', 'Frases de ' . $categoryName . ' para Status | WhatsGrupos')
 @section('description', 'As melhores frases de ' . $categoryName . ' para status de WhatsApp, stories e legendas. Copie com um clique e divirta-se.')
+@section('canonical', route('phrases.category', $category))
 
 @section('content')
+{{-- Structured data: BreadcrumbList + ItemList das frases da categoria --}}
+<x-seo.breadcrumbs :items="[
+    ['name' => 'Início', 'url' => url('/')],
+    ['name' => 'Frases', 'url' => route('phrases.index')],
+    ['name' => $categoryName, 'url' => route('phrases.category', $category)],
+]" />
+@php
+    $phraseItems = collect($phrases)->map(fn ($p) => [
+        'name' => Str::limit($p->phrase, 90),
+        'url'  => route('phrases.show', $p),
+    ])->all();
+@endphp
+@if(count($phraseItems))
+<x-seo.itemlist :name="'Frases de ' . $categoryName" :items="$phraseItems" />
+@endif
+
 {{-- Breadcrumb --}}
 <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6 flex-wrap" aria-label="Breadcrumb">
     <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Início</a>

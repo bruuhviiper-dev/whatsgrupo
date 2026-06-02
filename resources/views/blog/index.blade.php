@@ -5,6 +5,21 @@
 
 @section('content')
 
+{{-- Structured data: BreadcrumbList + ItemList dos artigos --}}
+<x-seo.breadcrumbs :items="[
+    ['name' => 'Início', 'url' => url('/')],
+    ['name' => 'Blog', 'url' => url('/blog')],
+]" />
+@php
+    $postItems = collect($posts)->map(fn ($p) => [
+        'name' => $p->title,
+        'url'  => url('/blog/' . $p->slug),
+    ])->all();
+@endphp
+@if(count($postItems))
+<x-seo.itemlist name="Blog WhatsGrupos" :items="$postItems" />
+@endif
+
 {{-- Breadcrumb --}}
 <nav class="flex items-center gap-2 text-sm text-slate-500 pt-5 mb-6" aria-label="Breadcrumb">
     <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Início</a>

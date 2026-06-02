@@ -4,6 +4,21 @@
 @section('description', 'Encontre as melhores frases para status de WhatsApp, legendas de fotos e stories. Mais de 200 frases de Amor, Amizade, Motivação, Engraçadas e Reflexão.')
 
 @section('content')
+{{-- Structured data: BreadcrumbList + ItemList das frases --}}
+<x-seo.breadcrumbs :items="[
+    ['name' => 'Início', 'url' => url('/')],
+    ['name' => 'Frases para Status', 'url' => route('phrases.index')],
+]" />
+@php
+    $phraseItems = collect($phrases)->map(fn ($p) => [
+        'name' => Str::limit($p->phrase, 90),
+        'url'  => route('phrases.show', $p),
+    ])->all();
+@endphp
+@if(count($phraseItems))
+<x-seo.itemlist name="Frases para Status de WhatsApp" :items="$phraseItems" />
+@endif
+
 {{-- Breadcrumb --}}
 <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6 flex-wrap" aria-label="Breadcrumb">
     <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Início</a>

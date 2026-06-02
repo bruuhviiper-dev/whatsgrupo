@@ -5,6 +5,15 @@
 @section('canonical', route('phrases.show', $statusPhrase))
 
 @section('content')
+{{-- Structured data: Quotation (frase) + BreadcrumbList --}}
+<x-seo.quotation :phrase="$statusPhrase" :categoryName="$categoryName" />
+<x-seo.breadcrumbs :items="[
+    ['name' => 'Início', 'url' => url('/')],
+    ['name' => 'Frases', 'url' => route('phrases.index')],
+    ['name' => $categoryName, 'url' => route('phrases.category', $statusPhrase->category)],
+    ['name' => 'Frase', 'url' => route('phrases.show', $statusPhrase)],
+]" />
+
 {{-- Breadcrumb --}}
 <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6 flex-wrap" aria-label="Breadcrumb">
     <a href="{{ route('home') }}" class="hover:text-primary transition-colors">Início</a>
