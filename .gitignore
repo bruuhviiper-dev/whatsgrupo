@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 .venv
 .DS_Store
-.env
 .env.backup
 .env.example
 .env.production
