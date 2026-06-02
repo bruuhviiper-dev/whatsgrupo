@@ -224,6 +224,7 @@ Route::middleware('admin.auth')->prefix('admin')->name('admin.')->group(function
     // Moderação de Figurinhas
     Route::prefix('figurinhas')->name('figurinhas.')->group(function () {
         Route::get('/', [FigurinhaAdminController::class, 'index'])->name('index');
+        Route::post('/aprovar-todas', [FigurinhaAdminController::class, 'aprovarTodas'])->name('aprovar-todas');
         Route::post('/{figurinha}/aprovar', [FigurinhaAdminController::class, 'aprovar'])->name('aprovar');
         Route::post('/{figurinha}/rejeitar', [FigurinhaAdminController::class, 'rejeitar'])->name('rejeitar');
         Route::delete('/{figurinha}', [FigurinhaAdminController::class, 'destroy'])->name('destroy');
@@ -232,6 +233,7 @@ Route::middleware('admin.auth')->prefix('admin')->name('admin.')->group(function
     // Moderação de Frases de Status
     Route::prefix('frases')->name('phrases.')->group(function () {
         Route::get('/', [PhraseAdminController::class, 'index'])->name('index');
+        Route::post('/aprovar-todas', [PhraseAdminController::class, 'aprovarTodas'])->name('aprovar-todas');
         Route::post('/{phrase}/aprovar', [PhraseAdminController::class, 'aprovar'])->name('aprovar');
         Route::post('/{phrase}/rejeitar', [PhraseAdminController::class, 'rejeitar'])->name('rejeitar');
         Route::delete('/{phrase}', [PhraseAdminController::class, 'destroy'])->name('destroy');
@@ -241,6 +243,7 @@ Route::middleware('admin.auth')->prefix('admin')->name('admin.')->group(function
     Route::prefix('grupos')->name('groups.')->group(function () {
         Route::get('/', [GroupModerationController::class, 'index'])->name('index');
         Route::get('/pendentes', [GroupModerationController::class, 'pending'])->name('pending');
+        Route::post('/aprovar-todos', [GroupModerationController::class, 'approveAll'])->name('approve-all');
         Route::post('/{group}/aprovar', [GroupModerationController::class, 'approve'])->name('approve');
         Route::post('/{group}/rejeitar', [GroupModerationController::class, 'reject'])->name('reject');
         Route::post('/{group}/gambling', [GroupModerationController::class, 'toggleGambling'])->name('gambling.toggle');

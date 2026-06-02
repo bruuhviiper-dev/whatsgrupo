@@ -13,6 +13,14 @@
             <span class="bg-amber-100 text-amber-700 border border-amber-200 text-xs font-bold px-3 py-1.5 rounded-full">
                 {{ $pendentes }} pendentes
             </span>
+            <form action="{{ route('admin.phrases.aprovar-todas') }}" method="POST" class="inline no-confirm"
+                  onsubmit="return confirm('Aprovar TODAS as {{ $pendentes }} frases pendentes de uma vez?');">
+                @csrf
+                <button type="submit" class="btn btn-green">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Aprovar todas
+                </button>
+            </form>
         @else
             <span class="bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold px-3 py-1.5 rounded-full">
                 Tudo em dia ✓

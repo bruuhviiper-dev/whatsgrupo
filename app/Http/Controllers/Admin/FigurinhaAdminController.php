@@ -46,6 +46,23 @@ class FigurinhaAdminController extends Controller
         return back()->with('success', "Figurinha \"{$figurinha->titulo}\" aprovada com sucesso!");
     }
 
+    public function aprovarTodas()
+    {
+        $total = Figurinha::pendentes()->count();
+
+        if ($total === 0) {
+            return back()->with('success', 'Nenhuma figurinha pendente para aprovar.');
+        }
+
+        // Atualização em massa (1 query) — mesmo status/timestamp do fluxo individual.
+        Figurinha::pendentes()->update([
+            'status'      => FigurinhaStatus::Aprovado,
+            'aprovado_em' => now(),
+        ]);
+
+        return back()->with('success', "{$total} figurinha(s) pendente(s) aprovada(s) com sucesso!");
+    }
+
     public function rejeitar(Request $request, Figurinha $figurinha)
     {
         $request->validate([

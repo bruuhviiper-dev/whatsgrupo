@@ -64,11 +64,24 @@
                 <span class="badge" style="background:#eff6ff;color:#2563eb;border:1px solid #dbeafe;font-size:10px;">Filtrado</span>
             @endif
         </div>
-        <a href="{{ route('admin.groups.pending') }}"
-           class="btn btn-orange text-[11px]">
-            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Ver Pendentes
-        </a>
+        <div class="flex items-center gap-2">
+            @php($pendentesCount = \App\Models\Group::where('status', 'pending')->count())
+            @if($pendentesCount > 0)
+                <form action="{{ route('admin.groups.approve-all') }}" method="POST" class="inline"
+                      onsubmit="return confirm('Aprovar TODOS os {{ $pendentesCount }} grupos pendentes de uma vez?');">
+                    @csrf
+                    <button type="submit" class="btn btn-green text-[11px]">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Aprovar todos ({{ $pendentesCount }})
+                    </button>
+                </form>
+            @endif
+            <a href="{{ route('admin.groups.pending') }}"
+               class="btn btn-orange text-[11px]">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Ver Pendentes
+            </a>
+        </div>
     </div>
 
     @if ($groups->isEmpty())

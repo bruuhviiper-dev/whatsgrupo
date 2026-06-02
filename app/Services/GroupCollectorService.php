@@ -236,15 +236,15 @@ class GroupCollectorService
         }
         $desc = mb_substr($desc, 0, 1000);
 
-        // ── Imagem: download + conversão WebP ──
-        // Se vazia, usa a imagem padrão do WhatsApp
-        if (empty($img) || ! str_starts_with($img, 'http')) {
-            $img = self::WA_DEFAULT_IMG;
+        // ── Imagem real do grupo (vinda da página de convite do WhatsApp) ──
+        // O Python só envia foto quando ela é REAL (servida por pps.whatsapp.net).
+        // Quando o grupo não tem foto, image_path fica null e o group-card/group-detail
+        // exibem o gradiente + inicial do nome — esse é o visual default do projeto.
+        // O download/conversão WebP nunca bloqueia o cadastro: se falhar, retorna null.
+        $imagePath = null;
+        if (! empty($img) && str_starts_with($img, 'http')) {
+            $imagePath = $this->downloadImagem($img, $hash);
         }
-        // Tenta baixar e converter a imagem para WebP.
-        // Se falhar (CDN bloqueada, URL inválida, etc.) retorna null — nunca bloqueia o cadastro.
-        // O group-card e o group-detail já exibem gradiente + inicial do nome quando image_path é null.
-        $imagePath = $this->downloadImagem($img, $hash);
 
         // ── 3 Regras fixas obrigatórias ──
         $regras = self::REGRAS_FIXAS;

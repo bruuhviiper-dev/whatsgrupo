@@ -92,6 +92,32 @@ class GroupModerationController extends Controller
     }
 
     // -------------------------------------------------------------------------
+    // Aprovar TODOS os grupos pendentes de uma vez (curadoria em massa)
+    // -------------------------------------------------------------------------
+
+    public function approveAll()
+    {
+        // Pega os pendentes antes de atualizar para disparar o push de cada um.
+        $pendentes = Group::where('status', 'pending')->get();
+
+        if ($pendentes->isEmpty()) {
+            return back()->with('success', 'Nenhum grupo pendente para aprovar.');
+        }
+
+        // Atualização em massa (1 query) — eficiente mesmo com centenas de grupos.
+        Group::where('status', 'pending')->update(['status' => 'approved']);
+
+        // Dispara a notificação push para a categoria de cada grupo aprovado.
+        // E-mails individuais são propositalmente omitidos na aprovação em massa
+        // (a maioria é do bot@whatsgrupos.com) para não gerar disparo em lote.
+        foreach ($pendentes as $group) {
+            SendNewGroupPushJob::dispatch($group);
+        }
+
+        return back()->with('success', "✅ {$pendentes->count()} grupo(s) pendente(s) aprovado(s) com sucesso!");
+    }
+
+    // -------------------------------------------------------------------------
     // Rejeitar grupo com motivo
     // -------------------------------------------------------------------------
 

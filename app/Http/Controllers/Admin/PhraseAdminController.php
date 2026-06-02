@@ -40,6 +40,19 @@ class PhraseAdminController extends Controller
         return back()->with('success', 'Frase aprovada com sucesso!');
     }
 
+    public function aprovarTodas()
+    {
+        $total = StatusPhrase::pendentes()->count();
+
+        if ($total === 0) {
+            return back()->with('success', 'Nenhuma frase pendente para aprovar.');
+        }
+
+        StatusPhrase::pendentes()->update(['status' => 'aprovado', 'motivo_rejeicao' => null]);
+
+        return back()->with('success', "{$total} frase(s) pendente(s) aprovada(s) com sucesso!");
+    }
+
     public function rejeitar(Request $request, StatusPhrase $phrase)
     {
         $request->validate([

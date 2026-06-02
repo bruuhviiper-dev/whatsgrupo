@@ -655,8 +655,51 @@ class GroupCollector:
 
         return 'outros'
 
+    # ────────────────── METADADOS REAIS DO GRUPO (WHATSAPP) ───────────────────
+    def _fetch_wa_meta(self, canonical: str) -> dict:
+        """
+        Busca o NOME e a FOTO REAIS do grupo direto na página de convite do WhatsApp.
+
+        A página chat.whatsapp.com/<hash> expõe:
+          • og:title       → nome real do grupo
+          • og:image        → foto real do grupo (servida por pps.whatsapp.net)
+          • og:description  → texto genérico ("WhatsApp Group Invite"), sem valor
+
+        Isso corrige o bug em que nome/imagem vinham do DIRETÓRIO de origem
+        (título do site e print/og:image do diretório), e não do grupo em si.
+
+        Retorna {} quando o convite é inválido/expirado/privado ou não traz dados úteis.
+        O BeautifulSoup já decodifica entidades HTML (&#xea; → ê, &amp; → &).
+        """
+        try:
+            resp = self._get(canonical, timeout=12)
+            if resp.status_code != 200 or not resp.text:
+                return {}
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            nome = MetaExtractor._og(soup, 'og:title')
+            img  = MetaExtractor._og(soup, 'og:image')
+
+            # Títulos genéricos do WhatsApp = convite sem dados reais (expirado/privado).
+            genericos = {
+                'whatsapp group invite', 'whatsapp', 'invite to group',
+                'convite do grupo do whatsapp', 'convite para grupo do whatsapp',
+            }
+            if nome and nome.strip().lower() in genericos:
+                nome = ''
+
+            # Só é foto REAL a que vem do servidor de fotos de perfil (pps.whatsapp.net).
+            # O static.whatsapp.net devolve o avatar genérico (grupo sem foto) → tratamos
+            # como "sem imagem" para o front exibir o gradiente + inicial (default).
+            if img and 'pps.whatsapp.net' not in img:
+                img = ''
+
+            return {'nome': (nome or '').strip(), 'img': (img or '').strip()}
+        except Exception as e:
+            self.log(f'Falha ao buscar metadados WA de {canonical}: {e}', 'DEBUG')
+            return {}
+
     # ──────────────────────────── ADICIONAR ───────────────────────────────────
-    def adicionar(self, url: str, cat_slug: str, nome: str, desc: str, img: str) -> bool:
+    def adicionar(self, url: str, cat_slug: str, nome: str = '', desc: str = '', img: str = '') -> bool:
         if self._cap_atingido():
             return False
 
@@ -669,6 +712,19 @@ class GroupCollector:
             return False  # dedup rigoroso por hash
 
         self._hashes_vistos.add(h)
+
+        # ── Metadados REAIS do grupo (nome + foto) direto da página de convite ──
+        # Fonte da verdade do nome e da foto. O nome/imagem/og passados pelo diretório
+        # de origem são apenas pistas e NUNCA viram a identidade do grupo.
+        wa = self._fetch_wa_meta(canonical)
+        if wa.get('nome'):
+            nome = wa['nome']
+            # Recategoriza pelo NOME REAL do grupo (melhor que o palpite do diretório).
+            slug_real = self.categorizar(nome)
+            if slug_real != 'outros':
+                cat_slug = slug_real
+        # A foto real só pode vir do WhatsApp; descartamos qualquer imagem do diretório.
+        img = wa.get('img', '')
 
         # Garante slug válido com fallback para 'outros'
         if cat_slug not in self.categorias:
@@ -686,20 +742,20 @@ class GroupCollector:
         else:
             hash_puro = h
 
-        # Sanitização de nome e desc
+        # Sanitização de nome
         nome = re.sub(r'\s+', ' ', nome or '').strip()[:100]
-        desc = re.sub(r'\s+', ' ', desc or '').strip()[:1000]
-
         if len(nome) < 3:
             nome = f'Grupo WhatsApp {cat_slug.replace("-", " ").title()}'
 
-        if len(desc) < 20:
-            cat_nome = self.categorias.get(cat_slug, 'Outros')
-            desc = f'Participe do grupo {nome} da categoria {cat_nome} no WhatsApp!'
+        # Descrição: o convite do WhatsApp não expõe descrição real do grupo,
+        # então geramos uma descrição padrão a partir do NOME REAL + categoria.
+        cat_nome = self.categorias.get(cat_slug, 'Outros')
+        desc = f'Participe do grupo {nome} da categoria {cat_nome} no WhatsApp!'
 
-        # Imagem: se vazia ou inválida, usa padrão do WhatsApp
+        # Imagem: se o grupo não tem foto real, deixamos VAZIO de propósito.
+        # O PHP grava image_path = null e o front exibe o gradiente + inicial (default).
         if not img or not img.startswith('http') or any(x in img.lower() for x in ['placeholder', 'blank', '1x1', 'pixel']):
-            img = WHATSAPP_DEFAULT_IMG
+            img = ''
 
         self.resultados.append({
             'link':           canonical,
@@ -814,17 +870,12 @@ class GroupCollector:
             grupos_nesta_pagina = 0
 
             if links_diretos:
-                # Tenta enriquecer com metadados via Open Graph da própria página
+                # O og/título da PÁGINA do diretório serve só como dica de categoria.
+                # Nome e foto reais são buscados por link na página de convite do WhatsApp.
                 meta = MetaExtractor.extract(soup, base_url)
+                cat_hint = self.categorizar(meta['cat'] or meta['nome'])
                 for lk in links_diretos:
-                    adicionado = self.adicionar(
-                        lk,
-                        self.categorizar(meta['cat'] or meta['nome']),
-                        meta['nome'],
-                        meta['desc'],
-                        meta['img']
-                    )
-                    if adicionado:
+                    if self.adicionar(lk, cat_hint):
                         grupos_nesta_pagina += 1
                         total_grupos += 1
 
@@ -875,15 +926,9 @@ class GroupCollector:
             links_card = self._extrair_hashes_html(card_html)
             if links_card:
                 meta = MetaExtractor.extract(card, base_url)
+                cat_hint = self.categorizar(meta['cat'] or meta['nome'])
                 for lk in links_card:
-                    adicionado = self.adicionar(
-                        lk,
-                        self.categorizar(meta['cat'] or meta['nome']),
-                        meta['nome'],
-                        meta['desc'],
-                        meta['img']
-                    )
-                    if adicionado:
+                    if self.adicionar(lk, cat_hint):
                         encontrados += 1
                 continue
 
@@ -920,15 +965,9 @@ class GroupCollector:
 
             if links_internos:
                 meta2 = MetaExtractor.extract(soup2, base_url)
+                cat_hint = self.categorizar(meta2['cat'] or meta2['nome'])
                 for lk in links_internos:
-                    adicionado = self.adicionar(
-                        lk,
-                        self.categorizar(meta2['cat'] or meta2['nome']),
-                        meta2['nome'],
-                        meta2['desc'],
-                        meta2['img']
-                    )
-                    if adicionado:
+                    if self.adicionar(lk, cat_hint):
                         encontrados += 1
 
         return encontrados
