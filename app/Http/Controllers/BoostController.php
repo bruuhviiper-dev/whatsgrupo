@@ -336,10 +336,11 @@ class BoostController extends Controller
 
             return response()->json([
                 'success' => false,
-                // Detalha o erro só fora de produção, para facilitar o debug local.
-                'message' => app()->environment('production')
-                    ? 'Não foi possível iniciar o pagamento. Tente novamente.'
-                    : 'Erro no servidor: ' . $e->getMessage(),
+                // Detalha o erro quando APP_DEBUG=true (convenção do Laravel),
+                // facilitando o debug. Em produção mostra mensagem genérica.
+                'message' => config('app.debug')
+                    ? 'Erro no servidor: ' . $e->getMessage()
+                    : 'Não foi possível iniciar o pagamento. Tente novamente.',
             ], 500);
         }
 

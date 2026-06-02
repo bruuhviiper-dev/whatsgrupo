@@ -40,6 +40,7 @@
     stripeError: '',
     stripeSimulated: false,
     stripeRedirectUrl: '',
+    stripeCheckoutInstance: null,
 
     pixModalOpen: false,
     pixLoading: false,
@@ -57,6 +58,9 @@
         if (!this.buyerName || !this.buyerName.trim()) { alert('Preencha o seu Nome Completo.'); return; }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!this.buyerEmail || !emailRegex.test(this.buyerEmail)) { alert('Preencha um e-mail válido.'); return; }
+        // Garante que não exista um Embedded Checkout anterior montado
+        // (a Stripe não permite duas instâncias ao mesmo tempo).
+        this.destroyStripeCheckout();
         this.stripeLoading = true; this.stripeModalOpen = true; this.stripeError = ''; this.stripeSimulated = false;
         fetch('{{ route('boost.checkout-stripe-embedded', $package->slug) }}', {
             method: 'POST',
@@ -83,9 +87,16 @@
                 this.stripeClientSecret = data.client_secret;
                 this.stripePublishableKey = data.publishable_key;
                 setTimeout(() => {
+                    // Se o modal já foi fechado enquanto carregava, não monta.
+                    if (!this.stripeModalOpen) return;
+                    // Destrói qualquer instância remanescente antes de criar a nova.
+                    this.destroyStripeCheckout();
                     try {
                         const stripe = Stripe(data.publishable_key);
                         stripe.initEmbeddedCheckout({ clientSecret: data.client_secret }).then(checkout => {
+                            // Mais uma checagem: o usuário pode ter fechado durante o await.
+                            if (!this.stripeModalOpen) { try { checkout.destroy(); } catch (_) {} return; }
+                            this.stripeCheckoutInstance = checkout;
                             checkout.mount('#stripe-checkout-container');
                         }).catch(err => { this.stripeError = 'Erro ao montar checkout Stripe: ' + err.message; });
                     } catch(err) { this.stripeError = 'Erro SDK Stripe: ' + err.message; }
@@ -96,6 +107,26 @@
             console.error('[Stripe] Falha ao iniciar checkout:', err);
             this.stripeError = err && err.message ? err.message : 'Erro de conexão com Stripe.';
         });
+    },
+
+    // Destrói a instância do Embedded Checkout, se existir, e limpa o container.
+    destroyStripeCheckout() {
+        if (this.stripeCheckoutInstance) {
+            try { this.stripeCheckoutInstance.destroy(); } catch (_) {}
+            this.stripeCheckoutInstance = null;
+        }
+        const el = document.getElementById('stripe-checkout-container');
+        if (el) el.innerHTML = '';
+    },
+
+    // Fecha o modal Stripe e libera a instância para permitir trocar de método.
+    closeStripeModal() {
+        this.destroyStripeCheckout();
+        this.stripeModalOpen = false;
+        this.stripeLoading = false;
+        this.stripeError = '';
+        this.stripeSimulated = false;
+        this.stripeClientSecret = '';
     },
 
     generateMercadoPagoPix() {
@@ -197,22 +228,26 @@
                     {{-- PIX --}}
                     <label class="block cursor-pointer">
                         <input type="radio" name="payment_method" value="pix" x-model="paymentMethod" class="sr-only">
-                        <div class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all"
+                        <div class="flex items-center gap-3.5 px-4 py-3.5 rounded-xl border-2 transition-all"
                              :class="paymentMethod === 'pix'
                                 ? 'border-[#32BCAD] bg-[#32BCAD]/5'
                                 : 'border-slate-200 bg-white hover:border-slate-300'">
-                            {{-- PIX icon oficial (Banco Central) --}}
-                            <svg class="w-7 h-7 flex-shrink-0" viewBox="0 0 512 512" fill="#32BCAD" aria-label="PIX">
-                                <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-21.984l76.693-76.692c5.385-5.404 14.765-5.384 20.15 0l76.989 76.989c14.191 14.177 33.045 21.985 53.12 21.985h15.098l-97.21 97.21c-30.328 30.328-79.476 30.328-109.806 0l-97.515-97.508h9.371z"/>
-                                <path d="M398.766 120.792c-20.056 0-38.929 7.809-53.12 21.985l-76.99 76.988c-5.207 5.225-14.952 5.247-20.15-.001l-76.692-76.692c-14.192-14.177-33.063-21.985-53.12-21.985h-9.372l97.516-97.515c30.328-30.327 79.478-30.327 109.806 0l97.21 97.22h-15.098z"/>
-                                <path d="M22.758 200.852l58.733-58.733c1.298.49 2.704.795 4.183.795h26.913c13.847 0 27.41 5.608 37.18 15.395l76.69 76.689c6.752 6.753 15.612 10.126 24.477 10.126 8.86 0 17.726-3.373 24.471-10.118l76.99-76.991c9.768-9.787 23.333-15.395 37.179-15.395h32.624c1.479 0 2.885-.306 4.183-.795l58.987 58.987c30.328 30.328 30.328 79.476 0 109.806l-58.98 58.979c-1.305-.482-2.717-.787-4.19-.787h-32.624c-13.846 0-27.411-5.609-37.18-15.396l-76.982-76.982c-13.077-13.084-35.866-13.092-48.96.008l-76.689 76.682c-9.768 9.787-23.333 15.395-37.18 15.395H85.674c-1.479 0-2.885.306-4.183.795l-58.733-58.74c-30.327-30.328-30.327-79.478 0-109.804z"/>
-                            </svg>
+                            <div class="w-11 flex items-center justify-center shrink-0">
+                                {{-- PIX icon oficial (Banco Central) --}}
+                                <svg class="w-6 h-6" viewBox="0 0 512 512" fill="#32BCAD" aria-label="PIX">
+                                    <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-21.984l76.693-76.692c5.385-5.404 14.765-5.384 20.15 0l76.989 76.989c14.191 14.177 33.045 21.985 53.12 21.985h15.098l-97.21 97.21c-30.328 30.328-79.476 30.328-109.806 0l-97.515-97.508h9.371z"/>
+                                    <path d="M398.766 120.792c-20.056 0-38.929 7.809-53.12 21.985l-76.99 76.988c-5.207 5.225-14.952 5.247-20.15-.001l-76.692-76.692c-14.192-14.177-33.063-21.985-53.12-21.985h-9.372l97.516-97.515c30.328-30.327 79.478-30.327 109.806 0l97.21 97.22h-15.098z"/>
+                                    <path d="M22.758 200.852l58.733-58.733c1.298.49 2.704.795 4.183.795h26.913c13.847 0 27.41 5.608 37.18 15.395l76.69 76.689c6.752 6.753 15.612 10.126 24.477 10.126 8.86 0 17.726-3.373 24.471-10.118l76.99-76.991c9.768-9.787 23.333-15.395 37.179-15.395h32.624c1.479 0 2.885-.306 4.183-.795l58.987 58.987c30.328 30.328 30.328 79.476 0 109.806l-58.98 58.979c-1.305-.482-2.717-.787-4.19-.787h-32.624c-13.846 0-27.411-5.609-37.18-15.396l-76.982-76.982c-13.077-13.084-35.866-13.092-48.96.008l-76.689 76.682c-9.768 9.787-23.333 15.395-37.18 15.395H85.674c-1.479 0-2.885.306-4.183.795l-58.733-58.74c-30.327-30.328-30.327-79.478 0-109.804z"/>
+                                </svg>
+                            </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold leading-none mb-0.5"
-                                   :class="paymentMethod === 'pix' ? 'text-[#32BCAD]' : 'text-slate-800'">PIX</p>
+                                <div class="flex items-center gap-2 mb-0.5">
+                                    <p class="text-sm font-bold leading-none"
+                                       :class="paymentMethod === 'pix' ? 'text-[#32BCAD]' : 'text-slate-800'">PIX</p>
+                                    <span class="text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-[#32BCAD]/10 text-[#0f8a7e]">Mais usado</span>
+                                </div>
                                 <p class="text-[11px] text-slate-400">Aprovação imediata · via Mercado Pago</p>
                             </div>
-                            {{-- Radio visual --}}
                             <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
                                  :class="paymentMethod === 'pix' ? 'border-[#32BCAD]' : 'border-slate-300'">
                                 <div class="w-2 h-2 rounded-full bg-[#32BCAD] transition-all"
@@ -224,18 +259,19 @@
                     {{-- Cartão --}}
                     <label class="block cursor-pointer">
                         <input type="radio" name="payment_method" value="card" x-model="paymentMethod" class="sr-only">
-                        <div class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all"
+                        <div class="flex items-center gap-3.5 px-4 py-3.5 rounded-xl border-2 transition-all"
                              :class="paymentMethod === 'card'
                                 ? 'border-blue-500 bg-blue-50'
                                 : 'border-slate-200 bg-white hover:border-slate-300'">
-                            {{-- Card icon --}}
-                            <svg viewBox="0 0 40 26" fill="none" class="w-9 h-6 flex-shrink-0">
-                                <rect width="40" height="26" rx="4" fill="#3B82F6"/>
-                                <rect x="0" y="7" width="40" height="5" fill="#2563EB"/>
-                                <rect x="4" y="15" width="8" height="5" rx="1.5" fill="#93C5FD"/>
-                                <circle cx="33" cy="17.5" r="4" fill="#EF4444" opacity="0.85"/>
-                                <circle cx="29" cy="17.5" r="4" fill="#F97316" opacity="0.85"/>
-                            </svg>
+                            <div class="w-11 flex items-center justify-center shrink-0">
+                                <svg viewBox="0 0 40 26" fill="none" class="w-10 h-[26px]">
+                                    <rect width="40" height="26" rx="4" fill="#3B82F6"/>
+                                    <rect x="0" y="7" width="40" height="5" fill="#2563EB"/>
+                                    <rect x="4" y="15" width="8" height="5" rx="1.5" fill="#93C5FD"/>
+                                    <circle cx="33" cy="17.5" r="4" fill="#EF4444" opacity="0.85"/>
+                                    <circle cx="29" cy="17.5" r="4" fill="#F97316" opacity="0.85"/>
+                                </svg>
+                            </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold leading-none mb-0.5"
                                    :class="paymentMethod === 'card' ? 'text-blue-600' : 'text-slate-800'">Cartão de Crédito / Débito</p>
@@ -252,19 +288,20 @@
                     {{-- Google Pay --}}
                     <label class="block cursor-pointer">
                         <input type="radio" name="payment_method" value="gpay" x-model="paymentMethod" class="sr-only">
-                        <div class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all"
+                        <div class="flex items-center gap-3.5 px-4 py-3.5 rounded-xl border-2 transition-all"
                              :class="paymentMethod === 'gpay'
                                 ? 'border-slate-800 bg-slate-50'
                                 : 'border-slate-200 bg-white hover:border-slate-300'">
-                            {{-- Google Pay icon --}}
-                            <svg viewBox="0 0 40 26" class="w-9 h-6 flex-shrink-0">
-                                <rect width="40" height="26" rx="4" fill="#fff" stroke="#E2E8F0"/>
-                                <path d="M19.4 13.2c0-.4 0-.8-.1-1.1h-4.1v2.1h2.4a2 2 0 0 1-.9 1.3v1.1h1.4c.8-.8 1.3-1.9 1.3-3.4z" fill="#4285F4"/>
-                                <path d="M15.2 17.5c1.2 0 2.2-.4 2.9-1.1l-1.4-1.1c-.4.3-.9.4-1.5.4-1.1 0-2.1-.8-2.4-1.8h-1.5v1.1a4.4 4.4 0 0 0 3.9 2.5z" fill="#34A853"/>
-                                <path d="M12.8 13c-.2-.5-.2-1.1 0-1.7v-1.1h-1.5a4.3 4.3 0 0 0 0 3.9l1.5-1.1z" fill="#FBBC04"/>
-                                <path d="M15.2 9.7c.6 0 1.2.2 1.6.6l1.2-1.2a4.2 4.2 0 0 0-2.8-1.1 4.4 4.4 0 0 0-3.9 2.5l1.5 1.1c.3-1 1.3-1.9 2.4-1.9z" fill="#EA4335"/>
-                                <text x="22" y="16.5" font-family="Arial, sans-serif" font-size="7.5" font-weight="700" fill="#5F6368">Pay</text>
-                            </svg>
+                            <div class="w-11 flex items-center justify-center shrink-0">
+                                <svg viewBox="0 0 40 26" class="w-10 h-[26px]">
+                                    <rect width="40" height="26" rx="4" fill="#fff" stroke="#E2E8F0"/>
+                                    <path d="M19.4 13.2c0-.4 0-.8-.1-1.1h-4.1v2.1h2.4a2 2 0 0 1-.9 1.3v1.1h1.4c.8-.8 1.3-1.9 1.3-3.4z" fill="#4285F4"/>
+                                    <path d="M15.2 17.5c1.2 0 2.2-.4 2.9-1.1l-1.4-1.1c-.4.3-.9.4-1.5.4-1.1 0-2.1-.8-2.4-1.8h-1.5v1.1a4.4 4.4 0 0 0 3.9 2.5z" fill="#34A853"/>
+                                    <path d="M12.8 13c-.2-.5-.2-1.1 0-1.7v-1.1h-1.5a4.3 4.3 0 0 0 0 3.9l1.5-1.1z" fill="#FBBC04"/>
+                                    <path d="M15.2 9.7c.6 0 1.2.2 1.6.6l1.2-1.2a4.2 4.2 0 0 0-2.8-1.1 4.4 4.4 0 0 0-3.9 2.5l1.5 1.1c.3-1 1.3-1.9 2.4-1.9z" fill="#EA4335"/>
+                                    <text x="22" y="16.5" font-family="Arial, sans-serif" font-size="7.5" font-weight="700" fill="#5F6368">Pay</text>
+                                </svg>
+                            </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold leading-none mb-0.5"
                                    :class="paymentMethod === 'gpay' ? 'text-slate-900' : 'text-slate-800'">Google Pay</p>
@@ -281,17 +318,18 @@
                     {{-- Apple Pay --}}
                     <label class="block cursor-pointer">
                         <input type="radio" name="payment_method" value="applepay" x-model="paymentMethod" class="sr-only">
-                        <div class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all"
+                        <div class="flex items-center gap-3.5 px-4 py-3.5 rounded-xl border-2 transition-all"
                              :class="paymentMethod === 'applepay'
                                 ? 'border-slate-800 bg-slate-50'
                                 : 'border-slate-200 bg-white hover:border-slate-300'">
-                            {{-- Apple Pay icon --}}
-                            <svg viewBox="0 0 40 26" class="w-9 h-6 flex-shrink-0">
-                                <rect width="40" height="26" rx="4" fill="#000"/>
-                                <path d="M13.6 9.4c.4-.5.7-1.1.6-1.8-.6 0-1.3.4-1.7.9-.4.4-.7 1.1-.6 1.7.7 0 1.3-.3 1.7-.8z" fill="#fff"/>
-                                <path d="M14.2 10.3c-.9 0-1.7.5-2.1.5-.5 0-1.1-.5-1.9-.5-1 0-1.9.6-2.4 1.4-1 1.8-.3 4.4.7 5.9.5.7 1.1 1.5 1.8 1.5.7 0 1-.5 1.9-.5.9 0 1.1.5 1.9.4.8 0 1.3-.7 1.8-1.4.6-.8.8-1.6.8-1.6 0 0-1.5-.6-1.6-2.3 0-1.5 1.2-2.2 1.2-2.2-.6-1-1.7-1.1-2-1.1-.9-.1-1.7.5-2.1.5z" fill="#fff"/>
-                                <text x="22.5" y="16.5" font-family="Arial, sans-serif" font-size="7.5" font-weight="600" fill="#fff">Pay</text>
-                            </svg>
+                            <div class="w-11 flex items-center justify-center shrink-0">
+                                <svg viewBox="0 0 40 26" class="w-10 h-[26px]">
+                                    <rect width="40" height="26" rx="4" fill="#000"/>
+                                    <path d="M13.6 9.4c.4-.5.7-1.1.6-1.8-.6 0-1.3.4-1.7.9-.4.4-.7 1.1-.6 1.7.7 0 1.3-.3 1.7-.8z" fill="#fff"/>
+                                    <path d="M14.2 10.3c-.9 0-1.7.5-2.1.5-.5 0-1.1-.5-1.9-.5-1 0-1.9.6-2.4 1.4-1 1.8-.3 4.4.7 5.9.5.7 1.1 1.5 1.8 1.5.7 0 1-.5 1.9-.5.9 0 1.1.5 1.9.4.8 0 1.3-.7 1.8-1.4.6-.8.8-1.6.8-1.6 0 0-1.5-.6-1.6-2.3 0-1.5 1.2-2.2 1.2-2.2-.6-1-1.7-1.1-2-1.1-.9-.1-1.7.5-2.1.5z" fill="#fff"/>
+                                    <text x="22.5" y="16.5" font-family="Arial, sans-serif" font-size="7.5" font-weight="600" fill="#fff">Pay</text>
+                                </svg>
+                            </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold leading-none mb-0.5"
                                    :class="paymentMethod === 'applepay' ? 'text-slate-900' : 'text-slate-800'">Apple Pay</p>
@@ -308,27 +346,28 @@
                     {{-- Boleto --}}
                     <label class="block cursor-pointer">
                         <input type="radio" name="payment_method" value="boleto" x-model="paymentMethod" class="sr-only">
-                        <div class="flex items-center gap-4 px-4 py-3.5 rounded-xl border-2 transition-all"
+                        <div class="flex items-center gap-3.5 px-4 py-3.5 rounded-xl border-2 transition-all"
                              :class="paymentMethod === 'boleto'
                                 ? 'border-emerald-600 bg-emerald-50'
                                 : 'border-slate-200 bg-white hover:border-slate-300'">
-                            {{-- Boleto icon (barcode) --}}
-                            <svg viewBox="0 0 40 26" class="w-9 h-6 flex-shrink-0">
-                                <rect width="40" height="26" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
-                                <g fill="#0F172A">
-                                    <rect x="5" y="6" width="1.5" height="14"/>
-                                    <rect x="7.5" y="6" width="1" height="14"/>
-                                    <rect x="10" y="6" width="2" height="14"/>
-                                    <rect x="13.5" y="6" width="1" height="14"/>
-                                    <rect x="16" y="6" width="1.5" height="14"/>
-                                    <rect x="19" y="6" width="1" height="14"/>
-                                    <rect x="21.5" y="6" width="2" height="14"/>
-                                    <rect x="25" y="6" width="1" height="14"/>
-                                    <rect x="27.5" y="6" width="1.5" height="14"/>
-                                    <rect x="30.5" y="6" width="1" height="14"/>
-                                    <rect x="33" y="6" width="2" height="14"/>
-                                </g>
-                            </svg>
+                            <div class="w-11 flex items-center justify-center shrink-0">
+                                <svg viewBox="0 0 40 26" class="w-10 h-[26px]">
+                                    <rect width="40" height="26" rx="4" fill="#F8FAFC" stroke="#E2E8F0"/>
+                                    <g fill="#0F172A">
+                                        <rect x="5" y="6" width="1.5" height="14"/>
+                                        <rect x="7.5" y="6" width="1" height="14"/>
+                                        <rect x="10" y="6" width="2" height="14"/>
+                                        <rect x="13.5" y="6" width="1" height="14"/>
+                                        <rect x="16" y="6" width="1.5" height="14"/>
+                                        <rect x="19" y="6" width="1" height="14"/>
+                                        <rect x="21.5" y="6" width="2" height="14"/>
+                                        <rect x="25" y="6" width="1" height="14"/>
+                                        <rect x="27.5" y="6" width="1.5" height="14"/>
+                                        <rect x="30.5" y="6" width="1" height="14"/>
+                                        <rect x="33" y="6" width="2" height="14"/>
+                                    </g>
+                                </svg>
+                            </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold leading-none mb-0.5"
                                    :class="paymentMethod === 'boleto' ? 'text-emerald-700' : 'text-slate-800'">Boleto Bancário</p>
@@ -546,22 +585,31 @@
     {{-- MODAL: CARTÃO (STRIPE) --}}
     {{-- ================================================================ --}}
     <div x-show="stripeModalOpen"
+         @click.self="closeStripeModal()"
+         @keydown.escape.window="stripeModalOpen && closeStripeModal()"
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
          style="display: none;">
         <div class="relative w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
-            <button @click="stripeModalOpen = false" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-all">
+            <button @click="closeStripeModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-all">
                 <x-heroicon-o-x-mark class="w-5 h-5" />
             </button>
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-                <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
-                    <x-heroicon-s-credit-card class="w-5 h-5 text-blue-500" />
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                     :class="paymentMethod === 'boleto' ? 'bg-emerald-50' : (paymentMethod === 'card' ? 'bg-blue-50' : 'bg-slate-100')">
+                    <span x-show="paymentMethod === 'card'"><x-heroicon-s-credit-card class="w-5 h-5 text-blue-500" /></span>
+                    <span x-show="paymentMethod === 'gpay' || paymentMethod === 'applepay'"><x-heroicon-s-device-phone-mobile class="w-5 h-5 text-slate-700" /></span>
+                    <span x-show="paymentMethod === 'boleto'"><x-heroicon-s-document-text class="w-5 h-5 text-emerald-600" /></span>
                 </div>
                 <div>
-                    <h2 class="font-black text-slate-900">Pagamento com Cartão</h2>
-                    <p class="text-xs text-slate-500">{{ $package->name }} · <span class="font-bold text-blue-600">{{ $package->formatted_price }}</span></p>
+                    <h2 class="font-black text-slate-900" x-text="
+                        paymentMethod === 'gpay' ? 'Pagamento com Google Pay'
+                        : paymentMethod === 'applepay' ? 'Pagamento com Apple Pay'
+                        : paymentMethod === 'boleto' ? 'Pagamento com Boleto'
+                        : 'Pagamento com Cartão'"></h2>
+                    <p class="text-xs text-slate-500">{{ $package->name }} · <span class="font-bold text-slate-700">{{ $package->formatted_price }}</span></p>
                 </div>
             </div>
             <div x-show="stripeLoading" class="py-10 flex flex-col items-center gap-3">
