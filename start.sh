@@ -177,9 +177,20 @@ setup_python_deps() {
 
     ok "Dependências Python instaladas no venv: $VENV_DIR"
 
-    # Determina o caminho do Python no venv
+    # Determina o caminho do Python no venv.
+    # No Windows: converte o caminho cygwin para caminho Windows (ex: C:/...) com .exe,
+    # pois o PHP nativo não consegue encontrar caminhos no estilo /c/Users/...
     if [ "$OS" = "windows" ]; then
-        PYTHON_VENV="$VENV_DIR/Scripts/python"
+        WIN_VENV_PATH=$(cygpath -w "$VENV_DIR" 2>/dev/null || echo "")
+        if [ -n "$WIN_VENV_PATH" ]; then
+            # Converte backslashes para forward slashes (PHP aceita em Windows)
+            WIN_VENV_PATH=$(echo "$WIN_VENV_PATH" | tr '\\' '/')
+            PYTHON_VENV="${WIN_VENV_PATH}/Scripts/python.exe"
+        else
+            # Fallback: monta a partir do SCRIPT_DIR convertido
+            WIN_SCRIPT=$(cygpath -w "$SCRIPT_DIR" 2>/dev/null | tr '\\' '/')
+            PYTHON_VENV="${WIN_SCRIPT}/.venv/Scripts/python.exe"
+        fi
     else
         PYTHON_VENV="$VENV_DIR/bin/python"
     fi
