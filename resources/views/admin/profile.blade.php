@@ -9,13 +9,6 @@
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Gerencie suas informações de acesso e preferências do sistema.</p>
     </div>
 
-    @if (session('success'))
-        <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded-xl mb-6 font-medium text-sm flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            {{ session('success') }}
-        </div>
-    @endif
-
     <form action="{{ route('admin.profile.update') }}" method="POST" class="space-y-6">
         @csrf
 
