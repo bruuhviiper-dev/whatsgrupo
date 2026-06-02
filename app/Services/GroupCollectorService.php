@@ -241,6 +241,9 @@ class GroupCollectorService
         if (empty($img) || ! str_starts_with($img, 'http')) {
             $img = self::WA_DEFAULT_IMG;
         }
+        // Tenta baixar e converter a imagem para WebP.
+        // Se falhar (CDN bloqueada, URL inválida, etc.) retorna null — nunca bloqueia o cadastro.
+        // O group-card e o group-detail já exibem gradiente + inicial do nome quando image_path é null.
         $imagePath = $this->downloadImagem($img, $hash);
 
         // ── 3 Regras fixas obrigatórias ──
