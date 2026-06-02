@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,5 +32,35 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Em produção (APP_DEBUG=false) nunca exibe stack trace, queries SQL
+        // nem detalhes internos do Laravel ao usuário. Tudo é logado no lado
+        // do servidor; o usuário vê apenas uma página de erro limpa.
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            // Rotas de API retornam JSON sem detalhes internos
+            if ($request->expectsJson() || $request->is('api/*')) {
+                $status = $e instanceof HttpException ? $e->getStatusCode() : 500;
+                return response()->json([
+                    'error'   => 'Ocorreu um erro inesperado.',
+                    'message' => $status === 404 ? 'Recurso não encontrado.' : 'Tente novamente em instantes.',
+                ], $status);
+            }
+
+            // Em desenvolvimento mostra o debugger padrão do Laravel
+            if (config('app.debug')) {
+                return null;
+            }
+
+            // Em produção: mapeia para a view de erro correta sem vazar nenhum detalhe
+            if ($e instanceof NotFoundHttpException) {
+                return response()->view('errors.404', [], 404);
+            }
+
+            if ($e instanceof HttpException) {
+                $code = $e->getStatusCode();
+                $view = view()->exists("errors.{$code}") ? "errors.{$code}" : 'errors.500';
+                return response()->view($view, [], $code);
+            }
+
+            return response()->view('errors.500', [], 500);
+        });
     })->create();
