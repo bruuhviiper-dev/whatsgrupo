@@ -2,12 +2,23 @@
 
 @section('title', $seoPage->title)
 @section('description', $seoPage->meta_description)
+@section('canonical', url('/grupos-whatsapp/' . $seoPage->slug))
 @section('og_title', $seoPage->title)
 @section('og_description', $seoPage->meta_description)
 
 @section('content')
 
 <x-schema-list :title="$seoPage->h1" :groups="$groups" />
+
+{{-- Structured data: BreadcrumbList (espelha o breadcrumb visível abaixo) --}}
+@php
+    $seoCrumbs = [['name' => 'Início', 'url' => url('/')]];
+    if ($category) {
+        $seoCrumbs[] = ['name' => $category->name, 'url' => route('group.category', $category->slug)];
+    }
+    $seoCrumbs[] = ['name' => $seoPage->h1, 'url' => url('/grupos-whatsapp/' . $seoPage->slug)];
+@endphp
+<x-seo.breadcrumbs :items="$seoCrumbs" />
 
 {{-- Breadcrumb --}}
 <nav class="flex items-center gap-2 text-sm text-slate-500 mb-6 font-semibold" aria-label="Breadcrumb">
