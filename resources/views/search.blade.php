@@ -18,7 +18,7 @@
     @endif
 </div>
 
-<x-adsense class="mb-6" />
+<x-adsense class="mb-8" />
 
 {{-- Barra de busca na página --}}
 <form action="{{ route('group.search') }}" method="GET" class="mb-8">
@@ -97,5 +97,7 @@
         </div>
     </div>
 @endif
+
+<x-adsense class="mt-12" />
 
 @endsection

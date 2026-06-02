@@ -6,12 +6,10 @@
 @section('content')
 
   <!-- CABEÇALHO DA HOME -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-    <div>
-      <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mb-1">
-        Grupos de Whatsapp
-      </h1>
-    </div>
+  <div class="mb-8">
+    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mb-4">
+      Grupos de Whatsapp
+    </h1>
 
     <!-- TABS DE FILTRO EM ESTILO PILL SELECIONÁVEL -->
     <div class="flex flex-wrap gap-2">
