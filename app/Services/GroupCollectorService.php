@@ -107,7 +107,11 @@ class GroupCollectorService
 
     private function executarPython(array $categoriesArray): array
     {
-        $pythonBin  = env('PYTHON_BIN', PHP_OS_FAMILY === 'Windows' ? 'python' : 'python3');
+        // Usa config('app.python_bin') (resolvido de PYTHON_BIN) — NÃO env() direto,
+        // pois após `config:cache` (rodado pelo start.sh/entrypoint em produção) o env()
+        // fora dos arquivos de config retorna null, e o coletor cairia para o 'python' do
+        // sistema sem as libs (bs4/cloudscraper). config() permanece correto com cache.
+        $pythonBin  = config('app.python_bin') ?: (PHP_OS_FAMILY === 'Windows' ? 'python' : 'python3');
         $scriptPath = base_path('python-service/collector/group_collector.py');
 
         if (! file_exists($scriptPath)) {

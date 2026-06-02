@@ -39,8 +39,8 @@ class ColetarGrupos extends Command
         // Modo fila
         if ($this->option('queue')) {
             CollectGroupsJob::dispatch();
-            $this->info('✅ Job CollectGroupsJob despachado para a fila!');
-            $this->line('   → Execute: php artisan queue:work --queue=default --timeout=7200');
+            $this->info('✅ Job CollectGroupsJob despachado para a fila "coleta"!');
+            $this->line('   → Worker: php artisan queue:work --queue=coleta --timeout=10800');
             return 0;
         }
 

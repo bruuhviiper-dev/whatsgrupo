@@ -564,6 +564,20 @@ class GroupCollector:
         self._hashes_vistos: set = set()
         self.resultados: list = []
 
+        # ── Limites opcionais por env (default = produção completa) ──
+        # Permitem testes rápidos e tuning de ops SEM reduzir o alcance em produção
+        # (quando as envs não estão setadas, o comportamento é o varrer-tudo original).
+        self._max_dirs   = int(os.environ.get('COLLECTOR_MAX_DIRS', len(DIRETORIOS)))
+        self._max_pages  = os.environ.get('COLLECTOR_MAX_PAGES')   # None = usa o max de cada diretório
+        self._max_pages  = int(self._max_pages) if self._max_pages else None
+        self._max_groups = os.environ.get('COLLECTOR_MAX_GROUPS')  # None = sem teto
+        self._max_groups = int(self._max_groups) if self._max_groups else None
+        self._skip_search = os.environ.get('COLLECTOR_SKIP_SEARCH', '').lower() in ('1', 'true', 'yes')
+
+    def _cap_atingido(self) -> bool:
+        """True quando o teto opcional de grupos (COLLECTOR_MAX_GROUPS) foi alcançado."""
+        return self._max_groups is not None and len(self.resultados) >= self._max_groups
+
     # ──────────────────────────── LOGGING ─────────────────────────────────────
     def log(self, msg: str, tipo: str = 'INFO'):
         ts   = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -645,6 +659,9 @@ class GroupCollector:
 
     # ──────────────────────────── ADICIONAR ───────────────────────────────────
     def adicionar(self, url: str, cat_slug: str, nome: str, desc: str, img: str) -> bool:
+        if self._cap_atingido():
+            return False
+
         canonical = self._canonical(url)
         if not canonical:
             return False
@@ -718,6 +735,8 @@ class GroupCollector:
         tipo  = pg.get('tipo', 'query')
         inicio = pg.get('inicio', 1)
         maximo = pg.get('max', 30)
+        if self._max_pages is not None:
+            maximo = min(maximo, self._max_pages)
         urls = []
 
         for n in range(inicio, inicio + maximo):
@@ -1003,7 +1022,10 @@ class GroupCollector:
 
         # ── FASE 1: Diretórios públicos (rastreamento completo por site) ──
         self.log('── FASE 1: Diretórios públicos ──', 'INFO')
-        for cfg in DIRETORIOS:
+        for cfg in DIRETORIOS[:self._max_dirs]:
+            if self._cap_atingido():
+                self.log(f'Teto de {self._max_groups} grupos atingido — encerrando Fase 1.', 'INFO')
+                break
             try:
                 self.raspar_site_completo(cfg)
             except Exception as e:
@@ -1012,13 +1034,19 @@ class GroupCollector:
             time.sleep(random.uniform(3.0, 6.0))
 
         # ── FASE 2: Buscadores por categoria ──
-        self.log('── FASE 2: Buscadores por categoria ──', 'INFO')
-        for slug, nome in self.categorias.items():
-            try:
-                self.buscar_por_categoria(nome, slug)
-            except Exception as e:
-                self.log(f'Busca [{slug}] erro: {e}', 'ERROR')
-            time.sleep(random.uniform(1.0, 2.0))
+        if self._skip_search:
+            self.log('── FASE 2 pulada (COLLECTOR_SKIP_SEARCH) ──', 'INFO')
+        else:
+            self.log('── FASE 2: Buscadores por categoria ──', 'INFO')
+            for slug, nome in self.categorias.items():
+                if self._cap_atingido():
+                    self.log(f'Teto de {self._max_groups} grupos atingido — encerrando Fase 2.', 'INFO')
+                    break
+                try:
+                    self.buscar_por_categoria(nome, slug)
+                except Exception as e:
+                    self.log(f'Busca [{slug}] erro: {e}', 'ERROR')
+                time.sleep(random.uniform(1.0, 2.0))
 
         self.log(f'COLETA CONCLUÍDA: {len(self.resultados)} grupos únicos', 'SUCCESS')
         self.log('=' * 65, 'END')

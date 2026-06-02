@@ -23,7 +23,9 @@ return new class extends Migration
             $table->unsignedInteger('visualizacoes')->default(0);
             $table->string('status')->default('pendente');
             $table->text('motivo_rejeicao')->nullable();
-            $table->foreignUlid('user_id')->nullable()->constrained()->nullOnDelete();
+            // user_id referencia users.id (BIGINT). Deve ser foreignId — NÃO foreignUlid,
+            // senão o tipo CHAR(26) do ULID fica incompatível com o BIGINT de users.id.
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('ip_envio');
             $table->timestamp('aprovado_em')->nullable();
             $table->timestamps();
