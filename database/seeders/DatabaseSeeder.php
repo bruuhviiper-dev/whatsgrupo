@@ -17,12 +17,13 @@ class DatabaseSeeder extends Seeder
      *  5. BlogCategorySeeder    — categorias de blog antes dos posts
      *  6. BlogPostSeeder        — posts referenciam blog_categories
      *  7. MoreBlogPostsSeeder   — posts adicionais
-     *  8. NewPhrasesSeeder      — frases adicionais
-     *  9. MorePhrasesSeeder     — mais frases
-     * 10. FigurinhasSeeder      — figurinhas independentes
-     * 11. SpecialSeoPagesSeeder — páginas SEO especiais
-     * 12. SeoPages2026Seeder    — atualiza páginas para 2026 (desativa 2025)
-     * 13. GroupSeeder           — grupos referenciam categorias (por último)
+     *  8. Blog100PostsSeeder    — +87 posts de blog (firstOrCreate por slug)
+     *  9. NewPhrasesSeeder      — frases adicionais
+     * 10. MorePhrasesSeeder     — mais frases
+     * 11. FigurinhasSeeder      — figurinhas independentes
+     * 12. SpecialSeoPagesSeeder — páginas SEO especiais
+     * 13. SeoPages2026Seeder    — atualiza páginas para 2026 (desativa 2025)
+     * 14. GroupSeeder           — DESATIVADO (criava grupos fake)
      */
     public function run(): void
     {
