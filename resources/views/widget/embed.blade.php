@@ -136,8 +136,8 @@
                        class="group-item {{ $isVip ? 'vip-card-border' : '' }}">
 
                         {{-- Avatar --}}
-                        @if ($group->image_path)
-                            <img src="{{ asset('storage/' . $group->image_path) }}" alt="{{ $group->name }}"
+                        @if ($group->image_url)
+                            <img src="{{ $group->image_url }}" alt="{{ $group->name }}"
                                  style="width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid rgba(0,0,0,0.08);">
                         @else
                             <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#128C7E,#25D366);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden;">

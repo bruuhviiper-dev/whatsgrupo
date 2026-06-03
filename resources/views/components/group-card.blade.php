@@ -4,8 +4,8 @@
   
   <!-- Topo: Imagem/Avatar -->
   <div class="relative w-full h-[170px] bg-slate-100 flex-shrink-0">
-    @if ($group->image_path)
-      <img src="{{ Storage::url($group->image_path) }}" alt="{{ $group->name }}" loading="lazy" class="w-full h-full object-cover">
+    @if ($group->image_url)
+      <img src="{{ $group->image_url }}" alt="{{ $group->name }}" loading="lazy" class="w-full h-full object-cover">
     @else
       {{-- Imagem padrão do WhatsApp com inicial do grupo como fallback --}}
       <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#128C7E] to-[#25D366] relative overflow-hidden">

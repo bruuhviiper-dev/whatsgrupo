@@ -12,8 +12,8 @@
       Grupos de Whatsapp
     </h1>
 
-    <!-- TABS DE FILTRO EM ESTILO PILL SELECIONÁVEL (linha abaixo do título) -->
-    <div class="flex flex-wrap justify-center gap-2">
+    <!-- TABS DE FILTRO EM ESTILO PILL SELECIONÁVEL (linha abaixo do título, alinhadas à direita) -->
+    <div class="w-full flex flex-wrap justify-center md:justify-end gap-2">
       <a href="/" class="px-5 py-2 rounded-full text-xs font-semibold transition-all border
            {{ !request('tab')
     ? 'bg-slate-900 border-slate-900 text-white shadow-sm'

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Group extends Model
@@ -94,6 +95,27 @@ class Group extends Model
     public function verifiedGroup()
     {
         return $this->hasOne(VerifiedGroup::class);
+    }
+
+    /**
+     * Accessor: URL pública da imagem do grupo, transparente para path local e URL remota.
+     *
+     * Durante a coleta, se o download de pps.whatsapp.net falhar (CDN bloqueia),
+     * gravamos a URL remota diretamente como image_path. Este accessor detecta isso
+     * e devolve a URL pronta — as views usam sempre $group->image_url, nunca
+     * Storage::url($group->image_path) diretamente.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+        // URL remota (ex.: pps.whatsapp.net gravada como fallback)
+        if (str_starts_with($this->image_path, 'http')) {
+            return $this->image_path;
+        }
+        // Path local em storage/app/public
+        return Storage::disk('public')->url($this->image_path);
     }
 
     /**

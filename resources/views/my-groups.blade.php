@@ -100,8 +100,8 @@
                     <div class="flex flex-col sm:flex-row gap-4 p-4 rounded-xl border border-slate-100 hover:border-slate-300 transition-all bg-slate-50">
 
                         {{-- Imagem miniatura --}}
-                        @if ($group->image_path)
-                            <img src="{{ Storage::url($group->image_path) }}"
+                        @if ($group->image_url)
+                            <img src="{{ $group->image_url }}"
                                  alt="{{ $group->name }}"
                                  class="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-slate-200 shadow-sm">
                         @else

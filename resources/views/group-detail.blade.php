@@ -3,8 +3,8 @@
 @section('description', Str::limit(strip_tags($group->description), 155))
 @section('canonical', route('group.show', $group->slug ?: $group->id))
 @section('og_type', 'article')
-@if($group->image_path)
-@section('og_image', asset('storage/' . $group->image_path))
+@if($group->image_url)
+@section('og_image', $group->image_url)
 @endif
 
 @section('content')
@@ -45,8 +45,8 @@
     
     <!-- Topo: Capa (Banner) -->
 <div class="relative w-full h-[250px] sm:h-[300px] bg-slate-100">
-    @if($group->image_path)
-        <img src="{{ Storage::url($group->image_path) }}" alt="{{ $group->name }}" loading="lazy" class="w-full h-full object-cover">
+    @if($group->image_url)
+        <img src="{{ $group->image_url }}" alt="{{ $group->name }}" loading="lazy" class="w-full h-full object-cover">
     @else
         <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#075E54] via-[#128C7E] to-[#25D366] relative overflow-hidden">
             <svg xmlns="http://www.w3.org/2000/svg" class="absolute w-64 h-64 text-white opacity-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>

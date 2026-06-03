@@ -3,7 +3,7 @@
 @php
     $siteUrl = rtrim(url('/'), '/');
     $groupUrl = route('group.show', $group->slug ?: $group->id);
-    $img = $group->image_path ? asset('storage/' . $group->image_path) : asset('images/og-default.png');
+    $img = $group->image_url ?? asset('images/og-default.png');
 
     $schema = [
         '@context'         => 'https://schema.org',

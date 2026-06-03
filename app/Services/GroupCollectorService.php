@@ -237,13 +237,17 @@ class GroupCollectorService
         $desc = mb_substr($desc, 0, 1000);
 
         // ── Imagem real do grupo (vinda da página de convite do WhatsApp) ──
-        // O Python só envia foto quando ela é REAL (servida por pps.whatsapp.net).
-        // Quando o grupo não tem foto, image_path fica null e o group-card/group-detail
-        // exibem o gradiente + inicial do nome — esse é o visual default do projeto.
-        // O download/conversão WebP nunca bloqueia o cadastro: se falhar, retorna null.
+        // Tenta baixar e converter para WebP. Se o CDN bloquear (pps.whatsapp.net
+        // rejeita certos UAs), guarda a URL remota diretamente como image_path —
+        // o accessor Group::getImageUrlAttribute() a serve de forma transparente.
         $imagePath = null;
         if (! empty($img) && str_starts_with($img, 'http')) {
             $imagePath = $this->downloadImagem($img, $hash);
+            if ($imagePath === null) {
+                // Download falhou mas temos a URL real → guarda diretamente.
+                $imagePath = $img;
+                $this->log("Imagem guardada como URL remota (fallback): {$img}", 'WARNING');
+            }
         }
 
         // ── 3 Regras fixas obrigatórias ──
@@ -287,8 +291,14 @@ class GroupCollectorService
     private function downloadImagem(string $url, string $hash): ?string
     {
         try {
+            // pps.whatsapp.net / mmg.whatsapp.net rejeitam o UA do WhatsApp com 403.
+            // Usamos headers de browser real + Referer do WhatsApp para passar no CDN.
             $resp = Http::timeout(15)
-                ->withHeaders(['User-Agent' => 'WhatsApp/2.24.5.77 A'])
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                    'Referer'    => 'https://www.whatsapp.com/',
+                    'Accept'     => 'image/webp,image/apng,image/*,*/*;q=0.8',
+                ])
                 ->get($url);
 
             if (! $resp->ok()) {

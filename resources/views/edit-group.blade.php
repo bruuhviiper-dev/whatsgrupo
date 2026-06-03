@@ -138,9 +138,9 @@
         <!-- Imagem Atual / Nova Imagem -->
         <div class="space-y-1.5">
           <label for="image_input" class="block text-sm font-semibold text-slate-700">Imagem (Opcional)</label>
-          @if ($group->image_path)
+          @if ($group->image_url)
             <div class="flex items-center gap-4 mb-3 p-3 border border-slate-200 rounded-lg bg-slate-50">
-              <img src="{{ Storage::url($group->image_path) }}" class="w-12 h-12 rounded-lg object-cover border border-slate-300 shadow-sm">
+              <img src="{{ $group->image_url }}" class="w-12 h-12 rounded-lg object-cover border border-slate-300 shadow-sm">
               <span class="text-xs font-semibold text-slate-500">Esta é a imagem atual. Se enviar uma nova abaixo, ela será substituída.</span>
             </div>
           @endif
