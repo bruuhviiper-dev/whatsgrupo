@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', $category->name . ' — Grupos de WhatsApp')
-@section('description', 'Encontre os melhores grupos de WhatsApp de ' . $category->name . '. Participe de discussões, faça amizades e interaja gratuitamente!')
+@section('title', '+' . $groups->total() . ' Links de Grupos de ' . $category->name . ' para WhatsApp (Atualizados em ' . date('Y') . ')')
+@section('description', 'Encontre os melhores grupos de WhatsApp de ' . $category->name . ' ativos em ' . date('Y') . '. ' . $groups->total() . ' grupos verificados com link de convite direto. Participe grátis!')
 
 @push('head')
 @php
@@ -116,6 +116,9 @@
     <a href="/grupos-mais-populares" class="text-primary font-semibold hover:underline">mais populares</a> do portal.
   </p>
 </section>
+
+{{-- FAQ da categoria: visual accordion + JSON-LD FAQPage (captura queries informacionais) --}}
+<x-category-faq :category="$category" />
 
 {{-- Internal linking: outras categorias com grupos ativos (SEO cross-linking) --}}
 @if(isset($categories) && $categories->count() > 1)
