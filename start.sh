@@ -90,7 +90,7 @@ if [ ! -f "$SCRIPT_DIR/.env" ]; then
 fi
 
 # ── 4. Python – instalação automática ───────────────────────
-PYTHON_DEPS=(requests beautifulsoup4 cloudscraper lxml)
+PYTHON_DEPS=(requests beautifulsoup4 cloudscraper lxml nudenet)
 
 install_python_windows() {
     info "Windows detectado – verificando Python no PATH do sistema..."
@@ -173,6 +173,13 @@ setup_python_deps() {
     source "$VENV_DIR/bin/activate" 2>/dev/null || source "$VENV_DIR/Scripts/activate" 2>/dev/null || true
     pip install --quiet --upgrade pip 2>/dev/null || true
     pip install --quiet "${PYTHON_DEPS[@]}" 2>/dev/null || warn "Alguns pacotes Python podem não ter instalado."
+
+    # Pré-aquece o modelo nudenet (baixa ~30 MB do HuggingFace na 1ª execução).
+    # Necessário para que a análise de imagens NSFW funcione offline em produção.
+    info "Pré-carregando modelo de moderação de imagens (nudenet)..."
+    python -c "from nudenet import NudeDetector; NudeDetector(); print('[nudenet] modelo OK')" 2>/dev/null \
+        || warn "Modelo nudenet não pôde ser baixado agora (sem internet?). Será baixado no primeiro uso."
+
     deactivate 2>/dev/null || true
 
     ok "Dependências Python instaladas no venv: $VENV_DIR"

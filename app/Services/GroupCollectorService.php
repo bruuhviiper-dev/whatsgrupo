@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Group;
+use App\Services\ImageCheckerService;
 use App\Services\WhatsAppLinkValidator;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Storage;
 class GroupCollectorService
 {
     private string $logPath;
+    private ImageCheckerService $imageChecker;
 
     /** Imagem padrão oficial do WhatsApp para grupos sem foto */
     private const WA_DEFAULT_IMG = 'https://static.whatsapp.net/rsrc.php/v3/yP/r/rYZqPCBaG70.png';
@@ -39,7 +41,8 @@ class GroupCollectorService
 
     public function __construct()
     {
-        $this->logPath = storage_path('logs/mineracao.log');
+        $this->logPath      = storage_path('logs/mineracao.log');
+        $this->imageChecker = new ImageCheckerService();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -235,6 +238,19 @@ class GroupCollectorService
             $desc = "Participe do grupo {$nome} da categoria {$category->name} no WhatsApp!";
         }
         $desc = mb_substr($desc, 0, 1000);
+
+        // ── Verificação NSFW da imagem (nudenet) ──
+        // Bloqueia grupos cuja capa contenha conteúdo adulto/pornográfico mesmo
+        // que o nome e a descrição sejam limpos — proteção contra grupos que
+        // passam no filtro de texto mas têm imagem explícita.
+        if (! empty($img) && str_starts_with($img, 'http')) {
+            $nsfwResult = $this->imageChecker->check($img);
+            if (! $nsfwResult['safe']) {
+                $labels = implode(', ', $nsfwResult['labels']);
+                $this->log("#{$idx}: NSFW bloqueado (score={$nsfwResult['score']}, labels={$labels}) – {$canonical}", 'WARNING');
+                return 'proibido';
+            }
+        }
 
         // ── Imagem real do grupo (vinda da página de convite do WhatsApp) ──
         // Tenta baixar e converter para WebP. Se o CDN bloquear (pps.whatsapp.net

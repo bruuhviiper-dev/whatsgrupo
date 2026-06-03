@@ -7,6 +7,7 @@ use App\Models\BoostOrder;
 use App\Models\BoostUsage;
 use App\Models\Category;
 use App\Models\Group;
+use App\Services\ImageCheckerService;
 use App\Services\WhatsAppLinkValidator;
 use App\Services\ReferralService;
 use Illuminate\Http\Request;
@@ -295,6 +296,29 @@ class GroupController extends Controller
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::warning('[GroupController] Fallback og:image falhou: ' . $e->getMessage());
                 }
+            }
+        }
+
+        // ── Verificação NSFW da imagem ──────────────────────────────────────────
+        // Bloqueia cadastro quando a capa contiver conteúdo adulto/pornográfico,
+        // mesmo que nome e descrição não tenham palavras de alerta.
+        if ($imagePath) {
+            // Se for path local converte para URL pública para o script Python poder baixar;
+            // se já for uma URL remota (fallback pps.whatsapp.net) usa diretamente.
+            $imageToCheck = str_starts_with($imagePath, 'http')
+                ? $imagePath
+                : \Illuminate\Support\Facades\Storage::disk('public')->url($imagePath);
+
+            $nsfw = (new ImageCheckerService())->check($imageToCheck);
+
+            if (! $nsfw['safe']) {
+                // Remove o arquivo já salvo antes de rejeitar
+                if (! str_starts_with($imagePath, 'http')) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($imagePath);
+                }
+                return back()
+                    ->withInput()
+                    ->withErrors(['image' => 'A imagem enviada contém conteúdo inapropriado e não foi aceita.']);
             }
         }
 

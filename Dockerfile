@@ -43,7 +43,12 @@ RUN composer dump-autoload --optimize --no-dev \
 RUN python3 -m venv /var/www/html/.venv \
     && /var/www/html/.venv/bin/pip install --no-cache-dir --upgrade pip \
     && /var/www/html/.venv/bin/pip install --no-cache-dir \
-        requests beautifulsoup4 cloudscraper lxml
+        requests beautifulsoup4 cloudscraper lxml nudenet \
+    # Pré-aquece o modelo nudenet (baixa do HuggingFace durante o build).
+    # Garante que a análise NSFW funcione offline em produção.
+    && /var/www/html/.venv/bin/python -c \
+        "from nudenet import NudeDetector; NudeDetector(); print('[nudenet] modelo pré-carregado')" \
+        2>/dev/null || true
 
 # ── Permissões ──
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
