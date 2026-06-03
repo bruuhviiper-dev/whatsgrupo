@@ -55,7 +55,8 @@ class ImageCheckerService
             ? "\"{$bin}\" \"{$script}\" " . escapeshellarg($imageInput)
             : escapeshellarg($bin) . ' ' . escapeshellarg($script) . ' ' . escapeshellarg($imageInput);
 
-        $output = shell_exec($cmd . ' 2>/dev/null');
+        $redirect = PHP_OS_FAMILY === 'Windows' ? '2>NUL' : '2>/dev/null';
+        $output   = shell_exec($cmd . ' ' . $redirect);
 
         if (empty($output)) {
             Log::warning('[ImageChecker] Sem resposta para: ' . $imageInput);

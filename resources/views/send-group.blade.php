@@ -189,6 +189,23 @@
       <form action="/enviar-grupo" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
 
+        {{-- Alerta de erros de validação (incluindo rejeição por imagem NSFW) --}}
+        @if($errors->any())
+          <div id="form-error-alert"
+               class="flex items-start gap-3 bg-red-50 border border-red-300 text-red-700 rounded-xl px-4 py-4 shadow-sm"
+               role="alert">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            <div>
+              <p class="font-bold text-sm mb-1">Não foi possível enviar o grupo:</p>
+              @foreach($errors->all() as $e)
+                <p class="text-sm">• {{ $e }}</p>
+              @endforeach
+            </div>
+          </div>
+        @endif
+
         {{-- Base64 da imagem detectada pelo browser (proxy + canvas) --}}
         <input type="hidden" id="detected_image_b64" name="detected_image_b64" value="">
 
@@ -456,5 +473,16 @@
     </div>
   </div>
 </div>
+
+@if($errors->any())
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var el = document.getElementById('form-error-alert');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+</script>
+@endif
 
 @endsection
