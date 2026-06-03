@@ -63,13 +63,29 @@ REGRAS_FIXAS = (
     "3. Respeite todos os membros do grupo. Sem preconceito, bullying ou ofensas."
 )
 
-# Regex para capturar hashes de convite WhatsApp.
-# Cobre as variações de URL (/invite/ /join/ /v/ /v= e hash direta).
-# IMPORTANTE: o código real de convite de GRUPO tem ~22 chars (ex.: G9pu0uftWMa6FPTURKRn2W).
-# Exigimos {20,28} para REJEITAR slugs vanity de diretório (ex.: "DevsFullstackBrasil" = 19),
-# que NÃO resolvem no WhatsApp e geravam cadastros genéricos sem nome/capa.
-RE_WA_GROUP   = re.compile(r'chat\.whatsapp\.com/(?:invite/|join/|v/|v=)?([A-Za-z0-9_\-]{20,28})')
-RE_WA_CHANNEL = re.compile(r'whatsapp\.com/channel/([A-Za-z0-9_\-@]{16,60})')
+# Regex para capturar hashes de convite WhatsApp — cobertura UNIVERSAL.
+#
+# Variações cobertas:
+#   chat.whatsapp.com/<hash>              → forma canônica
+#   chat.whatsapp.com/invite/<hash>       → forma antiga
+#   chat.whatsapp.com/join/<hash>         → forma nova (equivalente a /invite/)
+#   chat.whatsapp.com/v/<hash>            → variante encontrada em alguns sites
+#   wa.me/invite/<hash>                   → short-link usado por alguns diretórios
+#   wa.me/join/<hash>                     → idem
+#   invite.whatsapp.com/<hash>            → domínio alternativo de convite
+#   whatsapp.com/channel/<code>           → canais
+#   www.whatsapp.com/channel/<code>       → canais (www)
+#
+# {20,28}: o hash real de GRUPO tem ~22 chars — rejeita slugs vanity de diretório
+# (ex.: "DevsFullstackBrasil" = 19 chars) que não resolvem no WhatsApp.
+RE_WA_GROUP = re.compile(
+    r'(?:'
+    r'chat\.whatsapp\.com/(?:invite/|join/|v/|v=)?'  # chat.whatsapp.com — todas as variantes
+    r'|wa\.me/(?:invite/|join/)?'                     # wa.me short-link
+    r'|invite\.whatsapp\.com/'                        # domínio alternativo
+    r')([A-Za-z0-9_\-]{20,28})'
+)
+RE_WA_CHANNEL = re.compile(r'(?:www\.)?whatsapp\.com/channel/([A-Za-z0-9_\-@]{16,60})')
 
 # User-agents rotativos
 USER_AGENTS = [
@@ -403,29 +419,43 @@ class RobustHttp:
         self._session = None
 
     def get(self, url: str, timeout: int = 18, retries: int = 3) -> FakeResponse:
+        last_status = 0
         for attempt in range(retries):
+            status = 0
             try:
                 if self._session:
                     r = self._session.get(url, timeout=timeout, allow_redirects=True)
-                    if r.status_code not in (403, 429, 503):
-                        return FakeResponse(r.status_code, r.text)
-                    # tenta urllib no 403/429
+                    status = r.status_code
+                    if status not in (403, 429, 503):
+                        return FakeResponse(status, r.text)
+                    # 429: espera longa antes de tentar urllib; 403/503: vai direto
+                    if status == 429:
+                        wait = 30 + (2 ** attempt) * 5 + random.uniform(5, 20)
+                        time.sleep(wait)
                     if attempt == retries - 1:
-                        return FakeResponse(r.status_code, r.text)
+                        return FakeResponse(status, r.text)
                 else:
-                    return self._urllib_get(url, timeout)
+                    resp = self._urllib_get(url, timeout)
+                    if resp.status_code == 200:
+                        return resp
+                    status = resp.status_code
             except Exception:
                 pass
 
-            # urllib fallback
+            # urllib fallback com UA rotativo
             resp = self._urllib_get(url, timeout)
             if resp.status_code == 200:
                 return resp
+            last_status = resp.status_code if resp.status_code else status
 
-            wait = (2 ** attempt) + random.uniform(0.5, 1.5)
+            # 429 no urllib: espera longa antes de retry
+            if last_status == 429:
+                wait = 30 + (2 ** attempt) * 5 + random.uniform(5, 20)
+            else:
+                wait = (2 ** attempt) + random.uniform(0.5, 1.5)
             time.sleep(wait)
 
-        return FakeResponse(0, '')
+        return FakeResponse(last_status, '')
 
     def _urllib_get(self, url: str, timeout: int = 18) -> FakeResponse:
         headers = {
@@ -601,25 +631,49 @@ class GroupCollector:
             pass
 
     # ──────────────────────── EXTRAÇÃO DE HASHES ──────────────────────────────
+    @staticmethod
+    def _desempacotar_redirect(href: str) -> str:
+        """
+        Tenta extrair a URL real de redirectores genéricos de diretórios.
+        Ex.: /saida?url=https%3A%2F%2Fchat.whatsapp.com%2FHASH
+             /redirect?link=https%3A%2F%2Fwa.me%2Finvite%2FHASH
+        """
+        for param in ('url', 'link', 'u', 'q', 'to', 'goto', 'redirect', 'dest', 'target'):
+            m = re.search(rf'[?&]{re.escape(param)}=([^&\s"\']+)', href)
+            if m:
+                decoded = urllib.parse.unquote(m.group(1))
+                if 'whatsapp' in decoded.lower() or 'wa.me' in decoded.lower():
+                    return decoded
+        return href
+
     def _extrair_hashes_html(self, html: str) -> list[str]:
-        """Extrai todos os links únicos de WhatsApp de um bloco de HTML."""
+        """
+        Extrai todos os links únicos de WhatsApp de um bloco de HTML.
+
+        Cobre:
+          • HTML bruto (forma canônica)
+          • HTML percent-decoded (para links como chat%2Ewhatsapp%2Ecom ou %2Finvite%2F)
+          • Ambas as origens são unificadas numa única lista deduplicada
+        """
         links = []
         vistos = set()
 
-        for m in RE_WA_GROUP.finditer(html):
-            h = m.group(1)
-            url = f'https://chat.whatsapp.com/{h}'
-            if h not in vistos:
-                vistos.add(h)
-                links.append(url)
+        # Roda o regex em ambas as formas: raw e percent-decoded.
+        # O set elimina duplicatas quando raw == decoded.
+        decoded = urllib.parse.unquote(html)
+        for source in (html, decoded) if html != decoded else (html,):
+            for m in RE_WA_GROUP.finditer(source):
+                h = m.group(1)
+                if h not in vistos:
+                    vistos.add(h)
+                    links.append(f'https://chat.whatsapp.com/{h}')
 
-        for m in RE_WA_CHANNEL.finditer(html):
-            h = m.group(1)
-            url = f'https://whatsapp.com/channel/{h}'
-            key = f'ch_{h}'
-            if key not in vistos:
-                vistos.add(key)
-                links.append(url)
+            for m in RE_WA_CHANNEL.finditer(source):
+                h = m.group(1)
+                key = f'ch_{h}'
+                if key not in vistos:
+                    vistos.add(key)
+                    links.append(f'https://whatsapp.com/channel/{h}')
 
         return links
 
@@ -633,9 +687,11 @@ class GroupCollector:
         return None
 
     def _canonical(self, url: str) -> str | None:
-        m = RE_WA_GROUP.search(url)
-        if m:
-            return f'https://chat.whatsapp.com/{m.group(1)}'
+        # Tenta também na versão percent-decoded (wa.me em redirect codificado)
+        for src in (url, urllib.parse.unquote(url)):
+            m = RE_WA_GROUP.search(src)
+            if m:
+                return f'https://chat.whatsapp.com/{m.group(1)}'
         m = RE_WA_CHANNEL.search(url)
         if m:
             return f'https://whatsapp.com/channel/{m.group(1)}'
@@ -896,6 +952,16 @@ class GroupCollector:
             self.log(f'[{nome}] Raspando: {url_atual}', 'INFO')
             resp = self._get(url_atual)
 
+            if resp.status_code == 429:
+                # Rate-limit do diretório: espera longa e re-enfileira a URL.
+                # NÃO conta como falha — o site está acessível, só limitando a taxa.
+                espera = random.uniform(50, 90)
+                self.log(f'[{nome}] 429 Rate Limited — aguardando {espera:.0f}s e re-enfileirando.', 'WARNING')
+                time.sleep(espera)
+                fila_urls.appendleft(url_atual)
+                urls_visitadas.discard(url_atual)
+                continue
+
             if resp.status_code == 0:
                 paginas_sem_grupo += 1
                 if paginas_sem_grupo >= MAX_SEM_GRUPO:
@@ -990,9 +1056,20 @@ class GroupCollector:
                 continue
 
             href = a_tag['href'].strip()
+            # Tenta desempacotar redirector genérico antes de qualquer checagem
+            href = self._desempacotar_redirect(href)
             if href.startswith('/'):
                 href = base_url.rstrip('/') + href
             if not href.startswith('http'):
+                continue
+
+            # Links do WhatsApp diretos no href do card (ex.: wa.me em diretórios externos)
+            links_diretos_card = self._extrair_hashes_html(href)
+            if links_diretos_card:
+                cat_hint = self.categorizar(base_url)
+                for lk in links_diretos_card:
+                    if self.adicionar(lk, cat_hint):
+                        encontrados += 1
                 continue
 
             # Não visita URLs externas ao domínio
@@ -1034,12 +1111,14 @@ class GroupCollector:
         # Links nos resultados
         for a in soup.find_all('a', href=True):
             href = a['href']
-            # Desempacota redirect DDG
+            # Desempacota redirect DDG (uddg=) e redirectores genéricos
             if 'uddg=' in href:
                 try:
                     href = urllib.parse.unquote(re.search(r'uddg=([^&]+)', href).group(1))
                 except Exception:
                     pass
+            else:
+                href = self._desempacotar_redirect(href)
             links = self._extrair_hashes_html(href)
             for lk in links:
                 if self.adicionar(lk, cat_slug, self._txt(a), '', ''):
@@ -1063,12 +1142,14 @@ class GroupCollector:
 
         for a in soup.find_all('a', href=True):
             href = a['href']
-            # Desempacota redirect Bing
+            # Desempacota redirect Bing e redirectores genéricos
             if 'r.bing.com' in href and 'u=' in href:
                 try:
                     href = urllib.parse.unquote(re.search(r'u=([^&]+)', href).group(1))
                 except Exception:
                     pass
+            else:
+                href = self._desempacotar_redirect(href)
             links = self._extrair_hashes_html(href + ' ' + str(a))
             for lk in links:
                 if self.adicionar(lk, cat_slug, self._txt(a), '', ''):

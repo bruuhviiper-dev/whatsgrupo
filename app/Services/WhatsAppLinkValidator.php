@@ -13,17 +13,26 @@ class WhatsAppLinkValidator
      * Suporta grupos (chat.whatsapp.com) e canais (whatsapp.com/channel).
      * Remove variações como /invite/, /join/, /v/, /v= para garantir unicidade.
      */
+    /**
+     * Padrão de grupo — todas as variações de URL, alinhado com o Python RE_WA_GROUP.
+     * Cobre: chat.whatsapp.com, wa.me e invite.whatsapp.com com /invite/ /join/ /v/ /v=.
+     */
+    private const REGEX_GROUP = '/(?:chat\.whatsapp\.com\/(?:invite\/|join\/|v\/|v=)?|wa\.me\/(?:invite\/|join\/)?|invite\.whatsapp\.com\/)([a-zA-Z0-9_-]{10,})/i';
+
+    /** Padrão de canal — www opcional. */
+    private const REGEX_CHANNEL = '/(?:www\.)?whatsapp\.com\/channel\/([a-zA-Z0-9@_-]{10,})/i';
+
     public static function normalizeLink(string $link): string
     {
         $link = trim($link);
 
-        // Regex para Grupos de WhatsApp (suporta /invite/, /join/, /v/, /v= e hash direta)
-        if (preg_match('/(?:chat\.whatsapp\.com\/(?:invite\/|join\/|v\/|v=)?)([a-zA-Z0-9_-]{10,})/i', $link, $matches)) {
+        // Grupos: chat.whatsapp.com, wa.me e invite.whatsapp.com → forma canônica
+        if (preg_match(self::REGEX_GROUP, $link, $matches)) {
             return 'https://chat.whatsapp.com/' . $matches[1];
         }
 
-        // Regex para Canais de WhatsApp
-        if (preg_match('/(?:whatsapp\.com\/channel\/)([a-zA-Z0-9@_-]{10,})/i', $link, $matches)) {
+        // Canais: whatsapp.com/channel
+        if (preg_match(self::REGEX_CHANNEL, $link, $matches)) {
             return 'https://whatsapp.com/channel/' . $matches[1];
         }
 
@@ -39,13 +48,11 @@ class WhatsAppLinkValidator
     {
         $link = trim($link);
 
-        // Grupos: extrai hash após qualquer variação de prefixo
-        if (preg_match('/chat\.whatsapp\.com\/(?:invite\/|join\/|v\/|v=)?([a-zA-Z0-9_-]{10,})/i', $link, $matches)) {
+        if (preg_match(self::REGEX_GROUP, $link, $matches)) {
             return $matches[1];
         }
 
-        // Canais: extrai código com prefixo para distinguir de grupos
-        if (preg_match('/whatsapp\.com\/channel\/([a-zA-Z0-9@_-]{10,})/i', $link, $matches)) {
+        if (preg_match(self::REGEX_CHANNEL, $link, $matches)) {
             return 'channel_' . $matches[1];
         }
 
