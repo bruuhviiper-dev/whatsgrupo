@@ -3,6 +3,24 @@
 @section('title', 'Grupos de WhatsApp — WhatsGrupos')
 @section('description', 'Encontre os melhores grupos de WhatsApp do Brasil. Mais de 10.000 grupos ativos organizados por categorias.')
 
+@push('head')
+@php
+    $homeUrl  = url('/');
+    $curPage  = $groups->currentPage();
+    $lastPage = $groups->lastPage();
+@endphp
+@if($curPage > 1)
+<link rel="canonical" href="{{ $homeUrl }}?page={{ $curPage }}">
+<meta name="robots" content="noindex, follow">
+@endif
+@if($curPage > 1)
+<link rel="prev" href="{{ $homeUrl }}{{ $curPage === 2 ? '' : '?page=' . ($curPage - 1) }}">
+@endif
+@if($curPage < $lastPage)
+<link rel="next" href="{{ $homeUrl }}?page={{ $curPage + 1 }}">
+@endif
+@endpush
+
 @section('content')
 
   <!-- CABEÇALHO DA HOME -->

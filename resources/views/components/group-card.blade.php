@@ -7,12 +7,13 @@
     @if ($group->image_url)
       <img src="{{ $group->image_url }}" alt="{{ $group->name }}" loading="lazy" class="w-full h-full object-cover">
     @else
-      {{-- Imagem padrão do WhatsApp com inicial do grupo como fallback --}}
-      <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#128C7E] to-[#25D366] relative overflow-hidden">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 text-white opacity-30 absolute" viewBox="0 0 24 24" fill="currentColor">
+      {{-- Sem foto: gradiente + inicial. role="img" + aria-label garantem sinal semântico ao Google. --}}
+      <div role="img" aria-label="{{ $group->name }}"
+           class="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#128C7E] to-[#25D366] relative overflow-hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 text-white opacity-30 absolute" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
         </svg>
-        <span class="text-4xl font-black text-white z-10 drop-shadow-md">{{ Str::upper(Str::substr($group->name, 0, 1)) }}</span>
+        <span class="text-4xl font-black text-white z-10 drop-shadow-md" aria-hidden="true">{{ Str::upper(Str::substr($group->name, 0, 1)) }}</span>
       </div>
     @endif
     

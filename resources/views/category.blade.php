@@ -3,6 +3,28 @@
 @section('title', $category->name . ' — Grupos de WhatsApp')
 @section('description', 'Encontre os melhores grupos de WhatsApp de ' . $category->name . '. Participe de discussões, faça amizades e interaja gratuitamente!')
 
+@push('head')
+@php
+    $catUrl   = url('/categoria/' . $category->slug);
+    $curPage  = $groups->currentPage();
+    $lastPage = $groups->lastPage();
+@endphp
+{{-- Canonical auto-referencial por página (Google prefere self-referential pós-2019) --}}
+@if($curPage > 1)
+<link rel="canonical" href="{{ $catUrl }}?page={{ $curPage }}">
+@endif
+{{-- rel prev/next: ajuda o Google a entender a série paginada --}}
+@if($curPage > 1)
+<link rel="prev" href="{{ $catUrl }}{{ $curPage === 2 ? '' : '?page=' . ($curPage - 1) }}">
+@endif
+@if($curPage < $lastPage)
+<link rel="next" href="{{ $catUrl }}?page={{ $curPage + 1 }}">
+@endif
+@if($curPage > 1)
+<meta name="robots" content="noindex, follow">
+@endif
+@endpush
+
 @section('content')
 
 {{-- Breadcrumb estilo moderno --}}
@@ -94,6 +116,36 @@
     <a href="/grupos-mais-populares" class="text-primary font-semibold hover:underline">mais populares</a> do portal.
   </p>
 </section>
+
+{{-- Internal linking: outras categorias com grupos ativos (SEO cross-linking) --}}
+@if(isset($categories) && $categories->count() > 1)
+@php
+    $related = $categories->where('id', '!=', $category->id)
+        ->where('groups_count', '>', 0)
+        ->sortByDesc('groups_count')
+        ->take(10);
+@endphp
+@if($related->count())
+<section class="mt-8 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+    <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <x-heroicon-o-squares-2x2 class="w-4 h-4 text-slate-500" />
+        Explore outras categorias
+    </h2>
+    <div class="flex flex-wrap gap-2">
+        @foreach($related as $rel)
+            <a href="{{ url('/categoria/' . $rel->slug) }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-green-50 hover:border-green-300 hover:text-green-800 text-slate-700 text-xs font-semibold transition-all">
+                @if($rel->icon)
+                    <span class="text-sm leading-none">{{ $rel->icon }}</span>
+                @endif
+                {{ $rel->name }}
+                <span class="text-slate-400 text-[10px]">({{ $rel->groups_count }})</span>
+            </a>
+        @endforeach
+    </div>
+</section>
+@endif
+@endif
 
 {{-- Structured data: ItemList dos grupos + BreadcrumbList --}}
 @if($groups->count())

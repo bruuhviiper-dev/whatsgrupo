@@ -29,13 +29,17 @@
 
 <div class="max-w-3xl mx-auto px-4 py-8">
 
-  <!-- Breadcrumb Moderno -->
-  <nav class="flex items-center gap-2 text-sm text-slate-500 mb-8">
+  <!-- Breadcrumb (visual + semântico — alinhado ao JSON-LD BreadcrumbList) -->
+  <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-slate-500 mb-8">
     <a href="/" class="hover:text-slate-900 transition-colors">Início</a>
-    <span class="text-slate-300">/</span>
+    <span class="text-slate-300" aria-hidden="true">/</span>
     <a href="/categoria/{{ $group->category->slug }}" class="hover:text-slate-900 transition-colors">
       {{ $group->category->name }}
     </a>
+    <span class="text-slate-300" aria-hidden="true">/</span>
+    <span class="text-slate-900 font-medium truncate max-w-[200px] sm:max-w-xs" aria-current="page">
+      {{ $group->name }}
+    </span>
   </nav>
 
   <x-adsense class="mb-8" />

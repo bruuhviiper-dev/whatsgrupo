@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogPost;
 use App\Models\Category;
 use App\Models\Group;
 use App\Models\SeoPage;
@@ -79,6 +80,19 @@ class SitemapController extends Controller
 
         return response()
             ->view('sitemap-seo', compact('seoPages', 'baseUrl'))
+            ->header('Content-Type', 'application/xml');
+    }
+
+    public function blog()
+    {
+        $baseUrl = rtrim(config('app.url'), '/');
+
+        $posts = BlogPost::where('is_published', true)
+            ->orderBy('updated_at', 'desc')
+            ->get(['slug', 'updated_at']);
+
+        return response()
+            ->view('sitemap-blog', compact('posts', 'baseUrl'))
             ->header('Content-Type', 'application/xml');
     }
 }

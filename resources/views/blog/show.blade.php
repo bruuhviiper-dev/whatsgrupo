@@ -8,8 +8,19 @@
 {{-- Structured data: BlogPosting + BreadcrumbList --}}
 @push('schema')
 @php
-    $siteUrl = rtrim(url('/'), '/');
-    $postUrl = url('/blog/' . $post->slug);
+    $siteUrl  = rtrim(url('/'), '/');
+    $postUrl  = url('/blog/' . $post->slug);
+    // og:image dinâmica: extrai a primeira imagem do conteúdo, fallback para og-default
+    $ogImage  = asset('images/og-default.png');
+    if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/', $post->content ?? '', $imgMatch)) {
+        $ogImage = $imgMatch[1];
+        // Garante URL absoluta para imagens relativas
+        if (! str_starts_with($ogImage, 'http')) {
+            $ogImage = $siteUrl . '/' . ltrim($ogImage, '/');
+        }
+    }
+    $plainText  = strip_tags($post->content ?? '');
+    $wordCount  = str_word_count($plainText);
     $blogPosting = [
         '@context'         => 'https://schema.org',
         '@type'            => 'BlogPosting',
@@ -20,7 +31,9 @@
         'datePublished'    => $post->created_at->toIso8601String(),
         'dateModified'     => $post->updated_at->toIso8601String(),
         'inLanguage'       => 'pt-BR',
-        'image'            => asset('images/og-default.png'),
+        'image'            => $ogImage,
+        'wordCount'        => $wordCount,
+        'articleBody'      => Str::limit($plainText, 500),
         'author'           => ['@type' => 'Organization', 'name' => 'WhatsGrupos', 'url' => $siteUrl . '/'],
         'publisher'        => ['@id' => $siteUrl . '/#organization'],
     ];
@@ -28,6 +41,10 @@
 <script type="application/ld+json">
 {!! json_encode($blogPosting, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
 </script>
+@endpush
+
+@push('head')
+<meta property="og:image" content="{{ $ogImage }}">
 @endpush
 
 <x-seo.breadcrumbs :items="[

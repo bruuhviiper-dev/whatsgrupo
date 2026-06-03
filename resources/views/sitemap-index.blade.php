@@ -12,4 +12,8 @@
         <loc>{{ route('sitemap.seo') }}</loc>
         <lastmod>{{ now()->toAtomString() }}</lastmod>
     </sitemap>
+    <sitemap>
+        <loc>{{ route('sitemap.blog') }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
+    </sitemap>
 </sitemapindex>

@@ -283,6 +283,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 Route::get('/sitemap-static.xml', [SitemapController::class, 'static'])->name('sitemap.static');
 Route::get('/sitemap-groups.xml', [SitemapController::class, 'groups'])->name('sitemap.groups');
 Route::get('/sitemap-seo.xml', [SitemapController::class, 'seo'])->name('sitemap.seo');
+Route::get('/sitemap-blog.xml', [SitemapController::class, 'blog'])->name('sitemap.blog');
 
 // Robots.txt — exibido como view de texto puro
 Route::get('/robots.txt', function () {
