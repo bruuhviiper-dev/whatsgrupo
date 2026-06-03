@@ -303,11 +303,12 @@ class GroupController extends Controller
         // Bloqueia cadastro quando a capa contiver conteúdo adulto/pornográfico,
         // mesmo que nome e descrição não tenham palavras de alerta.
         if ($imagePath) {
-            // Se for path local converte para URL pública para o script Python poder baixar;
-            // se já for uma URL remota (fallback pps.whatsapp.net) usa diretamente.
+            // Para path local: passa o caminho FÍSICO do arquivo (ex.: storage/app/public/groups/xxx.webp).
+            // O Python lê direto do disco — sem depender de HTTP localhost que pode falhar.
+            // Para URL remota (pps.whatsapp.net): passa a URL diretamente.
             $imageToCheck = str_starts_with($imagePath, 'http')
                 ? $imagePath
-                : \Illuminate\Support\Facades\Storage::disk('public')->url($imagePath);
+                : \Illuminate\Support\Facades\Storage::disk('public')->path($imagePath);
 
             $nsfw = (new ImageCheckerService())->check($imageToCheck);
 
