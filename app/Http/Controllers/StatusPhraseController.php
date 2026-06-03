@@ -14,7 +14,7 @@ class StatusPhraseController extends Controller
     /**
      * Exibe a página principal de frases com as categorias e as frases mais populares.
      */
-    private function getExtendedCategories()
+    public function getExtendedCategories()
     {
         return [
             'amor'      => ['label' => 'Amor', 'slug' => 'amor', 'desc' => 'Frases românticas para status e legendas', 'icon' => 'heroicon-o-heart', 'color' => 'text-slate-500'],

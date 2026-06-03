@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             BlogCategorySeeder::class,
             BlogPostSeeder::class,
             MoreBlogPostsSeeder::class,
+            Blog100PostsSeeder::class,
             NewPhrasesSeeder::class,
             MorePhrasesSeeder::class,
             FigurinhasSeeder::class,

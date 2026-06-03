@@ -30,22 +30,58 @@ class SitemapController extends Controller
     {
         $baseUrl = rtrim(config('app.url'), '/');
 
-        // URLs estáticas fixas da plataforma
+        // ── URLs estáticas: todo o ecossistema público do site ──
         $staticUrls = [
-            ['loc' => $baseUrl . '/',                    'changefreq' => 'daily',   'priority' => '1.0'],
-            ['loc' => $baseUrl . '/enviar-grupo',        'changefreq' => 'monthly', 'priority' => '0.8'],
-            ['loc' => $baseUrl . '/pacotes-vip',         'changefreq' => 'weekly',  'priority' => '0.9'],
-            ['loc' => $baseUrl . '/meus-grupos',         'changefreq' => 'monthly', 'priority' => '0.5'],
-            ['loc' => $baseUrl . '/grupos-novos',        'changefreq' => 'daily',   'priority' => '0.8'],
-            ['loc' => $baseUrl . '/grupos-mais-populares','changefreq' => 'daily',   'priority' => '0.8'],
-            ['loc' => $baseUrl . '/grupos-novos-hoje',   'changefreq' => 'daily',   'priority' => '0.8'],
+            // Núcleo / listagens principais (alta prioridade)
+            ['loc' => $baseUrl . '/',                      'changefreq' => 'daily',   'priority' => '1.0'],
+            ['loc' => $baseUrl . '/grupos-novos',          'changefreq' => 'daily',   'priority' => '0.8'],
+            ['loc' => $baseUrl . '/grupos-mais-populares', 'changefreq' => 'daily',   'priority' => '0.8'],
+            ['loc' => $baseUrl . '/grupos-novos-hoje',     'changefreq' => 'daily',   'priority' => '0.8'],
+            ['loc' => $baseUrl . '/blog',                  'changefreq' => 'daily',   'priority' => '0.8'],
+
+            // Conversão / engajamento
+            ['loc' => $baseUrl . '/enviar-grupo',          'changefreq' => 'monthly', 'priority' => '0.7'],
+            ['loc' => $baseUrl . '/pacotes-vip',           'changefreq' => 'weekly',  'priority' => '0.8'],
+            ['loc' => $baseUrl . '/anuncie',               'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/meus-grupos',           'changefreq' => 'monthly', 'priority' => '0.4'],
+
+            // Hub de conteúdo: frases e figurinhas
+            ['loc' => $baseUrl . '/frases',                'changefreq' => 'weekly',  'priority' => '0.7'],
+            ['loc' => $baseUrl . '/enviar-frase',          'changefreq' => 'monthly', 'priority' => '0.4'],
+            ['loc' => $baseUrl . '/figurinhas-whatsapp',   'changefreq' => 'weekly',  'priority' => '0.7'],
+
+            // Ferramentas (URLs na raiz para SEO)
+            ['loc' => $baseUrl . '/analise-de-engajamento','changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/gerador-de-regras',     'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/gerador-de-nomes',      'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/mensagem-de-boas-vindas','changefreq' => 'monthly','priority' => '0.6'],
+            ['loc' => $baseUrl . '/verificador-de-link',   'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/gerador-de-enquete',    'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/gerador-de-letras',     'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/gerador-de-sorteios',   'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/detector-de-spam',      'changefreq' => 'monthly', 'priority' => '0.6'],
+            ['loc' => $baseUrl . '/widget-gerador',        'changefreq' => 'monthly', 'priority' => '0.4'],
+
+            // Institucional / legal
+            ['loc' => $baseUrl . '/faq',                   'changefreq' => 'monthly', 'priority' => '0.5'],
+            ['loc' => $baseUrl . '/contato',               'changefreq' => 'monthly', 'priority' => '0.4'],
+            ['loc' => $baseUrl . '/termos-de-uso',         'changefreq' => 'yearly',  'priority' => '0.3'],
+            ['loc' => $baseUrl . '/politica-de-privacidade','changefreq' => 'yearly', 'priority' => '0.3'],
         ];
 
-        // Categorias do diretório
+        // Categorias do diretório de grupos
         $categories = Category::ordered()->get();
 
+        // Categorias do blog
+        $blogCategories = \App\Models\BlogCategory::all(['slug']);
+
+        // Categorias de frases (definidas no StatusPhraseController)
+        $phraseCategories = collect(
+            (new \App\Http\Controllers\StatusPhraseController)->getExtendedCategories()
+        )->keys();
+
         return response()
-            ->view('sitemap-static', compact('staticUrls', 'categories', 'baseUrl'))
+            ->view('sitemap-static', compact('staticUrls', 'categories', 'blogCategories', 'phraseCategories', 'baseUrl'))
             ->header('Content-Type', 'application/xml');
     }
 

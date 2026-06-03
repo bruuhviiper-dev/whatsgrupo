@@ -10,13 +10,33 @@
     </url>
     @endforeach
 
-    {{-- Categorias --}}
+    {{-- Categorias de grupos --}}
     @foreach ($categories as $category)
     <url>
         <loc>{{ htmlspecialchars($baseUrl . '/categoria/' . $category->slug) }}</loc>
         <lastmod>{{ now()->toAtomString() }}</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
+    </url>
+    @endforeach
+
+    {{-- Categorias do blog --}}
+    @foreach ($blogCategories as $bc)
+    <url>
+        <loc>{{ htmlspecialchars($baseUrl . '/blog/categoria/' . $bc->slug) }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    @endforeach
+
+    {{-- Categorias de frases --}}
+    @foreach ($phraseCategories as $pc)
+    <url>
+        <loc>{{ htmlspecialchars($baseUrl . '/frases/' . $pc) }}</loc>
+        <lastmod>{{ now()->toAtomString() }}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
     </url>
     @endforeach
 </urlset>
