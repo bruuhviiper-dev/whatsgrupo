@@ -138,7 +138,9 @@
         @foreach($related as $rel)
             <a href="{{ url('/categoria/' . $rel->slug) }}"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-green-50 hover:border-green-300 hover:text-green-800 text-slate-700 text-xs font-semibold transition-all">
-                @if($rel->icon)
+                @if($rel->icon && str_starts_with($rel->icon, 'heroicon'))
+                    <x-dynamic-component :component="$rel->icon" class="w-4 h-4 text-slate-500" />
+                @elseif($rel->icon)
                     <span class="text-sm leading-none">{{ $rel->icon }}</span>
                 @endif
                 {{ $rel->name }}
