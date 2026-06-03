@@ -69,13 +69,23 @@ class GroupController extends Controller
 
             $categories = Category::ordered()->withCount(['groups' => fn ($q) => $q->where('status', 'approved')])->get();
 
-            return compact('groups', 'categories');
+            // Tópicos SEO (cauda longa) da PRÓPRIA categoria — internal linking que
+            // ajuda o Google a descobrir e ranquear as páginas /grupos-whatsapp/*.
+            // A página de categoria tem alta autoridade interna e funila para esses tópicos.
+            $relatedSeoPages = \App\Models\SeoPage::active()
+                ->where('category_id', $category->id)
+                ->inRandomOrder()
+                ->limit(12)
+                ->get(['slug', 'keyword']);
+
+            return compact('groups', 'categories', 'relatedSeoPages');
         });
 
-        $groups = $data['groups'];
-        $categories = $data['categories'];
+        $groups          = $data['groups'];
+        $categories      = $data['categories'];
+        $relatedSeoPages = $data['relatedSeoPages'] ?? collect();
 
-        return view('category', compact('category', 'groups', 'categories'));
+        return view('category', compact('category', 'groups', 'categories', 'relatedSeoPages'));
     }
 
     // -------------------------------------------------------------------------

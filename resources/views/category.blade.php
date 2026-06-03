@@ -120,6 +120,33 @@
 {{-- FAQ da categoria: visual accordion + JSON-LD FAQPage (captura queries informacionais) --}}
 <x-category-faq :category="$category" />
 
+{{-- Tópicos relacionados (cauda longa) da categoria: internal linking para as
+     páginas /grupos-whatsapp/* — funila autoridade da categoria para os tópicos SEO. --}}
+@if(isset($relatedSeoPages) && $relatedSeoPages->isNotEmpty())
+<section class="mt-8 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+    <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <x-heroicon-o-magnifying-glass class="w-4 h-4 text-slate-500" />
+        Buscas populares de {{ $category->name }}
+    </h2>
+    <div class="flex flex-wrap gap-2">
+        @foreach($relatedSeoPages as $page)
+            @php
+                $cleanName = str_ireplace(
+                    ['grupos de whatsapp de', 'grupos de whatsapp', 'grupo de whatsapp', 'grupos whatsapp', 'grupo whatsapp', 'no whatsapp', 'do whatsapp', 'de whatsapp', 'whatsapp', 'grupos de ', 'grupo de ', 'grupos ', 'grupo '],
+                    '',
+                    $page->keyword
+                );
+                $cleanName = trim($cleanName);
+            @endphp
+            <a href="/grupos-whatsapp/{{ $page->slug }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 hover:bg-green-50 hover:border-green-300 hover:text-green-800 text-slate-700 text-xs font-semibold transition-all">
+                Grupos de <span class="capitalize">{{ $cleanName ?: $category->name }}</span>
+            </a>
+        @endforeach
+    </div>
+</section>
+@endif
+
 {{-- Internal linking: outras categorias com grupos ativos (SEO cross-linking) --}}
 @if(isset($categories) && $categories->count() > 1)
 @php
