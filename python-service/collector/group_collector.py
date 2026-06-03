@@ -941,6 +941,8 @@ class GroupCollector:
 
         paginas_sem_grupo = 0
         MAX_SEM_GRUPO = 5  # para de paginar quando 5 páginas consecutivas não têm grupos
+        _429_contador: dict = {}  # url → nº de 429 consecutivos (evita loop infinito)
+        MAX_429_POR_URL = 3       # desiste de uma URL após 3 tentativas bloqueadas
 
         while fila_urls:
             url_atual = fila_urls.popleft()
@@ -953,10 +955,18 @@ class GroupCollector:
             resp = self._get(url_atual)
 
             if resp.status_code == 429:
-                # Rate-limit do diretório: espera longa e re-enfileira a URL.
-                # NÃO conta como falha — o site está acessível, só limitando a taxa.
+                tentativas_429 = _429_contador.get(url_atual, 0) + 1
+                _429_contador[url_atual] = tentativas_429
+                if tentativas_429 >= MAX_429_POR_URL:
+                    # Desiste desta URL — site provavelmente bloqueia permanentemente.
+                    self.log(f'[{nome}] 429 persistente ({tentativas_429}×) em {url_atual} — ignorando.', 'WARNING')
+                    paginas_sem_grupo += 1
+                    if paginas_sem_grupo >= MAX_SEM_GRUPO:
+                        break
+                    continue
+                # Rate-limit pontual: espera e re-enfileira.
                 espera = random.uniform(50, 90)
-                self.log(f'[{nome}] 429 Rate Limited — aguardando {espera:.0f}s e re-enfileirando.', 'WARNING')
+                self.log(f'[{nome}] 429 (tentativa {tentativas_429}/{MAX_429_POR_URL}) — aguardando {espera:.0f}s.', 'WARNING')
                 time.sleep(espera)
                 fila_urls.appendleft(url_atual)
                 urls_visitadas.discard(url_atual)
