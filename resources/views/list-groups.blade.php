@@ -62,30 +62,10 @@
         @endforeach
     </div>
 
-    {{-- Paginação --}}
+    {{-- Paginação responsiva (mesmo componente da home e categorias) --}}
     @if ($groups->hasPages())
-        <div class="mt-8 flex justify-center">
-            <div class="pagination">
-                @if ($groups->onFirstPage())
-                    <span class="page-link opacity-40 cursor-not-allowed">← Anterior</span>
-                @else
-                    <a href="{{ $groups->previousPageUrl() }}" class="page-link">← Anterior</a>
-                @endif
-
-                @for ($i = max(1, $groups->currentPage() - 2); $i <= min($groups->lastPage(), $groups->currentPage() + 2); $i++)
-                    @if ($i === $groups->currentPage())
-                        <span class="page-link active">{{ $i }}</span>
-                    @else
-                        <a href="{{ $groups->url($i) }}" class="page-link">{{ $i }}</a>
-                    @endif
-                @endfor
-
-                @if ($groups->hasMorePages())
-                    <a href="{{ $groups->nextPageUrl() }}" class="page-link">Próximo →</a>
-                @else
-                    <span class="page-link opacity-40 cursor-not-allowed">Próximo →</span>
-                @endif
-            </div>
+        <div class="mt-10 max-w-xl mx-auto">
+            {{ $groups->onEachSide(1)->links('components.pagination') }}
         </div>
     @endif
 @endif

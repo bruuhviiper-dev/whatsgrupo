@@ -108,8 +108,8 @@
   </div>
 
   <!-- PAGINAÇÃO -->
-  <div class="flex justify-center mt-12">
-    {{ $groups->onEachSide(2)->links('components.pagination') }}
+  <div class="mt-12 max-w-xl mx-auto">
+    {{ $groups->onEachSide(1)->links('components.pagination') }}
   </div>
 
   <x-adsense class="mt-12" />
