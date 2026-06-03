@@ -63,11 +63,13 @@ REGRAS_FIXAS = (
     "3. Respeite todos os membros do grupo. Sem preconceito, bullying ou ofensas."
 )
 
-# Regex para capturar qualquer hash de convite WhatsApp.
-# Cobre TODAS as variações de URL (imune a /invite/ /join/ /v/ /v= e hash direta),
-# alinhado ao WhatsAppLinkValidator do PHP para garantir unicidade entre bot e CRUD.
-RE_WA_GROUP   = re.compile(r'chat\.whatsapp\.com/(?:invite/|join/|v/|v=)?([A-Za-z0-9_\-]{10,36})')
-RE_WA_CHANNEL = re.compile(r'whatsapp\.com/channel/([A-Za-z0-9_\-@]{10,60})')
+# Regex para capturar hashes de convite WhatsApp.
+# Cobre as variações de URL (/invite/ /join/ /v/ /v= e hash direta).
+# IMPORTANTE: o código real de convite de GRUPO tem ~22 chars (ex.: G9pu0uftWMa6FPTURKRn2W).
+# Exigimos {20,28} para REJEITAR slugs vanity de diretório (ex.: "DevsFullstackBrasil" = 19),
+# que NÃO resolvem no WhatsApp e geravam cadastros genéricos sem nome/capa.
+RE_WA_GROUP   = re.compile(r'chat\.whatsapp\.com/(?:invite/|join/|v/|v=)?([A-Za-z0-9_\-]{20,28})')
+RE_WA_CHANNEL = re.compile(r'whatsapp\.com/channel/([A-Za-z0-9_\-@]{16,60})')
 
 # User-agents rotativos
 USER_AGENTS = [
@@ -572,6 +574,17 @@ class GroupCollector:
         self._max_groups = int(self._max_groups) if self._max_groups else None
         self._skip_search = os.environ.get('COLLECTOR_SKIP_SEARCH', '').lower() in ('1', 'true', 'yes')
 
+        # ── Throttle das requisições à página de convite do WhatsApp ──
+        # O WhatsApp limita por IP (HTTP 429). Sem throttle, o coletor leva 429,
+        # a extração falha e o grupo cai em nome genérico. Aqui espaçamos cada
+        # fetch e aplicamos backoff exponencial no 429 para preservar a qualidade.
+        self._wa_delay_min    = float(os.environ.get('WA_DELAY_MIN', '1.5'))
+        self._wa_delay_max    = float(os.environ.get('WA_DELAY_MAX', '3.0'))
+        self._wa_retries      = int(os.environ.get('WA_RETRIES', '3'))
+        self._wa_backoff_base = float(os.environ.get('WA_BACKOFF', '8'))
+        self._wa_429_seguidos = 0          # contador de 429 consecutivos
+        self._wa_bloqueado    = False      # True quando o IP está hard-blocked no run
+
     def _cap_atingido(self) -> bool:
         """True quando o teto opcional de grupos (COLLECTOR_MAX_GROUPS) foi alcançado."""
         return self._max_groups is not None and len(self.resultados) >= self._max_groups
@@ -658,45 +671,75 @@ class GroupCollector:
     # ────────────────── METADADOS REAIS DO GRUPO (WHATSAPP) ───────────────────
     def _fetch_wa_meta(self, canonical: str) -> dict:
         """
-        Busca o NOME e a FOTO REAIS do grupo direto na página de convite do WhatsApp.
+        Busca o NOME e a FOTO REAIS direto na PÁGINA DO WHATSAPP (grupo ou canal).
 
-        A página chat.whatsapp.com/<hash> expõe:
-          • og:title       → nome real do grupo
-          • og:image        → foto real do grupo (servida por pps.whatsapp.net)
-          • og:description  → texto genérico ("WhatsApp Group Invite"), sem valor
+        Funciona para:
+          • Grupos  → chat.whatsapp.com/<hash>     (og:title = nome, og:image = foto)
+          • Canais  → whatsapp.com/channel/<código> (og:title = nome, og:image = foto)
 
-        Isso corrige o bug em que nome/imagem vinham do DIRETÓRIO de origem
-        (título do site e print/og:image do diretório), e não do grupo em si.
+        Esta é a ÚNICA fonte da verdade do nome e da capa — independente do diretório
+        de origem (extração global). Trata o rate limit do WhatsApp (HTTP 429) com
+        throttle + backoff exponencial, evitando o hard-block que gerava nomes genéricos.
 
-        Retorna {} quando o convite é inválido/expirado/privado ou não traz dados úteis.
-        O BeautifulSoup já decodifica entidades HTML (&#xea; → ê, &amp; → &).
+        Retorna {'nome','img'} (strings vazias quando não há dado real). O BeautifulSoup
+        já decodifica entidades HTML (&#xea; → ê, &amp; → &).
         """
+        if self._wa_bloqueado:
+            return {}
+
+        # Throttle: espaça cada acesso à página do WhatsApp para não tomar 429.
+        time.sleep(random.uniform(self._wa_delay_min, self._wa_delay_max))
+
+        html = None
+        for tentativa in range(self._wa_retries):
+            resp = self._get(canonical, timeout=14)
+            if resp.status_code == 200 and resp.text:
+                html = resp.text
+                self._wa_429_seguidos = 0
+                break
+            if resp.status_code == 429:
+                self._wa_429_seguidos += 1
+                # Muitos 429 seguidos = IP bloqueado; encerra os fetches do run.
+                if self._wa_429_seguidos >= 15:
+                    self._wa_bloqueado = True
+                    self.log('WhatsApp retornou 429 repetidamente — IP bloqueado neste run. '
+                             'Pausando extração na fonte (tente novamente mais tarde).', 'ERROR')
+                    return {}
+                espera = self._wa_backoff_base * (tentativa + 1) + random.uniform(1, 4)
+                self.log(f'WA 429 em {canonical} — backoff {espera:.0f}s '
+                         f'(tentativa {tentativa + 1}/{self._wa_retries})', 'WARNING')
+                time.sleep(espera)
+                continue
+            # 404/403/expirado/privado: não adianta repetir.
+            return {}
+
+        if not html:
+            return {}
+
         try:
-            resp = self._get(canonical, timeout=12)
-            if resp.status_code != 200 or not resp.text:
-                return {}
-            soup = BeautifulSoup(resp.text, 'html.parser')
+            soup = BeautifulSoup(html, 'html.parser')
             nome = MetaExtractor._og(soup, 'og:title')
             img  = MetaExtractor._og(soup, 'og:image')
+        except Exception:
+            return {}
 
-            # Títulos genéricos do WhatsApp = convite sem dados reais (expirado/privado).
-            genericos = {
-                'whatsapp group invite', 'whatsapp', 'invite to group',
-                'convite do grupo do whatsapp', 'convite para grupo do whatsapp',
-            }
-            if nome and nome.strip().lower() in genericos:
-                nome = ''
+        # Títulos genéricos do WhatsApp = convite sem dados reais (expirado/privado/inválido).
+        genericos = {
+            'whatsapp group invite', 'whatsapp', 'invite to group',
+            'convite do grupo do whatsapp', 'convite para grupo do whatsapp',
+            'whatsapp channel', 'canal do whatsapp',
+        }
+        if nome and nome.strip().lower() in genericos:
+            nome = ''
 
-            # Só é foto REAL a que vem do servidor de fotos de perfil (pps.whatsapp.net).
-            # O static.whatsapp.net devolve o avatar genérico (grupo sem foto) → tratamos
-            # como "sem imagem" para o front exibir o gradiente + inicial (default).
-            if img and 'pps.whatsapp.net' not in img:
+        # Só é foto REAL a servida pelos CDNs de mídia do WhatsApp (pps/mmg.whatsapp.net).
+        # O avatar genérico (grupo/canal sem foto) vem de static.whatsapp.net/rsrc.php → descartado.
+        if img:
+            low = img.lower()
+            if 'whatsapp.net' not in low or 'rsrc.php' in low or 'static.whatsapp.net' in low:
                 img = ''
 
-            return {'nome': (nome or '').strip(), 'img': (img or '').strip()}
-        except Exception as e:
-            self.log(f'Falha ao buscar metadados WA de {canonical}: {e}', 'DEBUG')
-            return {}
+        return {'nome': (nome or '').strip(), 'img': (img or '').strip()}
 
     # ──────────────────────────── ADICIONAR ───────────────────────────────────
     def adicionar(self, url: str, cat_slug: str, nome: str = '', desc: str = '', img: str = '') -> bool:
@@ -713,18 +756,24 @@ class GroupCollector:
 
         self._hashes_vistos.add(h)
 
-        # ── Metadados REAIS do grupo (nome + foto) direto da página de convite ──
-        # Fonte da verdade do nome e da foto. O nome/imagem/og passados pelo diretório
-        # de origem são apenas pistas e NUNCA viram a identidade do grupo.
+        # ── PORTÃO DE QUALIDADE: extração na PRÓPRIA página do WhatsApp ──
+        # Só registra grupos/canais que RESOLVEM no WhatsApp com NOME e CAPA reais.
+        # Isso elimina os nomes genéricos ("Grupo Whatsapp Links"), os links vanity
+        # inválidos (ex.: chat.whatsapp.com/DevsFullstackBrasil) e os itens sem foto.
+        # Independe da estrutura do diretório de origem → extração 100% global.
         wa = self._fetch_wa_meta(canonical)
-        if wa.get('nome'):
-            nome = wa['nome']
-            # Recategoriza pelo NOME REAL do grupo (melhor que o palpite do diretório).
-            slug_real = self.categorizar(nome)
-            if slug_real != 'outros':
-                cat_slug = slug_real
-        # A foto real só pode vir do WhatsApp; descartamos qualquer imagem do diretório.
-        img = wa.get('img', '')
+        nome_real = wa.get('nome', '')
+        img_real  = wa.get('img', '')
+        if not nome_real or not img_real:
+            self.log(f'[ignorado] sem nome/capa reais no WhatsApp — {canonical}', 'DEBUG')
+            return False
+
+        nome = nome_real
+        img  = img_real
+        # Recategoriza pelo NOME REAL do grupo (melhor que o palpite do diretório).
+        slug_real = self.categorizar(nome)
+        if slug_real != 'outros':
+            cat_slug = slug_real
 
         # Garante slug válido com fallback para 'outros'
         if cat_slug not in self.categorias:
@@ -742,20 +791,20 @@ class GroupCollector:
         else:
             hash_puro = h
 
-        # Sanitização de nome
-        nome = re.sub(r'\s+', ' ', nome or '').strip()[:100]
+        # Sanitização de nome (já é o nome REAL do WhatsApp; sem fallback genérico).
+        nome = re.sub(r'\s+', ' ', nome).strip()[:100]
         if len(nome) < 3:
-            nome = f'Grupo WhatsApp {cat_slug.replace("-", " ").title()}'
+            return False  # segurança extra: nome real precisa ter conteúdo
 
-        # Descrição: o convite do WhatsApp não expõe descrição real do grupo,
+        # Descrição: o WhatsApp não expõe descrição real do grupo/canal,
         # então geramos uma descrição padrão a partir do NOME REAL + categoria.
         cat_nome = self.categorias.get(cat_slug, 'Outros')
         desc = f'Participe do grupo {nome} da categoria {cat_nome} no WhatsApp!'
 
-        # Imagem: se o grupo não tem foto real, deixamos VAZIO de propósito.
-        # O PHP grava image_path = null e o front exibe o gradiente + inicial (default).
-        if not img or not img.startswith('http') or any(x in img.lower() for x in ['placeholder', 'blank', '1x1', 'pixel']):
-            img = ''
+        # Imagem: a capa REAL já foi validada em _fetch_wa_meta (CDN pps/mmg.whatsapp.net).
+        # Como o portão de qualidade exige img_real, aqui ela é sempre uma URL http válida.
+        if not img.startswith('http'):
+            return False
 
         self.resultados.append({
             'link':           canonical,

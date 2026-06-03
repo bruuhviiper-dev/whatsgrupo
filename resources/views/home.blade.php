@@ -6,17 +6,14 @@
 @section('content')
 
   <!-- CABEÇALHO DA HOME -->
-  <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center">
+  <div class="mb-8 flex flex-col items-center gap-4">
 
-    <!-- Espaçador esquerdo (mantém o título centralizado em md+) -->
-    <div class="hidden md:block md:flex-1"></div>
-
-    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight text-center md:flex-1 whitespace-nowrap">
+    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight text-center whitespace-nowrap">
       Grupos de Whatsapp
     </h1>
 
-    <!-- TABS DE FILTRO EM ESTILO PILL SELECIONÁVEL (canto direito) -->
-    <div class="flex flex-wrap justify-center md:justify-end gap-2 md:flex-1">
+    <!-- TABS DE FILTRO EM ESTILO PILL SELECIONÁVEL (linha abaixo do título) -->
+    <div class="flex flex-wrap justify-center gap-2">
       <a href="/" class="px-5 py-2 rounded-full text-xs font-semibold transition-all border
            {{ !request('tab')
     ? 'bg-slate-900 border-slate-900 text-white shadow-sm'

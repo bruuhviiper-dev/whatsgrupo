@@ -39,7 +39,9 @@ class DatabaseSeeder extends Seeder
             FigurinhasSeeder::class,
             SpecialSeoPagesSeeder::class,
             SeoPages2026Seeder::class,
-            GroupSeeder::class,
+            // GroupSeeder::class, // desativado: criava grupos fake com links vanity
+            // (ex.: chat.whatsapp.com/DevsFullstackBrasil) que NÃO resolvem no WhatsApp.
+            // Agora o diretório é populado APENAS por grupos reais vindos do coletor.
         ]);
     }
 }
