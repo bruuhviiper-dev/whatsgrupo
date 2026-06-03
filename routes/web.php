@@ -289,6 +289,11 @@ Route::get('/robots.txt', function () {
     return response()->view('robots', [], 200, ['Content-Type' => 'text/plain']);
 })->name('robots');
 
+// Honeypot anti-scraper — link invisível no HTML, nunca clicado por humanos.
+// Qualquer bot que rastrear o HTML e seguir este link é banido por 24h.
+// Tratado pelo BotProtection middleware (retorna 404 para não revelar a armadilha).
+Route::get('/hp', fn () => abort(404))->name('honeypot');
+
 Route::get('/ads.txt', function () {
     $clientId = \App\Models\Setting::get('adsense_client_id', 'ca-pub-XXXXXXXXXXXXXXXX');
     $content  = "google.com, {$clientId}, DIRECT, f08c47fec0942fa0\n";

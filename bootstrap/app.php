@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Adiciona cabeçalhos de segurança globais
         $middleware->append(\App\Http\Middleware\AddSecurityHeaders::class);
 
+        // Proteção anti-scraper: honeypot + ban por IP + UA suspeito + rate limit no /g/
+        $middleware->append(\App\Http\Middleware\BotProtection::class);
+
         // Registra o middleware de autenticação do painel de administração
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuth::class,

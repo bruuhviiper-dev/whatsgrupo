@@ -289,6 +289,12 @@
   </nav>
 
   @stack('scripts')
+
+  {{-- Honeypot anti-scraper: invisível para humanos, visível no HTML para bots.
+       Bots que rastreiam o DOM e seguem este link são banidos por 24h. --}}
+  <a href="/hp" aria-hidden="true" tabindex="-1"
+     style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;opacity:0;pointer-events:none;"
+     rel="nofollow">&#x200B;</a>
 </body>
 </html>
 
